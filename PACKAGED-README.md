@@ -1,5 +1,7 @@
 # ORIX for Windows
 
+This is an unsigned beta. Release checksums and third-party source archives are supplied with the downloads on GitHub.
+
 ORIX is a free desktop layer for Windows. Open **ORIX Settings** from the tray or Start menu to configure its tools, connections and appearance. The desktop-layer switch in Overview hides the layer without stopping enabled tools or integrations.
 
 The Clipboard module is enabled by default. It keeps up to eight copied text entries in memory while enabled. To stop collection and clear ORIX's clipboard history, switch Clipboard off in Modules and save. This does not clear the Windows clipboard.

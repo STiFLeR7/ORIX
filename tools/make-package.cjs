@@ -48,6 +48,18 @@ function validateRuntime(runtime, expected) {
   if (actual !== expected) throw new Error(`Electron version mismatch: expected ${expected}, got ${actual}`);
 }
 
+function trimCodexVoice(appSource) {
+  const vendor = path.join(appSource, 'node_modules', '@openai', `codex-${process.platform}-${process.arch}`, 'vendor');
+  const root = fs.realpathSync(appSource) + path.sep;
+  for (const target of fs.readdirSync(vendor)) {
+    const voice = path.join(vendor, target, 'codex-resources', 'voice');
+    if (!fs.existsSync(voice)) continue;
+    if (!fs.realpathSync(voice).startsWith(root)) throw new Error('Voice payload must remain inside package staging');
+    // ORIX uses Codex text app-server/exec, with no real-time voice entry point.
+    fs.rmSync(voice, { recursive: true });
+  }
+}
+
 function build() {
   const root = path.resolve(__dirname, '..');
   const pkg = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
@@ -60,13 +72,15 @@ function build() {
   fs.mkdirSync(scratch, { recursive: true });
   const stage = fs.mkdtempSync(path.join(scratch, 'orix-package-'));
   const appRoot = path.join(stage, 'ORIX');
-  fs.cpSync(runtime, appRoot, { recursive: true });
+  // Windows 10/11 provide D3DCompiler through the OS, so its SDK redistributable is unnecessary.
+  fs.cpSync(runtime, appRoot, { recursive: true, filter: source => path.basename(source) !== 'd3dcompiler_47.dll' });
   fs.renameSync(path.join(appRoot, 'electron.exe'), path.join(appRoot, 'ORIX.exe'));
   const defaultApp = path.join(appRoot, 'resources/default_app.asar');
   if (fs.existsSync(defaultApp)) fs.unlinkSync(defaultApp);
   const appSource = path.join(appRoot, 'resources/app');
   stageApplication(root, appSource);
   execFileSync(process.execPath, [npmCli, 'ci', '--omit=dev', '--ignore-scripts', '--no-audit', '--no-fund'], { cwd: appSource, stdio: 'inherit' });
+  trimCodexVoice(appSource);
   const dist = path.join(root, 'dist');
   fs.mkdirSync(dist, { recursive: true });
   const zip = path.join(dist, `ORIX-Windows-${pkg.version}.zip`);
@@ -77,5 +91,5 @@ function build() {
   console.log('Packaged', zip);
 }
 
-module.exports = { stageApplication, validateRuntime };
+module.exports = { stageApplication, validateRuntime, trimCodexVoice };
 if (require.main === module) build();

@@ -1,9 +1,14 @@
 {
   "name": "orix-desktop",
-  "version": "0.1.0-beta.1",
+  "version": "0.1.0-beta.2",
   "description": "ORIX: a smarter interaction layer for Windows. Your operating system, within reach.",
-  "repository": { "type": "git", "url": "git+https://github.com/STiFLeR7/ORIX.git" },
-  "bugs": { "url": "https://github.com/STiFLeR7/ORIX/issues" },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/STiFLeR7/ORIX.git"
+  },
+  "bugs": {
+    "url": "https://github.com/STiFLeR7/ORIX/issues"
+  },
   "homepage": "https://github.com/STiFLeR7/ORIX#readme",
   "main": "main.js",
   "scripts": {

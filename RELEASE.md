@@ -1,4 +1,16 @@
-# ORIX 0.1.0-beta.1 release checklist
+# ORIX release checks
+
+## Windows beta.2 — 2026-11-05
+
+The owner requested a downloadable installer and refreshed repository presentation. Version 0.1.0-beta.2 supplies an unsigned Windows 10/11 x64 installer and portable ZIP, a 60-second demo, SHA-256 checksums and a third-party source ZIP. SignPath acceptance and a signing certificate remain pending.
+
+The package excludes Codex's unused real-time voice payload and Electron's app-local D3DCompiler. It retains the text Codex runtime/helpers and uses the Windows system D3DCompiler. An isolated app-server check passed initialize, account/read and thread/start. A separate Electron check decoded MP3 with a modified compatible FFmpeg DLL and initialized WebGL without the app-local D3DCompiler. The release's source ZIP supplies the pinned FFmpeg source and Electron/Chromium build material and notices. A full FFmpeg source rebuild was not performed.
+
+All 230 workspace tests passed. The beta.2 setup installed successfully into a new isolated folder with `--quiet --no-start`. All 193 installed files matched staging by SHA-256, and all 11 native files matched their upstream dependency copies. This installer check did not launch the app. Prior live integration and Windows observations below retain their original scope. Remaining actual-login, native drag/drop, system DPI and screen-reader checks are recorded in the execution ledger.
+
+Release assets are listed at [v0.1.0-beta.2](https://github.com/STiFLeR7/ORIX/releases/tag/v0.1.0-beta.2). The exact download hashes are supplied as `SHA256SUMS.txt` with those assets. [Native review](docs/NATIVE-REDISTRIBUTION.md)
+
+## Earlier beta.1 checks
 
 ORIX is a free, ISC-licensed desktop layer for Windows, based on recovered TwoCode 1.2.0-beta.6. This first independent beta includes the four-section dashboard redesign, Settings-only theme controls and English-only interface, hide-only layer switch, shared appearance system, unlocked tools, independent app identity, patched dependencies, and removal of original remote update/news/account defaults. Execution and final validation remain in progress. The selected ORIX aperture logo is integrated; visual Windows and small-icon validation remain open.
 

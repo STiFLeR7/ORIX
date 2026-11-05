@@ -1,6 +1,16 @@
 # Native-component distribution review
 
-## Decision recorded on 2026-11-05
+## Beta.2 distribution changes — 2026-11-05
+
+The owner requested a downloadable Windows installer. The beta.2 package excludes the unused Codex real-time voice payload, including its GStreamer/GLib libraries and Microsoft VC++ DLL. ORIX's text app-server and exec executable/helpers remain. A real isolated protocol check passed initialization, account-state reading and thread creation with the voice directory absent. A packaging regression verifies retention of the text executable/helpers and rejection of an out-of-staging junction before deletion.
+
+The package also excludes Electron's app-local D3DCompiler and uses Windows 10/11's system component. A hidden Electron check initialized WebGL without the local DLL. The six remaining Electron and five Codex native files retain their upstream identities and notices.
+
+The release supplies FFmpeg source at Chromium's pinned commit `2b68d2babae73714846961fb0ee47e3b3d2e39a9`, the Electron 44.10.1 source including its patch series/build rules, Chromium 152.0.7977.169 build scripts, DEPS records, license and replacement instructions. These are mirrored in `ORIX-Third-Party-Sources-0.1.0-beta.2.zip` alongside the binaries. A test altered the FFmpeg DLL's DOS-stub text and successfully decoded a generated MP3 through Electron's AudioContext. This verifies that an altered compatible DLL can load. A full FFmpeg rebuild was not performed.
+
+FFmpeg LGPL, Ratatui MIT, Codex Apache/NOTICE, ripgrep/PCRE2, Electron component, font and icon notices are retained. The installer remains unsigned while SignPath enrollment is pending. The beta's remaining Windows checks are listed in [RELEASE.md](../RELEASE.md).
+
+## Earlier beta.1 review
 
 The reviewed source is published under ISC. Binary distribution remains on hold for the items below. The public source and source-preview release exclude the installed Electron and Codex runtime payloads. The owner confirmed GitHub MFA and reported no confirmed Visual Studio 2026/Build Tools 2026 license. SignPath enrollment and its MFA setup are pending.
 
@@ -24,7 +34,7 @@ The official [Build Tools 2022 license](https://visualstudio.microsoft.com/licen
 
 ## Release and signing consequences
 
-The [source preview](https://github.com/STiFLeR7/ORIX/releases/tag/v0.1.0-beta.1) is public. A Windows installer/portable release remains pending. The manual CI workflow tests and builds by default, with installer uploads gated on the signing route. This source preview alone does not satisfy SignPath's requirement for an existing release in the Windows binary form to be signed.
+The [source preview](https://github.com/STiFLeR7/ORIX/releases/tag/v0.1.0-beta.1) remains available. The requested beta.2 Windows release supplies the installer, portable ZIP and third-party source material. Signing remains a separate pending step. The manual CI workflow tests and builds by default, with signing uploads gated on the signing route.
 
 An owner-approved inquiry was sent to SignPath on 2026-11-05 asking for an alternative to the non-rendering application form and whether review can begin before the first public binary release. Foundation acceptance, any exception and certificate issuance require its response. The inquiry does not claim that the outstanding requirements are satisfied.
 

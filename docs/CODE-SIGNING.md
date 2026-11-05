@@ -2,7 +2,7 @@
 
 ## Current status
 
-ORIX's local Windows artifacts are unsigned. SignPath Foundation is the selected free signing application route. Acceptance, certificate issuance and live signing remain pending. The ISC-licensed source was published on 2026-11-05. Application prerequisites and setup instructions are in [SIGNING-SETUP.md](SIGNING-SETUP.md).
+ORIX's Windows beta downloads are unsigned. SignPath Foundation is the selected free signing application route. Acceptance, certificate issuance and live signing remain pending. The ISC source and source preview were published on 2026-11-05. The owner subsequently requested the beta.2 installer download. Application prerequisites and setup instructions are in [SIGNING-SETUP.md](SIGNING-SETUP.md).
 
 ## Intended scope
 

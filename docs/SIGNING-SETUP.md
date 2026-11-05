@@ -2,7 +2,7 @@
 
 ## Selected route and eligibility
 
-SignPath Foundation provides free Windows code signing to accepted open-source projects. ORIX's ISC-licensed source and source preview were published on 2026-11-05. The hosted Windows workflow passed 228 tests and built ZIP/setup. The owner confirmed GitHub MFA. A Windows binary release, SignPath enrollment/MFA, project-reputation review and the [native distribution requirements](NATIVE-REDISTRIBUTION.md) remain pending. [Foundation requirements](https://signpath.org/terms.html)
+SignPath Foundation provides free Windows code signing to accepted open-source projects. ORIX's ISC source and source preview were published on 2026-11-05, followed by preparation of the requested beta.2 Windows downloads and third-party source material. The owner confirmed GitHub MFA. SignPath enrollment/MFA, project-reputation review and certificate issuance remain pending. Current package changes and evidence are in the [native distribution review](NATIVE-REDISTRIBUTION.md). [Foundation requirements](https://signpath.org/terms.html)
 
 OSSign's application page reported that applications were suspended when researched on 2026-11-05. Microsoft offers free Store-managed signing for MSIX packages after certification. ORIX currently produces an EXE installer and ZIP. Store signing for those EXE/MSI submissions still requires the developer's own certificate. [OSSign](https://ossign.org/), [Microsoft signing options](https://learn.microsoft.com/en-us/windows/apps/package-and-deploy/code-signing-options)
 
@@ -21,7 +21,7 @@ Default workflow dispatch builds and tests on Windows. Installer uploads are par
 - [x] Run hosted Windows CI with signing off. All 228 tests and ZIP/setup builds passed.
 - [x] Publish a source preview describing functionality and linking to the Code signing policy. Add privacy/provider disclosures and record the owner's GitHub MFA confirmation.
 - [x] Start the application route with an owner-approved inquiry after the [official form](https://signpath.org/apply.html) failed to render. Request guidance on the first-binary-release prerequisite.
-- [ ] Complete native redistribution requirements and a reviewed Windows binary release, or obtain Foundation guidance on beginning review before that release.
+- [x] Prepare the requested beta.2 Windows installer/portable release with the unused voice payload excluded and FFmpeg source/build material and notices supplied alongside it.
 - [ ] Complete SignPath enrollment, its MFA and actual team-role assignments. Submit any further application material through the route provided by the Foundation.
 
 ## After acceptance
