@@ -1,0 +1,30 @@
+cluster,keyword,intent,initial_target,priority,content_requirement,research_status
+brand,ORIX desktop,navigational,/,primary,Define ORIX as the Windows desktop layer,unmeasured_candidate
+brand,ORIX Windows app,navigational,/,primary,Show platform and actual desktop interface,unmeasured_candidate
+brand,ORIX open source,navigational,/#open-source,primary,Link ISC license and public repository,unmeasured_candidate
+brand,ORIX GitHub,navigational,/#open-source,primary,Provide the official repository destination,unmeasured_candidate
+category,Windows desktop layer,product_discovery,/,primary,Explain the layer with a real Windows scene,unmeasured_candidate
+category,open source desktop layer for Windows,product_discovery,/,primary,Explain license and actual product behavior,unmeasured_candidate
+category,Windows notch app,product_discovery,/#demo,secondary,Demonstrate collapsed and expanded notch states,unmeasured_candidate
+category,desktop tools for Windows,product_discovery,/#tools,secondary,Connect each tool to a concrete task,unmeasured_candidate
+notes,ORIX desktop notes,feature_information,/#tools,secondary,Show prepared note and link usage documentation,unmeasured_candidate
+clipboard,ORIX clipboard history,feature_information,/docs/,secondary,Explain eight-entry memory history and capture controls,unmeasured_candidate
+clipboard,clipboard history desktop tool Windows,feature_discovery,/#tools,exploratory,Describe ORIX-specific capability and limits,unmeasured_candidate
+focus,ORIX focus timer,feature_information,/#tools,secondary,Show setup and running timer states,unmeasured_candidate
+file_tray,ORIX file tray,feature_information,/#tools,secondary,Show safe sample file references and verified behavior,unmeasured_candidate
+integrations,Claude Code session monitor Windows,workflow_information,/#integrations,secondary,Describe supported status monitoring and setup,unmeasured_candidate
+integrations,Codex session monitor Windows,workflow_information,/#integrations,secondary,Distinguish monitoring from provider requests,unmeasured_candidate
+integrations,ORIX ChatGPT setup,setup,/docs/,primary,Explain actual ChatGPT provider connection steps,unmeasured_candidate
+integrations,ORIX Claude Code integration,setup,/docs/,primary,Explain supported hooks and connection workflow,unmeasured_candidate
+integrations,ORIX Spotify controls,setup,/docs/,secondary,Explain connection and provider-account requirements,unmeasured_candidate
+appearance,ORIX light dark theme,configuration,/docs/,secondary,Show actual appearance settings,unmeasured_candidate
+visibility,hide ORIX desktop layer,configuration,/docs/,secondary,Explain that enabled integrations continue running,unmeasured_candidate
+installation,install ORIX Windows,setup,/docs/,primary,Route users to instructions for the available release,unmeasured_candidate
+release,ORIX download,release_access,/#get-orix,primary,Label source-preview and binary availability accurately,unmeasured_candidate
+release,ORIX Windows requirements,compatibility,/#get-orix,primary,Use verified requirements for the linked release,unmeasured_candidate
+release,ORIX release notes,maintenance,/#get-orix,secondary,Link authoritative GitHub release notes,unmeasured_candidate
+maintenance,update ORIX,maintenance,/docs/,primary,Explain the current manual update process,unmeasured_candidate
+maintenance,uninstall ORIX,maintenance,/docs/,primary,Provide the documented removal procedure and retention details,unmeasured_candidate
+privacy,ORIX privacy,data_information,/privacy/,primary,Explain local data and connected providers,unmeasured_candidate
+privacy,ORIX clipboard privacy,data_information,/privacy/,secondary,Explain default capture and memory retention,unmeasured_candidate
+contribution,contribute to ORIX,contribution,/#open-source,secondary,Link maintained contribution instructions,unmeasured_candidate

@@ -1,0 +1,21 @@
+tag,display_label,scope,usage
+product,Product,editorial,Product definition and overview content
+windows,Windows,platform,Verified Windows context and compatibility information
+desktop-layer,Desktop layer,feature,Notch and layer behavior
+notes,Notes,feature,Note creation and persistence guidance
+clipboard,Clipboard,feature,History capture controls and retention
+focus,Focus,feature,Timer setup and session behavior
+file-tray,File tray,feature,Prepared file references and verified tray workflows
+ai-monitoring,AI monitoring,workflow,Supported session-status monitoring
+claude-code,Claude Code,integration,Actual Claude Code connection and hooks
+codex,Codex,integration,Actual Codex monitoring and provider distinctions
+chatgpt,ChatGPT,integration,Actual ChatGPT provider setup
+spotify,Spotify,integration,Playback connection and provider requirements
+appearance,Appearance,configuration,Product theme and desktop presentation
+installation,Installation,documentation,Release-specific setup instructions
+updates,Updates,documentation,Release history and manual update guidance
+removal,Removal,documentation,Program removal and retained data
+privacy,Privacy,policy,Local data and connected-service disclosures
+open-source,Open source,project,ISC source and contribution information
+release,Release,project,Available artifact and release-status information
+troubleshooting,Troubleshooting,documentation,Specific user-visible problems and recovery

@@ -1,0 +1,42 @@
+async (page) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.goto('http://127.0.0.1:43870/index.html');
+  await page.waitForTimeout(4000);
+  await page.getByRole('slider', { name: 'Scrub layer opening', exact: true }).press('Home');
+  await page.waitForTimeout(500);
+  await page.getByRole('slider', { name: 'Scrub layer opening', exact: true }).press('End');
+  await page.waitForTimeout(800);
+  await page.locator('[data-tour="note"]').click();
+  await page.waitForTimeout(1800);
+  for (const chapter of [1,2,3]) {
+    await page.locator('#tour-track').evaluate((element,index) => {
+      const stage = element.querySelector('.tour-stage');
+      scrollTo({ top: scrollY + element.getBoundingClientRect().top - 88 + (element.offsetHeight - stage.offsetHeight) * (index+.2) / 4, behavior: 'smooth' });
+    }, chapter);
+    await page.waitForTimeout(2200);
+  }
+  await page.locator('#tour-play').click();
+  await page.waitForTimeout(5000);
+  await page.locator('#tour-play').click();
+  await page.getByRole('link', { name: 'Connections', exact: true }).click();
+  await page.waitForTimeout(800);
+  await page.locator('[data-integration="codex"]').click();
+  await page.locator('#signal-route').scrollIntoViewIfNeeded();
+  await page.waitForTimeout(600);
+  await page.locator('#connection-action').click();
+  await page.waitForTimeout(2200);
+  await page.locator('[data-integration="chatgpt"]').click();
+  await page.locator('#connection-action').click();
+  await page.waitForTimeout(1300);
+  await page.locator('[data-integration="spotify"]').click();
+  await page.locator('#connection-action').click();
+  await page.waitForTimeout(1600);
+  await page.locator('#connection-action').click();
+  await page.getByRole('button', { name: 'Light', exact: true }).click();
+  await page.waitForTimeout(1500);
+  await page.getByRole('button', { name: 'Dark', exact: true }).click();
+  await page.waitForTimeout(1000);
+  await page.locator('#get-orix').scrollIntoViewIfNeeded();
+  await page.waitForTimeout(2000);
+  return 'Captured the original ORIX motion and interaction sequence.';
+}

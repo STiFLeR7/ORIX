@@ -1,0 +1,24 @@
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebPage",
+      "@id": "https://orix.stifler.in/docs/#webpage",
+      "url": "https://orix.stifler.in/docs/",
+      "name": "ORIX documentation — Setup, tools and integrations",
+      "description": "Find ORIX setup instructions, local tool guidance, AI and Spotify connection details, appearance settings, updates, troubleshooting and removal information.",
+      "inLanguage": "en",
+      "isPartOf": {"@id": "https://orix.stifler.in/#website"},
+      "about": {"@id": "https://orix.stifler.in/#software"},
+      "breadcrumb": {"@id": "https://orix.stifler.in/docs/#breadcrumbs"}
+    },
+    {
+      "@type": "BreadcrumbList",
+      "@id": "https://orix.stifler.in/docs/#breadcrumbs",
+      "itemListElement": [
+        {"@type": "ListItem", "position": 1, "name": "Home", "item": "https://orix.stifler.in/"},
+        {"@type": "ListItem", "position": 2, "name": "Documentation", "item": "https://orix.stifler.in/docs/"}
+      ]
+    }
+  ]
+}

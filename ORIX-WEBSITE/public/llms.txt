@@ -1,0 +1,25 @@
+# ORIX desktop for Windows
+
+> ORIX is a free, open-source desktop layer for Windows with supported AI session status, notes, clipboard history, focus tools, a file tray and optional Spotify controls.
+
+The project uses the ISC license. Optional connected services have their own accounts, charges and terms. Hiding the layer leaves enabled tools and integrations running. Current release availability, Windows requirements and signing information are maintained in the project's release records.
+
+## Product reference
+
+- [Expanded ORIX product reference](https://orix.stifler.in/llms-full.txt)
+- [Product README](https://raw.githubusercontent.com/STiFLeR7/ORIX/main/README.md)
+- [ISC license](https://raw.githubusercontent.com/STiFLeR7/ORIX/main/LICENSE)
+
+## Documentation and policies
+
+- [Application privacy and connected services](https://raw.githubusercontent.com/STiFLeR7/ORIX/main/docs/PRIVACY.md)
+- [Release checklist and availability](https://raw.githubusercontent.com/STiFLeR7/ORIX/main/RELEASE.md)
+- [Code signing policy](https://raw.githubusercontent.com/STiFLeR7/ORIX/main/docs/CODE-SIGNING.md)
+- [Removal guidance](https://raw.githubusercontent.com/STiFLeR7/ORIX/main/docs/ORIX-REMOVAL.md)
+- [Contribution guidance](https://raw.githubusercontent.com/STiFLeR7/ORIX/main/CONTRIBUTING.md)
+
+## Optional
+
+- [ORIX website](https://orix.stifler.in/)
+- [Public source repository](https://github.com/STiFLeR7/ORIX)
+- [Published releases](https://github.com/STiFLeR7/ORIX/releases)

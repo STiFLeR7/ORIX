@@ -1,0 +1,57 @@
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://orix.stifler.in/#project",
+      "name": "ORIX project",
+      "url": "https://orix.stifler.in/",
+      "sameAs": ["https://github.com/STiFLeR7/ORIX"]
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://orix.stifler.in/#website",
+      "name": "ORIX",
+      "url": "https://orix.stifler.in/",
+      "inLanguage": "en",
+      "publisher": {"@id": "https://orix.stifler.in/#project"},
+      "about": {"@id": "https://orix.stifler.in/#software"}
+    },
+    {
+      "@type": "SoftwareApplication",
+      "@id": "https://orix.stifler.in/#software",
+      "name": "ORIX",
+      "url": "https://orix.stifler.in/",
+      "description": "ORIX is a free, open-source desktop layer for Windows with AI session status, notes, clipboard history, focus tools and optional Spotify controls.",
+      "applicationCategory": "DesktopEnhancementApplication",
+      "operatingSystem": "Windows",
+      "isAccessibleForFree": true,
+      "license": "https://github.com/STiFLeR7/ORIX/blob/main/LICENSE",
+      "publisher": {"@id": "https://orix.stifler.in/#project"},
+      "offers": {
+        "@type": "Offer",
+        "price": 0,
+        "url": "https://orix.stifler.in/#get-orix"
+      },
+      "subjectOf": {"@id": "https://orix.stifler.in/#source"}
+    },
+    {
+      "@type": "SoftwareSourceCode",
+      "@id": "https://orix.stifler.in/#source",
+      "name": "ORIX source code",
+      "codeRepository": "https://github.com/STiFLeR7/ORIX",
+      "license": "https://github.com/STiFLeR7/ORIX/blob/main/LICENSE",
+      "about": {"@id": "https://orix.stifler.in/#software"}
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://orix.stifler.in/#webpage",
+      "url": "https://orix.stifler.in/",
+      "name": "ORIX — Free desktop layer for Windows",
+      "description": "ORIX is a free, open-source desktop layer for Windows with AI session status, notes, clipboard history, focus tools and optional Spotify controls.",
+      "inLanguage": "en",
+      "isPartOf": {"@id": "https://orix.stifler.in/#website"},
+      "mainEntity": {"@id": "https://orix.stifler.in/#software"}
+    }
+  ]
+}

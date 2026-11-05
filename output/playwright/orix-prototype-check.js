@@ -1,0 +1,72 @@
+async (page) => {
+  const check = (condition, message) => { if (!condition) throw new Error(message); };
+  await page.getByRole('button', {name:'A little focus', exact:true}).click();
+  check(await page.locator('#demo-focus').isVisible(), 'Focus view');
+  await page.getByRole('button', {name:'Start focus', exact:true}).click();
+  await page.waitForFunction(() => document.getElementById('focus-time').textContent !== '25:00');
+  await page.getByRole('button', {name:'Pause focus', exact:true}).click();
+  const paused = await page.locator('#focus-time').textContent();
+  await page.waitForTimeout(1100);
+  check(await page.locator('#focus-time').textContent() === paused, 'Timer pause');
+  await page.getByRole('button', {name:'Reset', exact:true}).click();
+  check(await page.locator('#focus-time').textContent() === '25:00', 'Timer reset');
+  await page.getByRole('button', {name:'AI status', exact:true}).click();
+  check(await page.locator('#demo-ai').isVisible(), 'AI view');
+  await page.getByRole('button', {name:'A quick note', exact:true}).click();
+  await page.getByRole('textbox', {name:'Try editing this sample'}).fill('Prototype interaction checked.');
+  for (const name of ['Codex','ChatGPT','Spotify','Claude Code']) {
+    await page.getByRole('button', {name, exact:true}).click();
+    check(await page.locator('#integration-name').textContent() === name, 'Integration '+name);
+  }
+  await page.getByRole('button', {name:'Light', exact:true}).click();
+  check(await page.locator('#appearance-preview').evaluate(e=>e.classList.contains('light')), 'Light theme');
+  await page.getByRole('switch', {name:'Show sample desktop layer'}).click();
+  check(await page.locator('#layer-hidden').isVisible(), 'Hide layer');
+  await page.getByRole('switch', {name:'Show sample desktop layer'}).click();
+  check(await page.locator('#appearance-preview').isVisible(), 'Show layer');
+  await page.getByRole('button', {name:'Dark', exact:true}).click();
+  check(!await page.locator('#appearance-preview').evaluate(e=>e.classList.contains('light')), 'Dark theme');
+  await page.getByRole('button', {name:'System', exact:true}).click();
+  await page.emulateMedia({colorScheme:'light'});
+  await page.waitForFunction(() => document.getElementById('appearance-preview').classList.contains('light'));
+  await page.emulateMedia({colorScheme:'dark'});
+  await page.waitForFunction(() => !document.getElementById('appearance-preview').classList.contains('light'));
+  await page.getByRole('button', {name:'Dark', exact:true}).click();
+  await page.locator('summary').filter({hasText:'Is ORIX completely free?'}).click();
+  check(await page.locator('details').filter({has:page.locator('summary', {hasText:'Is ORIX completely free?'})}).getAttribute('open') !== null, 'FAQ opens');
+  for(const width of [320,390,768,1024,1440]) {
+    await page.setViewportSize({width,height:900});
+    check(await page.evaluate(()=>document.documentElement.scrollWidth <= innerWidth), 'Horizontal overflow '+width);
+  }
+  await page.setViewportSize({width:390,height:844});
+  await page.getByRole('button', {name:'Open navigation',exact:true}).click();
+  check(await page.locator('#navigation').isVisible(), 'Mobile navigation');
+  await page.keyboard.press('Escape');
+  check(await page.getByRole('button',{name:'Open navigation',exact:true}).getAttribute('aria-expanded') === 'false', 'Escape closes menu');
+  check(await page.getByRole('button',{name:'Open navigation',exact:true}).evaluate(e=>e===document.activeElement), 'Menu focus restoration');
+  await page.emulateMedia({reducedMotion:'reduce'});
+  await page.waitForFunction(() => document.documentElement.dataset.effects === 'off');
+  check(await page.locator('html').getAttribute('data-effects') === 'off', 'Reduced motion preference');
+  check(await page.locator('.art-glow').evaluate(e=>getComputedStyle(e).animationName) === 'none', 'Reduced motion disables animation');
+  await page.emulateMedia({reducedMotion:'no-preference'});
+  await page.waitForFunction(() => document.documentElement.dataset.effects === 'on');
+  await page.getByRole('button', {name:'Effects on',exact:true}).click();
+  check(await page.locator('html').getAttribute('data-effects') === 'off', 'Effects control');
+  check(await page.locator('img').evaluateAll(images=>images.every(img=>img.complete&&img.naturalWidth>0)), 'All embedded images load');
+  check(await page.locator('meta[name="robots"]').getAttribute('content') === 'noindex, nofollow', 'Prototype indexing policy');
+  await page.evaluate(()=>scrollTo(0,0));
+  await page.screenshot({path:'output/playwright/orix-website-mobile.png'});
+  await page.setViewportSize({width:1440,height:1000});
+  await page.screenshot({path:'output/playwright/orix-website-full.png',fullPage:true});
+  const context = await page.context().browser().newContext({javaScriptEnabled:false,viewport:{width:390,height:844}});
+  const staticPage = await context.newPage();
+  await staticPage.goto('http://127.0.0.1:43870/index.html');
+  check(await staticPage.locator('h1').isVisible(), 'No-JS heading');
+  check(await staticPage.locator('#demo-note').isVisible(), 'No-JS static preview');
+  check(await staticPage.getByRole('navigation', {name:'Main navigation',exact:true}).isVisible(), 'No-JS mobile navigation');
+  check(await staticPage.locator('details').count() === 9, 'No-JS FAQs');
+  check(await staticPage.locator('body').innerText().then(t=>t.includes('beta.2')), 'No-JS release content');
+  await context.close();
+  await page.reload();
+  console.log('PASS: timer start/pause/reset, three demo states, four integrations, themes, visibility, FAQ, five widths, mobile menu/focus, reduced motion, effects, images and no-JS content.');
+}

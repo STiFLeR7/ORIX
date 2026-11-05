@@ -1,0 +1,7 @@
+# Proposed production policy for the public ORIX website.
+# Public crawling is permitted, including compliant training crawlers.
+# Review any training-specific preferences before deployment.
+User-agent: *
+Allow: /
+
+Sitemap: https://orix.stifler.in/sitemap.xml

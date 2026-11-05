@@ -1,0 +1,91 @@
+# ORIX desktop for Windows
+
+> ORIX is a free, open-source Windows desktop layer that brings supported AI session status and everyday tools into a compact interface.
+
+Product-reference review date 2026-11-05. This reference summarizes public product documentation. Release-specific compatibility, artifacts and signature status are maintained in the linked project records.
+
+## Identity and purpose
+
+ORIX's primary brand line is “Your desktop, within reach.” The application provides a compact desktop layer together with a configuration dashboard. Its source is published by the ORIX project at https://github.com/STiFLeR7/ORIX under the ISC license. The project describes its recovery provenance and subsequent development in its repository documentation.
+
+ORIX is the Windows desktop product described here. Its core local tools are free. Optional AI and music services apply their own accounts, subscriptions, usage conditions and privacy policies.
+
+## Desktop layer and dashboard
+
+The desktop layer can present supported AI session information and local tools. The dashboard organizes configuration into Overview, Appearance, Modules and Settings. Appearance controls include Light, Dark and System modes in the application settings.
+
+The layer visibility control hides or shows the desktop layer. Enabled tools and integrations continue running when the layer is hidden. Turning the layer off therefore leaves background work subject to each enabled tool's own controls.
+
+The current application interface is English. Website language scope is maintained separately from application language behavior.
+
+## Local tools
+
+Notes provide a nearby editing surface, with persistent data stored in the application's profile. Focus tools provide a timer for focus sessions. The file tray stores references to selected local files. Exact workflows and current verification status should be checked against the presented release and documentation.
+
+Clipboard capture is enabled by default. While enabled, ORIX keeps up to eight text entries in memory. The history is cleared when capture is disabled or the process ends. Disable Clipboard in Modules and save to stop capture and clear ORIX's history. The Windows clipboard is managed separately.
+
+## AI connections
+
+ORIX includes supported AI-session monitoring and provider connections. Explain Claude Code integration, Codex monitoring and the ChatGPT provider according to their individual setup paths. Local status monitoring and requesting an AI response are different operations.
+
+Connecting a provider or sending it a request can involve account authentication and external service processing. Selected project context, prompts and screenshots requested for inspection can be sent to the chosen provider. Project-agent operations can read or change files in the selected project. Review the project and chosen connection before starting that work.
+
+Provider applications and runtimes can maintain their own configuration, credentials, history and network behavior. Their account controls and terms apply separately.
+
+## Spotify, weather and calendar
+
+Spotify controls are optional. Spotify authorization and playback/device requests use Spotify services. The documented OAuth callback is http://127.0.0.1:8888/callback. The project documents a public Spotify client ID configuration for its direct PKCE connection. Spotify access and subscription requirements depend on the provider and requested operation.
+
+The optional weather feature sends a configured city to Open-Meteo geocoding and uses the resulting coordinates for weather requests. The calendar feature fetches the HTTPS calendar URL supplied by the user. A private calendar URL can itself convey access to the calendar. Clearing the respective configuration and saving stops configured requests according to the application's documented behavior.
+
+## Data and controls
+
+ORIX stores application preferences and persistent tool data in its local profile, normally under the Windows application-data area for ORIX. ChatGPT/Codex runtime information uses a separate location within that profile. The application privacy document identifies local storage, provider destinations and controls.
+
+Quit ORIX to stop its running background processing. Program removal and profile-data removal are separate actions. The removal guide explains startup entries, shortcuts, hooks, the optional editor extension and retained data. Back up required notes and other data before removing a profile.
+
+Avoid sharing profile files, private calendar links, hook backups, account credentials or conversation/project information publicly. The repository's privacy guidance covers these materials.
+
+## Source and releases
+
+The public repository contains the application source, license, build tools, tests and contribution guidance. Published releases identify the available source preview or Windows artifacts. A source archive and a Windows installer are distinct deliverables.
+
+Use the exact release's requirements, artifact links, checksum and signing information when obtaining Windows binaries. Updates are manual in the current application documentation. Public release availability and outstanding verification are recorded in RELEASE.md and the project's validation records.
+
+## Questions and direct answers
+
+### What is ORIX?
+
+ORIX is a free, open-source desktop layer for Windows that brings supported AI session status and everyday tools into a compact interface.
+
+### Is ORIX free?
+
+The ORIX application is free and open source under ISC. Connected services apply their own accounts, charges and terms.
+
+### What happens when the layer is hidden?
+
+The desktop layer is hidden while enabled tools and integrations continue running.
+
+### Does ORIX keep clipboard history?
+
+Enabled capture retains up to eight text entries in memory. Disable Clipboard in Modules and save to stop collection and clear that history. The feature is enabled by default.
+
+### Where is the source?
+
+The public source is at https://github.com/STiFLeR7/ORIX. Its license and contribution instructions are in the repository.
+
+### Where can I check download and signing availability?
+
+Use the published releases and the project's release and code signing records. Identify whether the selected release supplies source archives, Windows binaries or both.
+
+## Authoritative public sources
+
+- [Product README](https://raw.githubusercontent.com/STiFLeR7/ORIX/main/README.md)
+- [ISC license](https://raw.githubusercontent.com/STiFLeR7/ORIX/main/LICENSE)
+- [Application privacy and connected services](https://raw.githubusercontent.com/STiFLeR7/ORIX/main/docs/PRIVACY.md)
+- [Release checklist and availability](https://raw.githubusercontent.com/STiFLeR7/ORIX/main/RELEASE.md)
+- [Code signing policy](https://raw.githubusercontent.com/STiFLeR7/ORIX/main/docs/CODE-SIGNING.md)
+- [Removal guidance](https://raw.githubusercontent.com/STiFLeR7/ORIX/main/docs/ORIX-REMOVAL.md)
+- [Contribution guidance](https://raw.githubusercontent.com/STiFLeR7/ORIX/main/CONTRIBUTING.md)
+- [Recovery provenance](https://raw.githubusercontent.com/STiFLeR7/ORIX/main/RECOVERY.md)
+- [Published releases](https://github.com/STiFLeR7/ORIX/releases)
