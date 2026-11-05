@@ -116,7 +116,7 @@ static class Installer {
         string dir = Path.GetFullPath(home) + Path.DirectorySeparatorChar;
         foreach (Process p in Process.GetProcessesByName("ORIX")) {
             bool running = false;
-            try { running = p.MainModule.FileName.StartsWith(dir, StringComparison.OrdinalIgnoreCase); } catch { }
+            try { running = Path.GetFullPath(p.MainModule.FileName).StartsWith(dir, StringComparison.OrdinalIgnoreCase); } catch { }
             finally { p.Dispose(); }
             if (running) throw new Exception("Quit ORIX from the tray menu before installing, then run setup again.");
         }

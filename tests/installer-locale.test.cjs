@@ -66,7 +66,16 @@ test('installer refuses to kill a running app during upgrade', { skip: process.p
       .replaceAll('{{ASMVERSION}}', '0.1.0.1').replaceAll('{{VERSION}}', '0.1.0-beta.1');
     fs.writeFileSync(path.join(dir, 'Setup.cs'), '\ufeff' + source);
     fs.writeFileSync(path.join(dir, 'Check.cs'), `using System;
-class Check { static int Main(string[] args) { try { Installer.Run(args[0], null); return 2; }
+class Check {
+  [System.Runtime.InteropServices.DllImport("kernel32.dll", CharSet = System.Runtime.InteropServices.CharSet.Unicode)]
+  static extern uint GetShortPathName(string path, System.Text.StringBuilder result, uint size);
+  static int Main(string[] args) {
+    if (args.Length > 1 && args[1] == "short") {
+      var result = new System.Text.StringBuilder(32768);
+      if (GetShortPathName(args[0], result, 32768) == 0) return 4;
+      Console.Write(result); return 0;
+    }
+    try { Installer.Run(args[0], null); return 2; }
   catch (Exception e) {
     if (e.Message.Contains(args.Length > 1 ? "drive root" : "Quit ORIX")) return 0;
     Console.Error.WriteLine("Install path: " + args[0] + "; error: " + e.Message);
@@ -81,7 +90,8 @@ class Check { static int Main(string[] args) { try { Installer.Run(args[0], null
     execFileSync(csc, ['/nologo', '/target:exe', '/main:Check', '/codepage:65001', '/out:' + check,
       ...['System.dll', 'System.Drawing.dll', 'System.Windows.Forms.dll', 'System.IO.Compression.dll', 'System.IO.Compression.FileSystem.dll'].map(r => '/r:' + path.join(fw, r)),
       path.join(dir, 'Setup.cs'), path.join(dir, 'Check.cs')], { stdio: 'pipe' });
-    child = spawn(exe, [], { windowsHide: true });
+    const shortExe = execFileSync(check, [exe, 'short'], { encoding: 'utf8', stdio: 'pipe' }).trim();
+    child = spawn(shortExe, [], { windowsHide: true });
     await new Promise((resolve, reject) => { child.once('spawn', resolve); child.once('error', reject); });
     execFileSync(check, [app], { timeout: 15000, stdio: ['ignore', 'pipe', 'inherit'] });
     execFileSync(check, [app + path.sep], { timeout: 15000, stdio: 'pipe' });
