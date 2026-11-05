@@ -8,7 +8,13 @@ This checklist records required release work, not a declaration that the beta is
 
 No application uninstaller was identified in the current package. A [provisional manual removal procedure](docs/ORIX-REMOVAL.md) is documented; it has not been verified end to end on a real Windows profile.
 
-The local artifacts are unsigned. No certificate, Windows trust result, public upload or production compatibility certification is claimed. See [the execution ledger](docs/ORIX-REDESIGN-VALIDATION.md) and [public-source review](docs/PUBLIC-SOURCE.md).
+The local Windows artifacts are unsigned. The ISC-licensed source and [source preview release](https://github.com/STiFLeR7/ORIX/releases/tag/v0.1.0-beta.1) are public. Windows binary downloads remain pending [native redistribution requirements](docs/NATIVE-REDISTRIBUTION.md), signing and final Windows checks. See [the execution ledger](docs/ORIX-REDESIGN-VALIDATION.md) and [public-source review](docs/PUBLIC-SOURCE.md).
+
+## Published source checkpoint — 2026-11-05
+
+The hosted Windows [run 41981139758](https://github.com/STiFLeR7/ORIX/actions/runs/41981139758) passed all 228 tests and built ZIP/setup at `a2ad065a61eeadb9bc2c70b15d84f3dbf12df84b`, tagged `v0.1.0-beta.1`. CI exposed an installer path-alias defect. Normalizing the running executable path fixed it, with the short-path regression observed failing and then passing locally. The editor concurrency fixture now uses the same native path resolution as production. Local ZIP/setup were rebuilt afterward, with hashes below. Prior installed-app observations predate this setup fix and the latest notice update.
+
+The owner confirmed GitHub MFA. The SignPath application form remained blank, so an approved application/eligibility inquiry was sent from the Codex inbox to SignPath on 2026-11-05. The source preview supplies source archives. It does not resolve the Foundation's requirement for an existing Windows binary release. A reply and completion of the native distribution requirements remain pending.
 
 **Hook preservation:** New hook installations record originally empty event lists and empty Claude status-line values in the ORIX profile for restoration. An installation created by an older build without the relevant record cannot reconstruct those original values; inspect backups before removal.
 
@@ -50,8 +56,8 @@ The user supplied an overall confirmation. Build identifier and individual test 
 
 | Unsigned local artifact | SHA-256 |
 | --- | --- |
-| ORIX-Windows-0.1.0-beta.1.zip | `0d78c23e58f04edd4f8859ed673807e62c9c629f412d567e9a50e91857bd496f` |
-| ORIX-Setup-0.1.0-beta.1.exe | `000275ca5b43e550ceecdf845c43d3bb41ece5c177a777f340e6360fa56b36fd` |
+| ORIX-Windows-0.1.0-beta.1.zip | `99b5649f10d9882747c6fbdba95840df60ce9af206f2c1b20037950122596a01` |
+| ORIX-Setup-0.1.0-beta.1.exe | `3edd2acd0d6e13619c38d10aabe247ae4d37a8e09d247352403f0547937cc775` |
 
 ## Redesign evidence and remaining checks
 
@@ -77,14 +83,14 @@ The detailed observations, dates and limits are in the [execution ledger](docs/O
 
 ## Package and distribute
 
-Free signing preparation is tracked in [SIGNING-SETUP.md](docs/SIGNING-SETUP.md), with a draft [Code signing policy](docs/CODE-SIGNING.md). The manual Windows workflow and installer artifact configuration are prepared locally. SignPath acceptance is pending. The public repository is empty, so publication, a release and the remaining application prerequisites must be resolved first.
+Free signing preparation is tracked in [SIGNING-SETUP.md](docs/SIGNING-SETUP.md), with the [Code signing policy](docs/CODE-SIGNING.md). The public Windows workflow passed its first complete build. Source and a source preview are published. SignPath acceptance and the Windows binary-release prerequisite remain pending.
 
 - [x] Build `ORIX-Windows-0.1.0-beta.1.zip` and `ORIX-Setup-0.1.0-beta.1.exe` using the project's local packaging tools. Redesigned candidate rebuilt and installed in an isolated folder; rebuild again after any shipped-file changes.
 - [ ] Confirm clean install, launch, quit, startup shortcut, manual upgrade, and uninstall on Windows. Expected installation: `%LOCALAPPDATA%\Programs\ORIX`; settings shortcut: **ORIX Settings**.
 - [ ] Inspect archive contents for LICENSE, THIRD_PARTY_NOTICES.md, Inter's license, Electron's LICENSE / LICENSES.chromium.html, and applicable dependency notices. Exclude local credentials, recovery artifacts, and verification scratch files.
 - [x] Check relative Markdown links in the five top-level packaged documents without including the checksum-bearing release checklist or excluded recovery files. External links and nested documents were not checked.
-- [ ] Prepare releases in the user-supplied repository [STiFLeR7/ORIX](https://github.com/STiFLeR7/ORIX). The remote was reachable with no branch references when inspected; no source push or release upload has been performed.
+- [x] Publish reviewed source and a source preview in the user-supplied repository [STiFLeR7/ORIX](https://github.com/STiFLeR7/ORIX). Windows binary assets remain pending the documented release gates.
 - [ ] Establish and verify ORIX code signing and artifact checksums before public distribution. Do not reuse the recovered updater's identity or keys. Developer credentials are handled through the vault MCP.
-- [ ] Publish only after explicitly authorized. No public release or upload has been performed by this foundation task.
+- [x] Obtain explicit authorization for source publication. The owner authorized it on 2026-11-05. Public source and the source preview are available.
 
 The earlier 30 passing recovered-source tests are historical evidence for the original baseline. They do not validate this release's changed behavior or UI. Automated tests and local smoke checks do not establish live provider compatibility; preserve these distinctions in release notes.

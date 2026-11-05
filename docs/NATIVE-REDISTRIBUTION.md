@@ -1,0 +1,31 @@
+# Native-component distribution review
+
+## Decision recorded on 2026-11-05
+
+The reviewed source is published under ISC. Binary distribution remains on hold for the items below. The public source and source-preview release exclude the installed Electron and Codex runtime payloads. The owner confirmed GitHub MFA and reported no confirmed Visual Studio 2026/Build Tools 2026 license. SignPath enrollment and its MFA setup are pending.
+
+## Reviewed evidence
+
+| Component | Evidence | Remaining binary-distribution action |
+| --- | --- | --- |
+| ORIX application and setup | First-party source and ISC text are published. The installer is compiled from `tools/setup/Setup.cs`. | Retain the ISC text and attribution. Sign only the first-party setup after approval. |
+| Inter, integration icons and ORIX artwork | OFL/MIT texts and pinned integration sources are retained. ORIX's approved mark is included. Unapproved design references and generated media are excluded. | Preserve attribution and vendor trademark distinctions. |
+| VS Code extension | All four VSIX entries were listed. The embedded extension JavaScript and package manifest match adjacent source byte-for-byte. | Preserve the published source and license. |
+| Electron 44.10.1 | The package retains Electron's MIT license and `LICENSES.chromium.html`. Its seven native files were matched to the installed Electron package. The notice includes LGPL-covered FFmpeg. Electron's `v44.10.1` DEPS pins Chromium `152.0.7977.169`. | Complete the corresponding FFmpeg source/build-material delivery and replacement review against that exact Electron build. Retaining the notice alone does not finish these obligations. |
+| Codex 0.160.0 and helpers | Apache-2.0 license and notice, ripgrep MIT and PCRE2 license texts are included. Native inventory records package identity. | Review any additional embedded-component obligations against upstream's complete build and notices. |
+| Codex voice libraries | Bundled notices, seven license texts, source manifests and build commit `a956835d020762cb2b570053af06f643a11c0ecc` identify GStreamer/GLib and supporting libraries. Earlier downloads verified all 11 recorded source archive hashes. The upstream source directory includes build and packaging scripts. | Provide complete corresponding source/build material through a durable distribution route and verify the applicable LGPL shared-library replacement conditions. The source archives were previously streamed for hashing, so no ORIX-hosted source mirror exists yet. |
+| Microsoft `vcruntime140.dll` | The bundled runtime is recorded as 14.50.35719, with its upstream Microsoft download, SHA-256 and license references. A complete local Visual Studio Build Tools 2022 installation was found. The owner has not confirmed an applicable Visual Studio product license. | Establish distributor eligibility and applicable terms before including this DLL in a public ORIX binary. The standalone Build Tools installation and an upstream signature do not establish that right. |
+
+## Microsoft license finding
+
+The [Microsoft redistribution guidance](https://learn.microsoft.com/en-us/cpp/windows/redistributing-visual-cpp-files) limits redistribution to licensed Visual Studio users under applicable terms. The [current v14 runtime page](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist) explains that Visual Studio 2017–2026 share current v14 redistributable files. A separate 2026 installation is therefore not by itself the deciding condition. An applicable Visual Studio license and its distribution terms still need to be established.
+
+The official [Build Tools 2022 license](https://visualstudio.microsoft.com/license-terms/vs2022-ga-diagnosticbuildtools/) was inspected. Its standalone permission to build third-party open-source C++ dependencies does not by itself grant redistribution of the separately licensed runtime. The reviewed evidence does not establish a suitable license for this distributor.
+
+## Release and signing consequences
+
+The [source preview](https://github.com/STiFLeR7/ORIX/releases/tag/v0.1.0-beta.1) is public. A Windows installer/portable release remains pending. The manual CI workflow tests and builds by default, with installer uploads gated on the signing route. This source preview alone does not satisfy SignPath's requirement for an existing release in the Windows binary form to be signed.
+
+An owner-approved inquiry was sent to SignPath on 2026-11-05 asking for an alternative to the non-rendering application form and whether review can begin before the first public binary release. Foundation acceptance, any exception and certificate issuance require its response. The inquiry does not claim that the outstanding requirements are satisfied.
+
+Detailed historical inventory and checks are in [PUBLIC-SOURCE.md](PUBLIC-SOURCE.md). [THIRD_PARTY_NOTICES.md](../THIRD_PARTY_NOTICES.md) contains the notices preserved in the current package.

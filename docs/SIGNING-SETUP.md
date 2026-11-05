@@ -2,7 +2,7 @@
 
 ## Selected route and eligibility
 
-SignPath Foundation provides free Windows code signing to accepted open-source projects. ORIX's ISC-licensed source was published on 2026-11-05. Eligibility is incomplete. A Windows release and project reputation require Foundation review, MFA is unverified and bundled native-library redistribution review remains open. [Foundation requirements](https://signpath.org/terms.html)
+SignPath Foundation provides free Windows code signing to accepted open-source projects. ORIX's ISC-licensed source and source preview were published on 2026-11-05. The hosted Windows workflow passed 228 tests and built ZIP/setup. The owner confirmed GitHub MFA. A Windows binary release, SignPath enrollment/MFA, project-reputation review and the [native distribution requirements](NATIVE-REDISTRIBUTION.md) remain pending. [Foundation requirements](https://signpath.org/terms.html)
 
 OSSign's application page reported that applications were suspended when researched on 2026-11-05. Microsoft offers free Store-managed signing for MSIX packages after certification. ORIX currently produces an EXE installer and ZIP. Store signing for those EXE/MSI submissions still requires the developer's own certificate. [OSSign](https://ossign.org/), [Microsoft signing options](https://learn.microsoft.com/en-us/windows/apps/package-and-deploy/code-signing-options)
 
@@ -17,11 +17,12 @@ Default workflow dispatch builds and tests on Windows. Installer uploads are par
 
 ## Before applying
 
-1. Complete the existing source-content and native redistribution reviews. The prepared source candidate excludes recovered binaries, local credentials, test profiles and generated media.
-2. Obtain publication approval, publish the reviewed source and ISC license to `STiFLeR7/ORIX`, and run the workflow with signing left off. Review the CI results and document the application's functionality on its release page.
-3. Meet the already-released prerequisite with a reviewed Windows release if acceptable to the owner. The owner previously selected signed distribution, so an unsigned public release requires a new decision. Alternatively ask the Foundation whether it will consider the existing pre-release situation. Do not claim that an unpublished local candidate meets this condition.
-4. Confirm MFA and maintainer roles, finish privacy/service disclosures and put a Code signing policy link on the homepage and download/release page.
-5. Apply through the [Foundation application page](https://signpath.org/apply.html). Provide the published repository, license, release, build workflow, policy and accurate project history. Acceptance depends on Foundation review, including project reputation.
+- [x] Complete source publication review and publish the ISC-licensed source, excluding recovered binaries, credentials, profiles and generated media.
+- [x] Run hosted Windows CI with signing off. All 228 tests and ZIP/setup builds passed.
+- [x] Publish a source preview describing functionality and linking to the Code signing policy. Add privacy/provider disclosures and record the owner's GitHub MFA confirmation.
+- [x] Start the application route with an owner-approved inquiry after the [official form](https://signpath.org/apply.html) failed to render. Request guidance on the first-binary-release prerequisite.
+- [ ] Complete native redistribution requirements and a reviewed Windows binary release, or obtain Foundation guidance on beginning review before that release.
+- [ ] Complete SignPath enrollment, its MFA and actual team-role assignments. Submit any further application material through the route provided by the Foundation.
 
 ## After acceptance
 
@@ -39,4 +40,6 @@ Default workflow dispatch builds and tests on Windows. Installer uploads are par
 4. Store the submitter token in the ORIX vault project as `SIGNPATH_API_TOKEN`. Use the vault MCP to inject it into a command that sets the GitHub Actions secret of the same name through stdin. Keep the token out of project files and logs. GitHub requires its own secret for the hosted workflow.
 5. Dispatch the reviewed version tag with `sign` enabled, approve the request in SignPath, and download `ORIX-signed-installer` only after its verification step passes. Check Windows publisher details, installation and the checksum again. Add the service attribution once granted, and keep the approval/build record with the release evidence.
 
-The public application and hosted workflow have not been submitted or run. No signing account, secret, certificate or repository protection has been created by this preparation.
+The hosted workflow completed successfully at [run 41981139758](https://github.com/STiFLeR7/ORIX/actions/runs/41981139758). The [source preview](https://github.com/STiFLeR7/ORIX/releases/tag/v0.1.0-beta.1) supplies source archives and documents the pending Windows binary release. It does not meet the binary-form release condition on its own.
+
+The official application page's embedded HubSpot form remained blank in Chrome, and its direct frame rejected top-level access. With the owner's approval, an application/eligibility inquiry was sent on 2026-11-05 from the Codex agent inbox to SignPath's published information address. It requests an alternative application route and guidance on review before the first binary release. A response is pending. No signing account, certificate or signing credential has been issued.

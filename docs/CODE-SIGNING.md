@@ -12,7 +12,7 @@ The requested signing scope is the installer built from `tools/setup/Setup.cs`. 
 
 ## Proposed team roles and approval
 
-The repository owner `STiFLeR7` is the proposed committer, reviewer and signing approver. Confirm the actual role assignments during enrollment. Everyone assigned a role must use MFA on GitHub and SignPath. Production signing requires manual SignPath approval after reviewing the source revision, workflow, dependency changes, build results and requested artifact. Restrict the submitter token to the approved project and policy.
+The repository owner `STiFLeR7` is the proposed committer, reviewer and signing approver. Confirm the actual role assignments during enrollment. The owner confirmed GitHub MFA on 2026-11-05. SignPath enrollment and MFA remain pending. Everyone assigned a role must use MFA on both services. Production signing requires manual SignPath approval after reviewing the source revision, workflow, dependency changes, build results and requested artifact. Restrict the submitter token to the approved project and policy.
 
 After acceptance, configure SignPath's GitHub trusted build integration for `STiFLeR7/ORIX`, this workflow, GitHub-hosted runners and reviewed release refs. The workflow checks the downloaded signature, expected publisher and timestamp before retaining a signed artifact. Signing dispatches retain Actions artifacts for 14 days. Default dispatches build and test.
 
