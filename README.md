@@ -8,8 +8,6 @@
 
 <p align="center"><b>A desktop layer for the things you reach for every day.</b><br>AI session status, quick notes, focus, clipboard history and music controls.</p>
 
-ORIX brings AI session status, desktop tools, notes, clipboard history, focus sessions, and optional Spotify controls into a compact desktop layer. Core tools and feature packs are fully free, with no TwoCode account, activation key, or paywall. The selected ORIX aperture mark is integrated into the local app and Windows icon assets.
-
 **[Download the Windows installer](https://github.com/STiFLeR7/ORIX/releases/download/v0.1.0-beta.2/ORIX-Setup-0.1.0-beta.2.exe)** · Windows 10/11 x64 · Free · Per-user installation
 
 This is **0.1.0-beta.2**, an unsigned beta. Windows may display an unknown-publisher warning while signing is pending. [All release files and checksums](https://github.com/STiFLeR7/ORIX/releases/tag/v0.1.0-beta.2)
