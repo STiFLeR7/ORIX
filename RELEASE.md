@@ -1,5 +1,15 @@
 # ORIX release checks
 
+## Windows beta.3 — 2026-11-05
+
+Version 0.1.0-beta.3 packages the Windows Codex hook fixes found during beta.2 validation. It quotes the stdin argument, serializes lifecycle callbacks and upgrades older ORIX hook definitions while preserving unrelated hooks. Four regression cases and all 234 workspace tests pass. The earlier clean hosted Windows [run 41991411203](https://github.com/STiFLeR7/ORIX/actions/runs/41991411203) passed 233 tests and built ZIP/setup for the first fix revision. The final callback-order revision has its own validation below.
+
+The final setup installed successfully in a new isolated directory. All 193 installed files matched staging, and all 11 native files matched the reviewed beta.2 payload. Startup upgraded the disposable profile's legacy hooks automatically and retained its note. A live request through the installed beta.3 Codex runtime and reviewed, session-scoped installed hook definitions produced an exact reply, ordered SessionStart/UserPromptSubmit/Stop/SessionEnd events, Ready → Working → Done, a completed history entry and a Windows notification show event with no failure event. The isolated hooks were removed and ORIX quit normally afterward. The default user hooks file and authentication remained outside the fixture.
+
+The [beta.3 release](https://github.com/STiFLeR7/ORIX/releases/tag/v0.1.0-beta.3) supplies the unsigned setup, portable ZIP, matching third-party source supplement, demo and checksums. The installer SHA-256 is `98862bcf5e4b3a5894456f274d60b68f31b1c0b01d67869247ada4b37f7fec28`. Its corresponding native source revisions and dependency versions match beta.2. [Codex hook behavior](https://developers.openai.com/codex/hooks)
+
+Claude Code and ORIX ChatGPT live replies remain pending sign-in, which the owner deferred. Existing user Codex configuration reported a malformed pre-existing hooks file. Live checks use reviewed, session-scoped ORIX hooks and the existing account without changing that file. Users must review new or changed hook definitions through `/hooks`. The release remains unsigned while SignPath's reply and enrollment are pending. Other remaining Windows checks retain the scope described in the beta.2 follow-up.
+
 ## Beta.2 follow-up validation — 2026-11-05
 
 The packaged, voice-free Codex executable returned the expected live reply using the existing CLI account. ChatGPT's ORIX-specific runtime reported signed out in both the previous test profile and legacy user profile. Claude Code also reported signed out. The owner chose to continue available checks, so fresh Claude and ChatGPT replies remain pending.

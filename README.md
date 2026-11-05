@@ -1,18 +1,18 @@
 <p align="center"><img src="docs/media/orix-cover.jpg" width="100%" alt="ORIX. Your desktop. Within reach. Free, open source, Windows."></p>
 
 <p align="center">
-  <a href="https://github.com/STiFLeR7/ORIX/releases/download/v0.1.0-beta.2/ORIX-Setup-0.1.0-beta.2.exe"><img src="https://img.shields.io/badge/Download_for_Windows-CEFF00?style=for-the-badge&logo=windows&logoColor=111318" alt="Download ORIX for Windows"></a>
-  <a href="https://github.com/STiFLeR7/ORIX/releases/tag/v0.1.0-beta.2"><img src="https://img.shields.io/badge/Beta-0.1.0--beta.2-2459FF?style=for-the-badge" alt="Beta 0.1.0-beta.2"></a>
+  <a href="https://github.com/STiFLeR7/ORIX/releases/download/v0.1.0-beta.3/ORIX-Setup-0.1.0-beta.3.exe"><img src="https://img.shields.io/badge/Download_for_Windows-CEFF00?style=for-the-badge&logo=windows&logoColor=111318" alt="Download ORIX for Windows"></a>
+  <a href="https://github.com/STiFLeR7/ORIX/releases/tag/v0.1.0-beta.3"><img src="https://img.shields.io/badge/Beta-0.1.0--beta.3-2459FF?style=for-the-badge" alt="Beta 0.1.0-beta.3"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-ISC-111318?style=for-the-badge" alt="ISC licensed"></a>
 </p>
 
 <p align="center"><b>A desktop layer for the things you reach for every day.</b><br>AI session status, quick notes, focus, clipboard history and music controls.</p>
 
-**[Download the Windows installer](https://github.com/STiFLeR7/ORIX/releases/download/v0.1.0-beta.2/ORIX-Setup-0.1.0-beta.2.exe)** · Windows 10/11 x64 · Free · Per-user installation
+**[Download the Windows installer](https://github.com/STiFLeR7/ORIX/releases/download/v0.1.0-beta.3/ORIX-Setup-0.1.0-beta.3.exe)** · Windows 10/11 x64 · Free · Per-user installation
 
-This is **0.1.0-beta.2**, an unsigned beta. Windows may display an unknown-publisher warning while signing is pending. [All release files and checksums](https://github.com/STiFLeR7/ORIX/releases/tag/v0.1.0-beta.2)
+This is **0.1.0-beta.3**, an unsigned beta. Windows may display an unknown-publisher warning while signing is pending. [All release files and checksums](https://github.com/STiFLeR7/ORIX/releases/tag/v0.1.0-beta.3)
 
-**Known beta.2 issue** — Codex monitoring callbacks can fail under Windows PowerShell or at CLI shutdown. The source fix is tested and awaits the next installer build. [Validation details](RELEASE.md#beta2-follow-up-validation--2026-11-05)
+Beta.3 fixes Windows Codex hook transport and event ordering. Review new or changed Codex hooks through `/hooks`. [Validation details](RELEASE.md#windows-beta3--2026-11-05)
 
 ## See it in action
 
@@ -23,7 +23,7 @@ https://github.com/user-attachments/assets/86b043c3-a29e-49e2-81fa-2595c121343c
 <details>
 <summary><b>Open the animated preview</b></summary>
 
-[![ORIX dashboard tour](docs/media/orix-demo.gif)](https://github.com/STiFLeR7/ORIX/releases/download/v0.1.0-beta.2/ORIX-Demo-60s.mp4)
+[![ORIX dashboard tour](docs/media/orix-demo.gif)](https://github.com/STiFLeR7/ORIX/releases/download/v0.1.0-beta.3/ORIX-Demo-60s.mp4)
 
 </details>
 
@@ -115,7 +115,7 @@ To build on Windows, install 7-Zip and put `7z` on PATH, then run:
 
 ```powershell
 npm run package:windows
-node tools/make-setup.cjs dist/ORIX-Windows-0.1.0-beta.2.zip
+node tools/make-setup.cjs dist/ORIX-Windows-0.1.0-beta.3.zip
 ```
 
 Alternatively, set the non-secret `ORIX_7ZIP` launch-environment variable to your `7z.exe` path. The installer compiler is the Windows .NET Framework C# compiler. Packaging stages the installed, pinned Electron runtime and production dependencies in `.verification/` and writes local artifacts to `dist/`.

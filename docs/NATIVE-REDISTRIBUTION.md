@@ -1,5 +1,9 @@
 # Native-component distribution review
 
+## Beta.3 component check — 2026-11-05
+
+All 11 native EXE/DLL files in the final beta.3 installation matched the reviewed beta.2 files by SHA-256. The dependency versions, exclusions and source revisions below still apply. The beta.3 release includes `ORIX-Third-Party-Sources-0.1.0-beta.3.zip` with the same pinned materials, refreshed version label and checksums. Its eight-file archive passed an integrity test. The packaged Codex runtime also completed a live reply and monitored lifecycle test. A full FFmpeg source rebuild remains unperformed.
+
 ## Beta.2 distribution changes — 2026-11-05
 
 The owner requested a downloadable Windows installer. The beta.2 package excludes the unused Codex real-time voice payload, including its GStreamer/GLib libraries and Microsoft VC++ DLL. ORIX's text app-server and exec executable/helpers remain. A real isolated protocol check passed initialization, account-state reading and thread creation with the voice directory absent. A packaging regression verifies retention of the text executable/helpers and rejection of an out-of-staging junction before deletion.

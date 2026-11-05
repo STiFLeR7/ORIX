@@ -25,7 +25,7 @@ test('Codex hook stdin argument is quoted for Windows PowerShell', () => {
   } finally { t.cleanup(); }
 });
 
-test('starting the hub upgrades older ORIX Codex commands and preserves other hooks', () => {
+for (const legacy of ['unquoted stdin', 'background callbacks']) test('starting the hub upgrades older ORIX Codex ' + legacy + ' and preserves other hooks', () => {
   const t = temp(), codexHome = path.join(t.dir, 'codex');
   const hub = createHub({ userData: t.dir, settingsFile: t.settingsFile, codexHome });
   try {
@@ -34,7 +34,10 @@ test('starting the hub upgrades older ORIX Codex commands and preserves other ho
     const config = JSON.parse(fs.readFileSync(file, 'utf8'));
     for (const groups of Object.values(config.hooks)) {
       for (const group of groups) {
-        for (const hook of group.hooks) hook.command = hook.command.replace('--data-binary "@-"', '--data-binary @-');
+        for (const hook of group.hooks) {
+          if (legacy === 'unquoted stdin') hook.command = hook.command.replace('--data-binary "@-"', '--data-binary @-');
+          else hook.async = true;
+        }
       }
     }
     const unrelated = { hooks: [{ type: 'command', command: 'echo unrelated' }] };
@@ -47,14 +50,15 @@ test('starting the hub upgrades older ORIX Codex commands and preserves other ho
   } finally { hub.stop(); t.cleanup(); }
 });
 
-test('Codex completion hooks finish before the session can cancel background work', () => {
+test('Codex lifecycle hooks finish in order before the session can cancel background work', () => {
   const t = temp(), codexHome = path.join(t.dir, 'codex');
   try {
     const hub = createHub({ userData: t.dir, settingsFile: t.settingsFile, codexHome });
     hub.installCodex();
     const config = JSON.parse(fs.readFileSync(path.join(codexHome, 'hooks.json'), 'utf8'));
-    for (const event of ['Stop', 'SessionEnd']) assert.equal(config.hooks[event][0].hooks[0].async, false);
-    assert.equal(config.hooks.UserPromptSubmit[0].hooks[0].async, true);
+    for (const groups of Object.values(config.hooks)) {
+      for (const group of groups) for (const hook of group.hooks) assert.equal(hook.async, false);
+    }
   } finally { t.cleanup(); }
 });
 

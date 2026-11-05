@@ -211,7 +211,7 @@ function createHub(options = {}) {
   function codexInstalled() {
     try {
       const hooks = readCodex().hooks || {}, cmd = codexCommand();
-      return CODEX_EVENTS.every(event => (hooks[event] || []).some(group => (group.hooks || []).some(h => isOurCodexHook(h) && h.command === cmd)));
+      return CODEX_EVENTS.every(event => (hooks[event] || []).some(group => (group.hooks || []).some(h => isOurCodexHook(h) && h.command === cmd && h.async !== true)));
     } catch { return false; }
   }
   function installCodex() {
@@ -219,8 +219,8 @@ function createHub(options = {}) {
     if (!hasOwnHooks(config, isOurCodexHook)) rememberEmptyHooks('codex', codexFile, config, CODEX_EVENTS);
     stripCodex(config); config.hooks ||= {};
     for (const event of CODEX_EVENTS) {
-      const background = !['Stop', 'SessionEnd'].includes(event);
-      (config.hooks[event] ||= []).push({ hooks: [{ type: 'command', command: codexCommand(), timeout: 5, async: background, statusMessage: 'ORIX' }] });
+      // Keep event order and finish callbacks before Codex cancels background work at session end.
+      (config.hooks[event] ||= []).push({ hooks: [{ type: 'command', command: codexCommand(), timeout: 5, async: false, statusMessage: 'ORIX' }] });
     }
     writeCodex(config); changed(); return { ok: true };
   }
