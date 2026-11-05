@@ -50,8 +50,8 @@ async (page) => {
   check(await page.locator('.art-glow').evaluate(e=>getComputedStyle(e).animationName) === 'none', 'Reduced motion disables animation');
   await page.emulateMedia({reducedMotion:'no-preference'});
   await page.waitForFunction(() => document.documentElement.dataset.effects === 'on');
-  await page.getByRole('button', {name:'Effects on',exact:true}).click();
-  check(await page.locator('html').getAttribute('data-effects') === 'off', 'Effects control');
+  await page.getByRole('button', {name:'Pause background animation',exact:true}).click();
+  check(await page.locator('html').getAttribute('data-effects') === 'off', 'Animation pause control');
   check(await page.locator('img').evaluateAll(images=>images.every(img=>img.complete&&img.naturalWidth>0)), 'All embedded images load');
   check(await page.locator('meta[name="robots"]').getAttribute('content') === 'noindex, nofollow', 'Prototype indexing policy');
   await page.evaluate(()=>scrollTo(0,0));

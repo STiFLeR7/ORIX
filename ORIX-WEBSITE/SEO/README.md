@@ -23,15 +23,14 @@ Prepared 2026-11-05 for the planned `https://orix.stifler.in` website. This exte
 
 ## Placement during implementation
 
-Publish the four files from `ORIX-WEBSITE/public/` at the production origin root. Embed the page-specific schema templates in their matching HTML documents. Use `page-metadata.json` as the initial metadata source. The handoff documents and creative-reference JPGs are development material with separate publication/rights requirements.
+The four files from `ORIX-WEBSITE/public/` are published at the production origin root. Page-specific schema is embedded in each HTML document, and `page-metadata.json` supplies build-time metadata. The handoff documents and creative-reference JPGs remain development material with separate publication/rights requirements.
 
-The `/`, `/docs/` and `/privacy/` routes follow the proposed site structure. Validate their final paths and availability before publishing the sitemap, canonical tags or schema. Social images remain unset until approved production assets exist.
+The `/`, `/docs/` and `/privacy/` routes follow the site structure. The initial social image is the actual isolated-profile dashboard capture. The live route responses, image URL, sitemap, canonical tags and schema were checked in [production validation](../PRODUCTION-VALIDATION.md).
 
 ## Working policy choices
 
-- The robots draft permits public crawling through the wildcard group. This also permits compliant training crawlers unless a more specific policy is later added. It grants crawl access through robots rules, while content licensing and use permissions remain separate matters.
-- The owner has not selected a training-specific policy. Review that choice and Cloudflare's effective edge settings before deployment.
-- English metadata and the proposed three routes follow the existing draft. Website language scope and final page architecture remain review items.
+- The website's own robots file permits public crawling through the wildcard group. Cloudflare currently prepends zone-managed training-crawler restrictions and `ai-train=no`; the effective live response is documented in [production validation](../PRODUCTION-VALIDATION.md). Robots rules and content licensing remain separate matters.
+- The deployed site uses English metadata and the three public routes.
 - Keyword priorities are editorial hypotheses based on ORIX's features. Search volume, difficulty and observed performance have not been measured.
 
 ## Evidence and limits

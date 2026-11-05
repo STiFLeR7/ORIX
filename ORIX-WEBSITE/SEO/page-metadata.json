@@ -1,5 +1,5 @@
 {
-  "status": "draft-for-proposed-three-route-site",
+  "status": "implemented-for-three-route-site",
   "reviewedOn": "2026-11-05",
   "origin": "https://orix.stifler.in",
   "siteName": "ORIX",
@@ -13,9 +13,9 @@
       "canonical": "https://orix.stifler.in/",
       "robots": "index, follow, max-image-preview:large",
       "openGraphType": "website",
-      "socialImage": null,
-      "socialImageAlt": null,
-      "twitterCard": "summary"
+      "socialImage": "https://orix.stifler.in/images/dashboard-dark.png",
+      "socialImageAlt": "ORIX beta dashboard showing desktop tools and connections",
+      "twitterCard": "summary_large_image"
     },
     {
       "path": "/docs/",
@@ -25,9 +25,9 @@
       "canonical": "https://orix.stifler.in/docs/",
       "robots": "index, follow, max-image-preview:large",
       "openGraphType": "website",
-      "socialImage": null,
-      "socialImageAlt": null,
-      "twitterCard": "summary"
+      "socialImage": "https://orix.stifler.in/images/dashboard-dark.png",
+      "socialImageAlt": "ORIX beta dashboard showing desktop tools and connections",
+      "twitterCard": "summary_large_image"
     },
     {
       "path": "/privacy/",
@@ -37,9 +37,9 @@
       "canonical": "https://orix.stifler.in/privacy/",
       "robots": "index, follow, max-image-preview:large",
       "openGraphType": "website",
-      "socialImage": null,
-      "socialImageAlt": null,
-      "twitterCard": "summary"
+      "socialImage": "https://orix.stifler.in/images/dashboard-dark.png",
+      "socialImageAlt": "ORIX beta dashboard showing desktop tools and connections",
+      "twitterCard": "summary_large_image"
     }
   ]
 }

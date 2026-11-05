@@ -16,7 +16,7 @@ Use [page-metadata.json](page-metadata.json) as the initial route metadata inven
 | Twitter/X card | Use a summary card initially, and the large-image variant when an appropriate approved image is available |
 | Site verification | Add real owner-issued verification values only when needed for the selected verification method |
 
-The inventory's `socialImage` values are null because the production assets and paths remain to be selected. Treat approved social imagery as a launch-review item. The current local JPG references require separate rights review before production use.
+The inventory uses the actual isolated-profile beta dashboard capture at `/images/dashboard-dark.png` for the initial social card. Its 1402 × 953 pixel dimensions and descriptive alternative text are reflected in the generated metadata. Replace this image only after reviewing a better production asset and update the inventory and route output together. Local creative-reference JPGs remain outside the public bundle.
 
 ## Title and description writing
 

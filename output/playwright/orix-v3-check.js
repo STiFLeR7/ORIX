@@ -70,13 +70,13 @@ async (page) => {
   check(await page.locator('#signal-destination').textContent() === 'ChatGPT', 'Signal destination follows provider');
   await page.locator('#connection-action').click();
   check(await page.locator('#signal-route').getAttribute('data-state') === 'complete', 'Prepared reply resolves signal');
-  await page.getByRole('button', { name: 'Motion on', exact: true }).click();
+  await page.getByRole('button', { name: 'Pause background animation', exact: true }).click();
   await track.scrollIntoViewIfNeeded();
-  check(await track.getAttribute('data-pinned') === 'false', 'Motion off releases sticky scroll budget');
-  check(await play.isHidden(), 'Motion off removes timed-story control');
+  check(await track.getAttribute('data-pinned') === 'false', 'Paused animation releases sticky scroll budget');
+  check(await play.isHidden(), 'Paused animation removes timed-story control');
   await page.locator('[data-tour="clipboard"]').click();
-  check(await page.locator('.work-result').evaluate(element => Number(getComputedStyle(element).opacity)) === 1, 'Motion-off manual chapter resolves immediately');
-  await page.getByRole('button', { name: 'Motion off', exact: true }).click();
+  check(await page.locator('.work-result').evaluate(element => Number(getComputedStyle(element).opacity)) === 1, 'Paused-animation manual chapter resolves immediately');
+  await page.getByRole('button', { name: 'Resume background animation', exact: true }).click();
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.waitForTimeout(80);
   check(await track.getAttribute('data-pinned') === 'false', 'System reduced motion releases pin');

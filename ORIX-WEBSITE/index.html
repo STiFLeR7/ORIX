@@ -274,27 +274,35 @@
         align-items: center;
         gap: 14px;
       }
-      .effects {
-        display: flex;
-        align-items: center;
-        gap: 7px;
-        border: 0;
-        background: transparent;
-        font-size: 10px;
-        padding: 10px 3px;
-        min-height: 44px;
-        color: var(--muted);
-      }
-      .effects-dot {
-        width: 5px;
-        height: 5px;
-        background: var(--ice);
+      .motion-control {
+        display: grid;
+        place-items: center;
+        width: 44px;
+        height: 44px;
+        flex: 0 0 auto;
+        border: 1px solid var(--line);
         border-radius: 50%;
-        box-shadow: 0 0 8px #a4c8ff;
+        background: transparent;
       }
-      .effects[aria-pressed="false"] .effects-dot {
-        background: #858b98;
-        box-shadow: none;
+      .motion-control:hover {
+        background: #ffffff12;
+        border-color: #a4c8ff88;
+      }
+      .motion-control:disabled {
+        opacity: 0.45;
+        cursor: default;
+      }
+      .motion-control svg {
+        width: 17px;
+        height: 17px;
+        fill: currentColor;
+      }
+      .motion-control .play-shape,
+      .motion-control[aria-pressed="true"] .pause-shape {
+        display: none;
+      }
+      .motion-control[aria-pressed="true"] .play-shape {
+        display: block;
       }
       .menu-button {
         display: none;
@@ -1636,9 +1644,6 @@
         .links a {
           padding: 7px;
         }
-        .effects {
-          font-size: 9px;
-        }
         .hero {
           padding-top: 30px;
         }
@@ -2059,8 +2064,7 @@
       .topbar[data-surface="light"] .logo {
         filter: brightness(0);
       }
-      .topbar[data-surface="light"] .links,
-      .topbar[data-surface="light"] .effects {
+      .topbar[data-surface="light"] .links {
         color: #505b66;
       }
       .topbar[data-surface="light"] .links a:hover {
@@ -2072,9 +2076,6 @@
       }
       .topbar[data-surface="light"] .btn:hover {
         background: #a4c8ff60;
-      }
-      .topbar[data-surface="light"] .effects-dot {
-        background: #315c97;
       }
       .topbar[data-surface="light"] .links.open {
         background: var(--cloud);
@@ -2533,10 +2534,20 @@
           ><a href="https://github.com/STiFLeR7/ORIX">GitHub ↗</a>
         </nav>
         <div class="nav-end">
-          <button class="effects" id="effects-toggle" aria-pressed="true">
-            <span class="effects-dot" aria-hidden="true"></span
-            ><span id="effects-label">Motion on</span></button
-          ><a
+          <button
+            class="motion-control"
+            id="motion-control"
+            type="button"
+            aria-label="Pause background animation"
+            aria-pressed="false"
+            title="Pause background animation"
+          >
+            <svg viewBox="0 0 20 20" aria-hidden="true">
+              <path class="pause-shape" d="M4 3h4v14H4zm8 0h4v14h-4z" />
+              <path class="play-shape" d="M5 2.5 17 10 5 17.5z" />
+            </svg>
+          </button>
+          <a
             class="btn"
             href="https://github.com/STiFLeR7/ORIX/releases/download/v0.1.0-beta.3/ORIX-Setup-0.1.0-beta.3.exe"
             >Get ORIX
@@ -2618,7 +2629,7 @@
                         width="24"
                         height="24"
                       />
-                      ORIX / INTERACTIVE PREVIEW</span
+                      ORIX / DESKTOP LAYER DEMO</span
                     ><button
                       class="round"
                       id="notch-close"
@@ -3400,7 +3411,7 @@ appear in all copies.</pre
             <a href="https://github.com/pheralb/svgl">SVGL</a>.<br />Third-party
             trademarks belong to their respective owners.</span
           ><span
-            >PROTOTYPE 03 / 05 NOVEMBER 2026<br />Illustrative interactions use
+            >Illustrative interactions use
             prepared data.<br />Desktop captures are actual beta views.</span
           >
         </div>
@@ -3568,9 +3579,9 @@ SOFTWARE.
       "use strict";
       const root = document.documentElement;
       const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
+      const motionControl = document.getElementById("motion-control");
+      let userMotionEnabled = true;
       const systemLight = matchMedia("(prefers-color-scheme: light)");
-      const effectsButton = document.getElementById("effects-toggle");
-      let userMotion = true;
       let openingTimers = [];
       let connectionTimers = [];
       const motionAllowed = () => root.dataset.effects === "on";
@@ -4354,14 +4365,19 @@ SOFTWARE.
           .forEach((visual) => revealObserver.observe(visual));
       }
       function updateEffects() {
-        const enabled = userMotion && !reducedMotion.matches;
+        const enabled = userMotionEnabled && !reducedMotion.matches;
         root.dataset.effects = enabled ? "on" : "off";
-        effectsButton.setAttribute("aria-pressed", String(enabled));
-        effectsButton.disabled = reducedMotion.matches;
-        document.getElementById("effects-label").textContent =
+        motionControl.disabled = reducedMotion.matches;
+        motionControl.setAttribute("aria-pressed", String(!userMotionEnabled));
+        motionControl.setAttribute(
+          "aria-label",
           reducedMotion.matches
-            ? "Reduced motion"
-            : `Motion ${enabled ? "on" : "off"}`;
+            ? "Animation disabled by system preference"
+            : enabled
+              ? "Pause background animation"
+              : "Resume background animation",
+        );
+        motionControl.title = motionControl.getAttribute("aria-label");
         if (!enabled) {
           stopOpening();
           stopStory();
@@ -4373,8 +4389,8 @@ SOFTWARE.
         updateTerrain();
         updateHeroHandoff();
       }
-      effectsButton.addEventListener("click", () => {
-        userMotion = !userMotion;
+      motionControl.addEventListener("click", () => {
+        userMotionEnabled = !userMotionEnabled;
         updateEffects();
       });
       reducedMotion.addEventListener("change", updateEffects);

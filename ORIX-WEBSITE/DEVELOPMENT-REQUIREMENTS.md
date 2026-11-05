@@ -76,7 +76,7 @@ The [SEO, GEO and AEO handoff](SEO/README.md) supplies draft page metadata, keyw
 - [ ] Verify all navigation, anchors, documentation and external release links.
 - [ ] Verify source-preview, binary-release and unavailable-information behavior.
 - [ ] Complete keyboard, touch, focus, zoom, screen-reader and contrast checks.
-- [ ] Verify reduced motion, Effects off, video controls and static fallbacks.
+- [ ] Verify system reduced motion, the icon-only animation pause control, video controls and static fallbacks.
 - [ ] Verify narrow-screen layouts and readable screenshot crops.
 - [ ] Measure loading, layout stability and optional-effect performance.
 - [ ] Check browser consoles, missing assets and enhancement failures.

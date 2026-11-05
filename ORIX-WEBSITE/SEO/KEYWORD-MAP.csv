@@ -20,7 +20,7 @@ integrations,ORIX Spotify controls,setup,/docs/,secondary,Explain connection and
 appearance,ORIX light dark theme,configuration,/docs/,secondary,Show actual appearance settings,unmeasured_candidate
 visibility,hide ORIX desktop layer,configuration,/docs/,secondary,Explain that enabled integrations continue running,unmeasured_candidate
 installation,install ORIX Windows,setup,/docs/,primary,Route users to instructions for the available release,unmeasured_candidate
-release,ORIX download,release_access,/#get-orix,primary,Label source-preview and binary availability accurately,unmeasured_candidate
+release,ORIX download,release_access,/#get-orix,primary,Link the unsigned beta.3 Windows installer and release checksums,unmeasured_candidate
 release,ORIX Windows requirements,compatibility,/#get-orix,primary,Use verified requirements for the linked release,unmeasured_candidate
 release,ORIX release notes,maintenance,/#get-orix,secondary,Link authoritative GitHub release notes,unmeasured_candidate
 maintenance,update ORIX,maintenance,/docs/,primary,Explain the current manual update process,unmeasured_candidate

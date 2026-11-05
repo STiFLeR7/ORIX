@@ -13,7 +13,7 @@ Paths in the first column are relative to `ORIX-WEBSITE/`. Publish these files a
 
 ## Robots policy
 
-The supplied draft has a single wildcard group that permits public crawling and declares the sitemap. It leaves public assets reachable so a crawler can understand the rendered site. It also permits compliant training crawlers through that same wildcard group. The owner has not selected a training-specific policy, so this remains a launch decision.
+The supplied origin file has a single wildcard group that permits public crawling and declares the sitemap. It leaves public assets reachable so a crawler can understand the rendered site. The effective production response also includes Cloudflare zone-managed directives that disallow several training crawlers and declare `ai-train=no`; see [production validation](../PRODUCTION-VALIDATION.md). Changing this zone-wide policy could affect other `stifler.in` sites.
 
 Robots rules communicate crawl preferences. Index removal uses the applicable indexing controls, and private material needs actual access control. Public source licensing and robots access are separate from content-use permissions. [Google robots guidance](https://developers.google.com/search/docs/crawling-indexing/robots/intro)
 

@@ -17,7 +17,7 @@ Google's AI search guidance carries forward SEO fundamentals and identifies inde
 | AI integration scope | Explain Claude Code, Codex monitoring and the ChatGPT provider individually | Current feature/setup records |
 | Optional services | Provider accounts, charges and policies apply separately | Privacy and connection documentation |
 | Visibility behavior | Hiding the layer leaves enabled tools and integrations running | Product visibility contract |
-| Release access | Follow the currently available source preview or verified binary release | GitHub releases and release checklist |
+| Release access | Version 0.1.0-beta.3 has a Windows 10/11 x64 installer; it is unsigned | [GitHub beta.3 release](https://github.com/STiFLeR7/ORIX/releases/tag/v0.1.0-beta.3) and release checklist |
 
 Use the same facts in visible HTML, metadata, structured data and agent-readable references. Refresh release-sensitive wording together. The supplied `llms-full.txt` is a compact authored product reference assembled from these public facts, with links to fuller documentation.
 
@@ -32,7 +32,7 @@ Start with the direct answer, then explain the condition, setup step or limitati
 | What happens when ORIX is hidden? | Its desktop layer is hidden while enabled tools and integrations continue running. | Visibility setting and exact behavior |
 | How does clipboard history work? | Enabled capture keeps up to eight recent text entries in memory. Disable Clipboard in Modules and save to stop collection and clear ORIX's history. | Default-enabled behavior and distinction from the Windows clipboard |
 | Can I inspect its source? | The ORIX repository publishes the source, license and contribution instructions. | Repository and release links |
-| Is there a Windows download? | Follow the release information for the available source preview or Windows artifact. | Current artifact availability and signature status |
+| Is there a Windows download? | Yes. The beta.3 Windows installer is available from the published release and is currently unsigned. | Windows 10/11 x64, release notes, checksum and signing status |
 
 The longer FAQ copy remains in [Section content](../SECTION-CONTENT.md). Keep answers visible and accessible in HTML, including when disclosures are collapsed. Google retired FAQ rich results in 2026, so FAQ content is maintained for visitors and clear answers. [Google documentation updates](https://developers.google.com/search/updates#june-2026)
 

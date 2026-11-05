@@ -4,15 +4,27 @@ Updated 2026-11-05. Intended address `orix.stifler.in`. Hosting platform Cloudfl
 
 Design-reference image and archive-contact-sheet links resolve in the maintainer's local reference collection. The versioned handoff includes the website prototype, original ORIX review captures, browser checks and motion previews.
 
-## Local website prototype
+## Production website
+
+[ORIX is live at orix.stifler.in](https://orix.stifler.in/). The deployable site in this folder uses Next.js, TypeScript, static export and Cloudflare Workers static assets. Its public routes are `/`, `/docs/` and `/privacy/`; `robots.txt`, `sitemap.xml`, `llms.txt` and `llms-full.txt` are served from the same origin. The standalone [index.html](index.html) remains a review reference and is excluded from the production bundle.
+
+Run `npm ci`, `npm run typecheck` and `npm run build` from this folder to verify the source. `npm run deploy` builds and deploys with Wrangler using [wrangler.jsonc](wrangler.jsonc). The release URL, version, checksum, signing status and Windows requirement live in [lib/release.ts](lib/release.ts). Update that record and the release-facing text files together when a new installer is published.
+
+The production page keeps the approved Aperture identity and Obsidian, Cloud and Ice palette. Continuous decoration has a compact icon-only pause control with an accessible name. `prefers-reduced-motion` stops animation and presents the settled examples. The production HTML includes the main content and download link before JavaScript runs; a no-JavaScript stylesheet keeps the layer and mobile navigation readable.
+
+The [deployment and validation record](PRODUCTION-VALIDATION.md) contains the live checks and the effective Cloudflare crawler policy.
+
+## Archived standalone prototype
 
 Prototype 03 follows the [full inspiration archive review](ARCHIVE-REVIEW.md), covering 21 site studies and 25 captured recordings. It adds a compact scroll-led tool tour, self-building tool vignettes, finite story playback, visible provider signals and coordinated header/section surfaces. Obsidian, Cloud, Ice, Inter and the approved Aperture remain the visual system. The [first version](../output/playwright/orix-website-v1.html) and [Prototype 02](../output/playwright/orix-website-v2.html) are retained for comparison.
+
+The visitor-facing prototype no longer displays “Motion on/off” or its internal prototype/version label. A compact icon-only control pauses continuous decoration and has an accessible pause/resume name. System reduced-motion preference also stops animation and disables that control. The migration plan is [here](../docs/superpowers/plans/2026-11-05-orix-nextjs-website.md).
 
 Open [index.html](index.html) in a browser to review the single-file prototype. Its font, ORIX artwork, integration marks and actual isolated-profile Dark/Light dashboard captures are embedded. The opening layer transitions through collapsed, expanded and tool states. It supports replay, sample Notes/Focus/Clipboard/File tray interactions, a session-status demonstration, a prepared ChatGPT response and a silent Spotify visual preview. The gallery provides theme comparison, three detail views and a full-image dialog.
 
 In the tools section, scroll through the short desktop stage or select a named chapter. Play tool story runs one four-chapter pass with pause and replay. Narrow or short viewports use normal flow with direct chapter buttons. Reduced motion removes the pin and timed playback, with immediately readable content. Provider sample actions light the path from your work through ORIX to the selected connection. These scenes use prepared illustrative data.
 
-The prototype uses `noindex, nofollow` for review. Layer and connection recreations carry Preview or Illustrative labels and prepared data. The gallery's detail views crop the actual Overview capture. The actual Light capture includes an unsaved-preferences bar. Documentation and privacy destinations link to GitHub. Production routes, crawler files, social assets, final media and deployment follow the handoff and launch checklist.
+The standalone prototype uses `noindex, nofollow` for review. Layer and connection recreations carry Preview or Illustrative labels and prepared data. The gallery's detail views crop the actual Overview capture. The actual Light capture includes an unsaved-preferences bar. Production routes, crawler files, social metadata and deployment are implemented in the Next.js site.
 
 The [45-assertion Prototype 03 browser check](../output/playwright/orix-v3-check.js) covers the new scroll chapters, stable stage, keyboard selection, finite playback, pause/offscreen behavior, timed signals, stale-provider cancellation, adaptive header and responsive/reduced-motion fallbacks. The existing [interaction check](../output/playwright/orix-v2-check.js) covers notch geometry, replay, timer, tool/provider actions, actual image replacement, gallery/dialog, terrain, mobile focus, five widths and JavaScript-disabled content. Review captures and results are under `output/playwright/`. Final visual approval and real-device performance remain review work.
 
@@ -48,21 +60,21 @@ The [motion reference map](MOTION-REFERENCE-MAP.md) connects the supplied `D:/WE
 
 | Item | Current position |
 | --- | --- |
-| Information architecture | Proposed Home, Documentation and Privacy pages, with eight homepage content sections |
+| Information architecture | Home, Documentation and Privacy are live; the home page contains the approved product story |
 | Audience priority | Working assumption of Windows users with frequent AI/tool switching, awaiting owner prioritization |
-| Copy language | English draft copy, with website language scope awaiting confirmation |
-| Visual presentation | Proposed dark primary presentation using existing ORIX colors |
+| Copy language | English only |
+| Visual presentation | Dark primary presentation using existing ORIX colors |
 | Exact typography sizes, spacing and motion values | Designer-proposed starting values for prototype review |
 | Illustration and animation selection | Candidate treatments documented per image, with final selection pending composition and performance review |
-| Framework and Cloudflare service | Open implementation decisions |
-| Public Windows downloads | Governed by current release availability and project release checks |
-| Public crawler policy | The staged robots draft allows public crawling, including compliant training crawlers. Training-specific preferences await owner review. |
-| Search and AI visibility | Technical/content assets are prepared. Live indexing, rankings and citations require post-launch observation. |
+| Framework and Cloudflare service | Next.js static export deployed with Cloudflare Workers static assets |
+| Public Windows downloads | Direct link to the published unsigned beta.3 installer |
+| Public crawler policy | Cloudflare prepends zone-managed restrictions for training crawlers. Search and user-initiated fetchers tested below remain reachable; changing the zone-wide policy needs a separate review. |
+| Search and AI visibility | Metadata, schema, sitemap and AI-readable files are live. Indexing, rankings and citations require post-launch observation. |
 
 The original Q&A remains the discovery record. These companion files add the later owner direction and proposed development detail. Confirmed owner instructions take precedence over proposed defaults. Product behavior, compatibility and download claims follow the repository's current release and privacy records.
 
 ## Scope of this handoff
 
-This package supplies design and content specifications. Next work can use it to produce wireframes, select a visual composition, review prototypes and establish the implementation plan. Existing app brand documents retain authority over the identity and supplied logo artwork.
+This package contains the production website, its archived prototype and its design and content specifications. Existing app brand documents retain authority over the identity and supplied logo artwork.
 
 The [application brand system](../dashboard-rewamp/orix-system/BRAND-SYSTEM.md), [interface design system](../dashboard-rewamp/orix-system/DESIGN-SYSTEM.md) and [release checklist](../RELEASE.md) provide the underlying product references.

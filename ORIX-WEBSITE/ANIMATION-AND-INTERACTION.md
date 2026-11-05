@@ -54,9 +54,9 @@ Pause decorative processing when the region leaves view or the document is hidde
 
 Honor `prefers-reduced-motion`. With reduced motion enabled, show complete static artwork, settled cards and immediate preview changes. Essential state changes remain available. Playback begins through explicit user input.
 
-Provide an accessible Effects control wherever continuous decoration is included. Its Off state stops background movement and optional pointer/scroll transforms. Store only this ordinary presentation preference locally if persistence is selected. A change to the system motion preference should be reflected during the visit.
+Provide an icon-only animation pause control with a clear accessible name wherever continuous decoration is included. Its paused state stops background movement and optional pointer/scroll transforms. A change to the system motion preference should be reflected during the visit.
 
-Automatically starting movement lasting more than five seconds alongside other content needs an applicable pause, stop or hide mechanism. The effects control supplies that mechanism for the proposed decorative treatment. This handoff also adopts disabling nonessential interaction motion as a design requirement. The latter is covered by the Level AAA interaction-animation criterion. [W3C Pause, Stop, Hide](https://www.w3.org/WAI/WCAG22/Understanding/pause-stop-hide.html), [W3C Animation from Interactions](https://www.w3.org/WAI/WCAG22/Understanding/animation-from-interactions.html)
+Automatically starting movement lasting more than five seconds alongside other content needs an applicable pause, stop or hide mechanism. The icon-only pause control supplies that mechanism for the proposed decorative treatment. This handoff also adopts disabling nonessential interaction motion as a design requirement. The latter is covered by the Level AAA interaction-animation criterion. [W3C Pause, Stop, Hide](https://www.w3.org/WAI/WCAG22/Understanding/pause-stop-hide.html), [W3C Animation from Interactions](https://www.w3.org/WAI/WCAG22/Understanding/animation-from-interactions.html)
 
 ## Video and optional effects
 
@@ -64,7 +64,7 @@ Use a poster, explicit playback control, captions and a useful text summary for 
 
 ## Motion acceptance
 
-- Complete the product story with system reduced motion enabled and with Effects off.
+- Complete the product story with system reduced motion enabled and with animation paused.
 - Verify hover, keyboard focus, touch and selected states independently.
 - Verify that focus and hit areas remain stable during animation.
 - Check text/background contrast across the entire decorative cycle.

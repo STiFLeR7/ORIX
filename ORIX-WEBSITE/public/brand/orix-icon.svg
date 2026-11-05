@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="ORIX V4 dark tile icon study">
+  <defs>
+    <mask id="opening" maskUnits="userSpaceOnUse" x="0" y="0" width="128" height="128">
+      <rect width="128" height="128" fill="white"/>
+      <path d="M 4 25 C 20 18 39 40 56 54 C 65 61 78 70 103 88" fill="none" stroke="black" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M 4 122 L 52 75 C 61 66 67 62 75 54 L 124 9" fill="none" stroke="black" stroke-width="21" stroke-linecap="round" stroke-linejoin="round"/>
+    </mask>
+  </defs>
+  <rect width="128" height="128" rx="28.16" fill="#111318"/>
+  <g transform="translate(8.96 8.96) scale(.86)">
+    <rect x="4" y="4" width="120" height="120" rx="30" fill="#F4F5F7" mask="url(#opening)"/>
+  </g>
+</svg>

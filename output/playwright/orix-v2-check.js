@@ -274,12 +274,12 @@ async (page) => {
       (await page.locator("#terrain").evaluate((e) => e.toDataURL())),
     "Terrain visibly changes over time",
   );
-  await page.getByRole("button", { name: "Motion on", exact: true }).click();
+  await page.getByRole("button", { name: "Pause background animation", exact: true }).click();
   const stopped = await page.locator("#terrain").evaluate((e) => e.toDataURL());
   await page.waitForTimeout(200);
   check(
     stopped === (await page.locator("#terrain").evaluate((e) => e.toDataURL())),
-    "Motion off stops canvas",
+    "Paused animation stops canvas",
   );
   check(
     await page.evaluate(
@@ -287,9 +287,9 @@ async (page) => {
         document.getAnimations().filter((a) => a.playState === "running")
           .length === 0,
     ),
-    "Motion off stops CSS and scripted animation",
+    "Pause control stops CSS and scripted animation",
   );
-  await page.getByRole("button", { name: "Motion off", exact: true }).click();
+  await page.getByRole("button", { name: "Resume background animation", exact: true }).click();
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.waitForFunction(
     () => document.documentElement.dataset.effects === "off",

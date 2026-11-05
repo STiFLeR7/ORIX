@@ -2,7 +2,7 @@
 
 > ORIX is a free, open-source Windows desktop layer that brings supported AI session status and everyday tools into a compact interface.
 
-Product-reference review date 2026-11-05. This reference summarizes public product documentation. Release-specific compatibility, artifacts and signature status are maintained in the linked project records.
+Product-reference review date 2026-11-05. This reference summarizes public product documentation and the published 0.1.0-beta.3 release.
 
 ## Identity and purpose
 
@@ -16,7 +16,7 @@ The desktop layer can present supported AI session information and local tools. 
 
 The layer visibility control hides or shows the desktop layer. Enabled tools and integrations continue running when the layer is hidden. Turning the layer off therefore leaves background work subject to each enabled tool's own controls.
 
-The current application interface is English. Website language scope is maintained separately from application language behavior.
+The application and website interfaces are English.
 
 ## Local tools
 
@@ -48,9 +48,13 @@ Avoid sharing profile files, private calendar links, hook backups, account crede
 
 ## Source and releases
 
-The public repository contains the application source, license, build tools, tests and contribution guidance. Published releases identify the available source preview or Windows artifacts. A source archive and a Windows installer are distinct deliverables.
+The public repository contains the application source, license, build tools, tests and contribution guidance. ORIX 0.1.0-beta.3 provides a Windows installer for Windows 10/11 x64. The installer is unsigned, so Windows may show an unknown-publisher warning.
 
-Use the exact release's requirements, artifact links, checksum and signing information when obtaining Windows binaries. Updates are manual in the current application documentation. Public release availability and outstanding verification are recorded in RELEASE.md and the project's validation records.
+- [Download the 0.1.0-beta.3 Windows installer](https://github.com/STiFLeR7/ORIX/releases/download/v0.1.0-beta.3/ORIX-Setup-0.1.0-beta.3.exe)
+- [Release notes and checksums](https://github.com/STiFLeR7/ORIX/releases/tag/v0.1.0-beta.3)
+- Installer SHA-256: `98862bcf5e4b3a5894456f274d60b68f31b1c0b01d67869247ada4b37f7fec28`
+
+Updates are manual in the current application documentation. Public release availability and outstanding verification are recorded in RELEASE.md and the project's validation records.
 
 ## Questions and direct answers
 
@@ -76,10 +80,13 @@ The public source is at https://github.com/STiFLeR7/ORIX. Its license and contri
 
 ### Where can I check download and signing availability?
 
-Use the published releases and the project's release and code signing records. Identify whether the selected release supplies source archives, Windows binaries or both.
+Use the [beta.3 release](https://github.com/STiFLeR7/ORIX/releases/tag/v0.1.0-beta.3) for the installer and checksums. This installer is unsigned; code signing remains in progress.
 
 ## Authoritative public sources
 
+- [ORIX website](https://orix.stifler.in/)
+- [ORIX documentation](https://orix.stifler.in/docs/)
+- [ORIX privacy](https://orix.stifler.in/privacy/)
 - [Product README](https://raw.githubusercontent.com/STiFLeR7/ORIX/main/README.md)
 - [ISC license](https://raw.githubusercontent.com/STiFLeR7/ORIX/main/LICENSE)
 - [Application privacy and connected services](https://raw.githubusercontent.com/STiFLeR7/ORIX/main/docs/PRIVACY.md)
