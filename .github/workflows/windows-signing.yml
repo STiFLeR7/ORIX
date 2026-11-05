@@ -65,6 +65,7 @@ jobs:
           "version=$version" >> $env:GITHUB_OUTPUT
           "file-version=$fileVersion" >> $env:GITHUB_OUTPUT
       - name: Upload unsigned installer
+        if: inputs.sign
         id: unsigned
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:

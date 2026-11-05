@@ -2,7 +2,7 @@
 
 ## Selected route and eligibility
 
-SignPath Foundation provides free Windows code signing to accepted open-source projects. ORIX uses ISC locally and is being actively developed. Eligibility is incomplete. The public repository has no source, license or releases, project reputation requires Foundation review, MFA is unverified and bundled native-library redistribution review remains open. [Foundation requirements](https://signpath.org/terms.html)
+SignPath Foundation provides free Windows code signing to accepted open-source projects. ORIX's ISC-licensed source was published on 2026-11-05. Eligibility is incomplete. A Windows release and project reputation require Foundation review, MFA is unverified and bundled native-library redistribution review remains open. [Foundation requirements](https://signpath.org/terms.html)
 
 OSSign's application page reported that applications were suspended when researched on 2026-11-05. Microsoft offers free Store-managed signing for MSIX packages after certification. ORIX currently produces an EXE installer and ZIP. Store signing for those EXE/MSI submissions still requires the developer's own certificate. [OSSign](https://ossign.org/), [Microsoft signing options](https://learn.microsoft.com/en-us/windows/apps/package-and-deploy/code-signing-options)
 
@@ -12,6 +12,8 @@ OSSign's application page reported that applications were suspended when researc
 - Signing disabled by default, enabled only for a version-matching release tag.
 - Installer-only artifact configuration and a draft [Code signing policy](CODE-SIGNING.md).
 - Verification of the returned Authenticode signature, Foundation publisher and timestamp, followed by a new SHA-256 checksum.
+
+Default workflow dispatch builds and tests on Windows. Installer uploads are part of the opt-in signing route after acceptance and redistribution review.
 
 ## Before applying
 
