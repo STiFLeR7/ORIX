@@ -1,5 +1,17 @@
 # ORIX release checks
 
+## Beta.2 follow-up validation — 2026-11-05
+
+The packaged, voice-free Codex executable returned the expected live reply using the existing CLI account. ChatGPT's ORIX-specific runtime reported signed out in both the previous test profile and legacy user profile. Claude Code also reported signed out. The owner chose to continue available checks, so fresh Claude and ChatGPT replies remain pending.
+
+Live monitoring exposed two hook defects. PowerShell rejects the unquoted `@-` argument, and an asynchronous Stop callback can be cancelled when the CLI session ends. The source now quotes the argument, runs Stop/SessionEnd callbacks synchronously and upgrades older ORIX commands at hub startup while preserving unrelated hooks. Three regressions cover these changes. All 233 workspace tests pass with the isolated app stopped so its server does not occupy the test port.
+
+Using the published beta.2 app and runtime with corrected, reviewed, session-scoped hook definitions, a real request produced Ready → Working → Done, all four lifecycle events, a completed activity-history entry and a Windows notification `show` event without a failure event. This validates the corrected command configuration. **The published beta.2 EXE and ZIP still contain the original hook commands. A rebuilt follow-up installer is required to distribute the fix.** Codex requires users to review and trust new or changed hooks through `/hooks`. A malformed pre-existing user hooks file was reported by Codex during testing and was left intact.
+
+The Windows removal check verified every installed file against staging, quit ORIX normally, removed the disposable installation's 193 files and two target-checked shortcuts, and retained the saved note unchanged. Reinstallation from the original beta.2 setup exited 0, and the installed note API read the retained text. This covers isolated Windows filesystem removal and reinstallation, including redirected shortcuts and hook settings. Default-profile cleanup and notification-registration cleanup remain outside that check.
+
+The native dashboard and accessibility tree were inspected at the machine's current 125% display scaling. Transparent-layer input was again rejected as belonging to the underlying Explorer window after activation and one retry. Native file drag/drop remains pending. An actual Windows login cycle, other system DPI settings, Windows high contrast and an actual screen reader still require a dedicated test session. SignPath's thread and sender search, including filtered mail, contained no reply on 2026-11-05.
+
 ## Windows beta.2 — 2026-11-05
 
 The owner requested a downloadable installer and refreshed repository presentation. Version 0.1.0-beta.2 is published with an unsigned Windows 10/11 x64 installer and portable ZIP, a 60-second demo, SHA-256 checksums and a third-party source ZIP. All five uploaded asset sizes and SHA-256 digests matched the local files, and the public installer URL returned HTTP 200. SignPath acceptance and a signing certificate remain pending.

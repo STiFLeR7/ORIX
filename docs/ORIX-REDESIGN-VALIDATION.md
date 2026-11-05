@@ -1,8 +1,14 @@
 # ORIX redesign execution evidence
 
-Plan: [execution plan](superpowers/plans/2026-11-02-orix-redesign.md). Started 2026-11-02. Goal active; no public publication authorized.
+Plan: [execution plan](superpowers/plans/2026-11-02-orix-redesign.md). Started 2026-11-02. The owner authorized source and release publication. Unsigned beta.2 is public, with remaining validation recorded below and in [RELEASE.md](../RELEASE.md).
 
 ## Execution ledger
+
+- 2026-11-05: The voice-free Codex executable shipped in beta.2 returned an exact live test marker using the existing CLI account. Claude Code and both checked ORIX ChatGPT profiles reported signed out. The owner chose to continue available checks. SignPath's inquiry thread still contained only the sent message, and its sender search, including spam/blocked/unauthenticated mail, found no reply.
+
+- 2026-11-05: Reproduced a PowerShell parser error from the generated unquoted stdin argument. Quoting it restored transport. Live monitoring then exposed an asynchronous Stop callback lost at CLI session end. With corrected, reviewed session-scoped commands and synchronous completion callbacks, the original installed app observed Ready → Working → Done, all four lifecycle events, a completed history entry and a Windows notification show event with no failure event. Source fixes include an older-command upgrade preserving unrelated hooks. Three new regressions and all 233 workspace tests pass. Published beta.2 assets retain the original commands and require a follow-up installer. Existing malformed user hook configuration was left intact.
+
+- 2026-11-05: Inspected native dashboard and accessibility controls at current 125% Windows scaling. Transparent-layer input was rejected against underlying Explorer after activation and one retry, so native drag/drop remains pending. Quit the isolated app, verified the 193 installed files against staging, removed only its installation and two target-checked redirected shortcuts, and preserved its note. Reinstalled the original setup successfully and read the retained note through the installed API. Hook settings were removed from the disposable profile before quitting. Default-profile removal, actual Windows login, other system DPI settings, Windows high contrast and an actual screen reader remain pending.
 
 - 2026-11-04: In a hidden Electron fixture using the production note renderer and quit handler over real IPC, a simulated Settings preflight injected a newer synthetic note after the first flush. The second flush produced a second write; the saved file contained the newer text and the process exited 0. Settings approval, note input and the filesystem handler were simulated; this is not a full ORIX UI or actual Settings-dialog test.
 

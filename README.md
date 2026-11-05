@@ -12,6 +12,8 @@
 
 This is **0.1.0-beta.2**, an unsigned beta. Windows may display an unknown-publisher warning while signing is pending. [All release files and checksums](https://github.com/STiFLeR7/ORIX/releases/tag/v0.1.0-beta.2)
 
+**Known beta.2 issue** — Codex monitoring callbacks can fail under Windows PowerShell or at CLI shutdown. The source fix is tested and awaits the next installer build. [Validation details](RELEASE.md#beta2-follow-up-validation--2026-11-05)
+
 ## See it in action
 
 A 60-second product tour with actual beta dashboard captures and edited feature callouts.

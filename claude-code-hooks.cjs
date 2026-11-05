@@ -182,7 +182,7 @@ function createHub(options = {}) {
   // ---- Codex: ~/.codex/hooks.json ----
   // Codex runs a command for each event; curl.exe (in every Windows 10/11) passes the event on to ORIX.
   // Codex asks you once to trust new hooks: that is Codex keeping you safe.
-  const codexCommand = () => `curl.exe -s -m 3 -H "X-TwoCode-Token: ${token()}" -H "Content-Type: application/json" --data-binary @- "${HOOK_URL}&agent=codex"`;
+  const codexCommand = () => `curl.exe -s -m 3 -H "X-TwoCode-Token: ${token()}" -H "Content-Type: application/json" --data-binary "@-" "${HOOK_URL}&agent=codex"`;
   const isOurCodexHook = hook => hook?.type === 'command' && typeof hook.command === 'string' && hook.command.includes('127.0.0.1:' + PORT + ROUTE);
   const codexAvailable = () => fs.existsSync(codexHome);
   function readCodex() {
@@ -218,7 +218,10 @@ function createHub(options = {}) {
     const config = readCodex();
     if (!hasOwnHooks(config, isOurCodexHook)) rememberEmptyHooks('codex', codexFile, config, CODEX_EVENTS);
     stripCodex(config); config.hooks ||= {};
-    for (const event of CODEX_EVENTS) (config.hooks[event] ||= []).push({ hooks: [{ type: 'command', command: codexCommand(), timeout: 5, async: true, statusMessage: 'ORIX' }] });
+    for (const event of CODEX_EVENTS) {
+      const background = !['Stop', 'SessionEnd'].includes(event);
+      (config.hooks[event] ||= []).push({ hooks: [{ type: 'command', command: codexCommand(), timeout: 5, async: background, statusMessage: 'ORIX' }] });
+    }
     writeCodex(config); changed(); return { ok: true };
   }
   function uninstallCodex() {
@@ -436,6 +439,9 @@ function createHub(options = {}) {
   function start() {
     if (server) return;
     if (ours().length && !installed()) { try { install(); } catch {} } // upgrade an older ORIX install
+    try {
+      if (hasOwnHooks(readCodex(), isOurCodexHook) && !codexInstalled()) installCodex();
+    } catch {}
     const expected = Buffer.from(token());
     server = http.createServer((req, res) => {
       const given = Buffer.from(String(req.headers['x-twocode-token'] || ''));

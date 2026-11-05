@@ -11,6 +11,53 @@ function temp() {
   return { dir, settingsFile: path.join(dir, 'claude', 'settings.json'), cleanup: () => fs.rmSync(dir, { recursive: true, force: true }) };
 }
 
+test('Codex hook stdin argument is quoted for Windows PowerShell', () => {
+  const t = temp(), codexHome = path.join(t.dir, 'codex');
+  try {
+    const hub = createHub({ userData: t.dir, settingsFile: t.settingsFile, codexHome });
+    hub.installCodex();
+    const config = JSON.parse(fs.readFileSync(path.join(codexHome, 'hooks.json'), 'utf8'));
+    for (const groups of Object.values(config.hooks)) {
+      for (const group of groups) {
+        for (const hook of group.hooks) assert(hook.command.includes('--data-binary "@-"'));
+      }
+    }
+  } finally { t.cleanup(); }
+});
+
+test('starting the hub upgrades older ORIX Codex commands and preserves other hooks', () => {
+  const t = temp(), codexHome = path.join(t.dir, 'codex');
+  const hub = createHub({ userData: t.dir, settingsFile: t.settingsFile, codexHome });
+  try {
+    hub.installCodex();
+    const file = path.join(codexHome, 'hooks.json');
+    const config = JSON.parse(fs.readFileSync(file, 'utf8'));
+    for (const groups of Object.values(config.hooks)) {
+      for (const group of groups) {
+        for (const hook of group.hooks) hook.command = hook.command.replace('--data-binary "@-"', '--data-binary @-');
+      }
+    }
+    const unrelated = { hooks: [{ type: 'command', command: 'echo unrelated' }] };
+    config.hooks.SessionStart.push(unrelated);
+    fs.writeFileSync(file, JSON.stringify(config));
+    assert.equal(hub.codexInstalled(), false);
+    hub.start();
+    assert.equal(hub.codexInstalled(), true);
+    assert.deepEqual(JSON.parse(fs.readFileSync(file, 'utf8')).hooks.SessionStart[0], unrelated);
+  } finally { hub.stop(); t.cleanup(); }
+});
+
+test('Codex completion hooks finish before the session can cancel background work', () => {
+  const t = temp(), codexHome = path.join(t.dir, 'codex');
+  try {
+    const hub = createHub({ userData: t.dir, settingsFile: t.settingsFile, codexHome });
+    hub.installCodex();
+    const config = JSON.parse(fs.readFileSync(path.join(codexHome, 'hooks.json'), 'utf8'));
+    for (const event of ['Stop', 'SessionEnd']) assert.equal(config.hooks[event][0].hooks[0].async, false);
+    assert.equal(config.hooks.UserPromptSubmit[0].hooks[0].async, true);
+  } finally { t.cleanup(); }
+});
+
 test('Claude Code failure details use English labels without translating unknown provider text', () => {
   const t = temp(), results = [];
   try {
