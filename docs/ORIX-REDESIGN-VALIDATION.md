@@ -1,8 +1,10 @@
 # ORIX redesign execution evidence
 
-Plan: [execution plan](superpowers/plans/2026-11-02-orix-redesign.md). Started 2026-11-02. The owner authorized source and release publication. Unsigned beta.2 is public, with remaining validation recorded below and in [RELEASE.md](../RELEASE.md).
+Plan: [execution plan](superpowers/plans/2026-11-02-orix-redesign.md). Started 2026-11-02. The owner authorized source and release publication. Unsigned beta.3 is public, with remaining validation recorded below and in [RELEASE.md](../RELEASE.md).
 
 ## Execution ledger
+
+- 2026-11-05: Investigated beta.3 native dragging with an isolated installed app. Activating Desktop 3 resolved one capture mismatch. The desktop tool rejected endpoints outside the source window. Tracing observed renderer drag-start, trusted main-frame IPC and native startDrag. One matching receiver receipt appeared during a temporary native-region experiment. After restoring the full region, a follow-up produced no fresh receipt or additional drag-start, so production drag/drop remains open. The owner chose to prepare display/accessibility and actual sign-in checks for later. Restored the full native region and quit the app normally. Prepared a separate-process receiver with exact native path/hash verification, incoming/outgoing samples, local launcher and session checklist. Four verifier self-checks and launcher syntax passed. The prepared end-to-end session awaits execution. See TESTING.md and RELEASE.md.
 
 - 2026-11-05: Published unsigned beta.3 after all five remote asset sizes and SHA-256 digests matched local files. The public installer returned HTTP 200 with the expected 297619456-byte length. The tag points to tested commit d3ea0c22925a22f3659d4cc15cab48135aa6efe3. Beta.2 release notes direct users to the repair release. Repaired the user's mixed legacy/nested Codex hook schema with a byte-for-byte backup and a concurrent-change check, preserving one legacy group and one existing SessionStart group. The packaged parser loaded 11 hooks with zero parse warnings afterward. SignPath sender search still found no reply.
 

@@ -1,5 +1,11 @@
 # ORIX release checks
 
+## Deferred native Windows session — 2026-11-05
+
+The owner chose to prepare display/accessibility checks and the real Windows sign-in cycle for later. Native captures showed the tray correctly after Desktop 3 became active. The desktop tool rejected a drag endpoint outside the source window's bounds. Tracing then observed the renderer drag-start, trusted IPC and Electron's native startDrag call. An in-process receiver recorded one matching file during a temporary native-region experiment. A later full-region attempt produced no fresh receiver receipt or additional recorded drag-start. Production incoming/outgoing drag/drop remains pending.
+
+The temporary native region was restored and the isolated app quit normally. A local later-session kit now supplies a separate-process receiver that validates the actual file path and SHA-256, a launcher with disposable incoming/outgoing samples, and a checklist covering native drag, 100%/150% scaling with restoration to 125%, contrast themes, actual Narrator observations and normal-installation autostart. Receiver verification passed four self-checks and the launcher passed a PowerShell syntax check. The prepared launch flow awaits the later session. Full OS scaling, contrast, screen-reader and sign-in results remain open. [Session procedure](TESTING.md#deferred-windows-session)
+
 ## Windows beta.3 — 2026-11-05
 
 Version 0.1.0-beta.3 packages the Windows Codex hook fixes found during beta.2 validation. It quotes the stdin argument, serializes lifecycle callbacks and upgrades older ORIX hook definitions while preserving unrelated hooks. Four regression cases and all 234 workspace tests pass. Clean hosted Windows [run 41992769011](https://github.com/STiFLeR7/ORIX/actions/runs/41992769011) passed all 234 tests and built ZIP/setup from release commit `d3ea0c22925a22f3659d4cc15cab48135aa6efe3`. The earlier [run 41991411203](https://github.com/STiFLeR7/ORIX/actions/runs/41991411203) passed 233 tests for the first fix revision.

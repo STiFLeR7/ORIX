@@ -1,5 +1,17 @@
 # ORIX tests and historical TwoCode comparison — 2026-11-02
 
+## Deferred Windows session
+
+The owner deferred visible display/accessibility testing and the actual Windows sign-in cycle on 2026-11-05. Keep Desktop 3 active throughout the native checks. The desktop tool limits drag endpoints to the source window's bounds, so cross-window file transfer needs a manual gesture or an appropriately supported native control route.
+
+1. **Native file transfer.** Use the installed beta.3 app with its full native region. Drag a fresh disposable file from Explorer into File Tray and verify its name/path. Drag a tray file into a separate-process receiver below the island and verify a fresh receipt, exact path and content hash. Record incoming and outgoing results independently. The earlier matching receipt came from a temporary native-region experiment.
+2. **Real display scaling.** Record the initial Windows value, which was 125% in this session. Test 100% and 150% through Windows Settings. Check every dashboard destination, Save/Cancel, focus visibility, Note, Focus and File Tray at each scale. Restore 125% and record screenshots and actual OS values.
+3. **Windows contrast.** Record the current contrast theme, apply a Windows high-contrast theme and check text, switches, focus and status. Restore the recorded theme afterward.
+4. **Actual screen reader.** Run Narrator and verify spoken name, role and state for the desktop-layer switch, navigation, motion choices, Note and File Tray. Record the spoken observations and exit Narrator.
+5. **Normal-installation startup.** Install beta.3 in its normal per-user location and record the initial Start with Windows preference. Enable startup through ORIX, verify its native target, save work and have the owner sign out and back in. Check automatic launch, About version, note persistence and layer visibility. Restore the initial startup preference when finished. The current isolated launcher redirects registry writes, and a normal per-user installation was absent at the start of this session.
+
+The local verification kit is maintained under `.verification`. Its prepared receiver passed four verifier self-checks and its PowerShell launcher parsed successfully. Execution of the prepared session remains pending.
+
 ## Current ORIX execution
 
 Beta.3 serializes all Codex lifecycle callbacks after an additional live run observed SessionStart arriving after UserPromptSubmit. Four regression cases cover PowerShell stdin quoting, both older-command and background-callback migration, and synchronous event delivery. All 234 workspace tests pass. Its setup installed in a fresh isolated folder and all 193 files matched staging. All 11 native files matched beta.2. Startup upgraded legacy hooks and retained the profile note. The installed runtime and reviewed session-scoped hook definitions passed a live reply, ordered lifecycle delivery, Ready → Working → Done, completed history and a Windows notification show event. The isolated hooks were removed and the app quit normally afterward. Beta.3 packages the source fixes found during the following beta.2 investigation.
