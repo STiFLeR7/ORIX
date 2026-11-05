@@ -5,7 +5,7 @@
       "@type": "WebPage",
       "@id": "https://orix.stifler.in/docs/#webpage",
       "url": "https://orix.stifler.in/docs/",
-      "name": "ORIX documentation — Setup, tools and integrations",
+      "name": "ORIX Documentation | Setup, tools and integrations",
       "description": "Find ORIX setup instructions, local tool guidance, AI and Spotify connection details, appearance settings, updates, troubleshooting and removal information.",
       "inLanguage": "en",
       "isPartOf": {"@id": "https://orix.stifler.in/#website"},

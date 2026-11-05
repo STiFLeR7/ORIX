@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ORIX social card source</title>
+    <link rel="icon" type="image/svg+xml" href="../public/brand/orix-icon.svg" />
+    <style>
+      @font-face {
+        font-family: Inter;
+        src: url("../public/fonts/inter-latin-opsz-normal.woff2") format("woff2");
+        font-weight: 100 900;
+      }
+      * { box-sizing: border-box; }
+      html, body { width: 1200px; height: 630px; margin: 0; overflow: hidden; }
+      body {
+        position: relative;
+        font-family: Inter, "Segoe UI", sans-serif;
+        color: #f4f5f7;
+        background:
+          radial-gradient(ellipse 590px 520px at 83% 56%, #345a89 0%, #1d2c42 43%, transparent 73%),
+          #111318;
+      }
+      body::after {
+        content: "";
+        position: absolute;
+        inset: 27px;
+        border: 1px solid #a4c8ff32;
+        border-radius: 30px;
+        pointer-events: none;
+      }
+      .top {
+        position: absolute;
+        inset: 55px 68px auto;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .logo { width: 164px; height: auto; }
+      .tag {
+        color: #c0d7f8;
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.18em;
+      }
+      .copy { position: absolute; left: 68px; top: 161px; width: 520px; z-index: 2; }
+      .eyebrow {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: #a4c8ff;
+        font-size: 12px;
+        font-weight: 650;
+        letter-spacing: 0.17em;
+      }
+      .eyebrow::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+      h1 {
+        margin: 22px 0 19px;
+        font-size: 70px;
+        font-weight: 650;
+        letter-spacing: -0.067em;
+        line-height: 1.045;
+      }
+      h1 span { display: block; white-space: nowrap; }
+      h1 span:last-child { color: #a4c8ff; }
+      p { width: 480px; margin: 0; color: #c7d2de; font-size: 19px; line-height: 1.48; }
+      .features {
+        position: absolute;
+        left: 68px;
+        bottom: 62px;
+        display: flex;
+        align-items: center;
+        gap: 13px;
+        color: #d8e2ec;
+        font-size: 12px;
+        font-weight: 550;
+        letter-spacing: 0.07em;
+      }
+      .features b { width: 3px; height: 3px; border-radius: 50%; background: #a4c8ff; }
+      .screen-glow {
+        position: absolute;
+        left: 624px;
+        top: 132px;
+        width: 645px;
+        height: 490px;
+        background: #a4c8ff36;
+        filter: blur(72px);
+      }
+      .screen {
+        position: absolute;
+        left: 595px;
+        top: 145px;
+        width: 670px;
+        height: 420px;
+        overflow: hidden;
+        border: 1px solid #a4c8ff91;
+        border-radius: 21px;
+        background: #111318;
+        box-shadow: 0 38px 95px #05080fc9, 0 0 0 8px #a4c8ff13;
+        transform: rotate(-3deg);
+      }
+      .screen img { display: block; width: 720px; height: auto; }
+      .screen::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(90deg, #11131808, transparent 42%, #11131817);
+        pointer-events: none;
+      }
+      .site {
+        position: absolute;
+        right: 68px;
+        bottom: 59px;
+        color: #c0d7f8;
+        font-size: 14px;
+        font-weight: 550;
+        letter-spacing: 0.03em;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="top">
+      <img class="logo" src="../public/brand/orix-lockup-light.svg" alt="ORIX" />
+      <div class="tag">FREE &amp; OPEN SOURCE · WINDOWS</div>
+    </div>
+    <main class="copy">
+      <div class="eyebrow">YOUR DESKTOP LAYER</div>
+      <h1><span>Your desktop.</span><span>Within reach.</span></h1>
+      <p>Notes, focus, clipboard and AI sessions, right where you work.</p>
+    </main>
+    <div class="screen-glow" aria-hidden="true"></div>
+    <div class="screen"><img src="../public/images/dashboard-dark.png" alt="Actual ORIX dashboard" /></div>
+    <div class="features">NOTES <b></b> FOCUS <b></b> CLIPBOARD <b></b> AI WORKFLOWS</div>
+    <div class="site">orix.stifler.in</div>
+  </body>
+</html>

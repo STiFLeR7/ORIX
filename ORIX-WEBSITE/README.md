@@ -12,6 +12,8 @@ Run `npm ci`, `npm run typecheck` and `npm run build` from this folder to verify
 
 The production page keeps the approved Aperture identity and Obsidian, Cloud and Ice palette. Continuous decoration has a compact icon-only pause control with an accessible name. `prefers-reduced-motion` stops animation and presents the settled examples. The production HTML includes the main content and download link before JavaScript runs; a no-JavaScript stylesheet keeps the layer and mobile navigation readable.
 
+Shared links use a dedicated [ORIX social card](public/images/orix-social-card.png) at 1200 × 630, built from the approved logo and actual dashboard capture. The [artwork source](tools/social-card.html) can be rendered again when the brand or capture changes. Each page supplies its own Open Graph and Twitter title, description and canonical URL.
+
 The [deployment and validation record](PRODUCTION-VALIDATION.md) contains the live checks and the effective Cloudflare crawler policy.
 
 ## Archived standalone prototype

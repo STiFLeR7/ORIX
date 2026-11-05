@@ -47,7 +47,7 @@
       "@type": "WebPage",
       "@id": "https://orix.stifler.in/#webpage",
       "url": "https://orix.stifler.in/",
-      "name": "ORIX — Free desktop layer for Windows",
+      "name": "ORIX | Free desktop layer for Windows",
       "description": "ORIX is a free, open-source desktop layer for Windows with AI session status, notes, clipboard history, focus tools and optional Spotify controls.",
       "inLanguage": "en",
       "isPartOf": {"@id": "https://orix.stifler.in/#website"},

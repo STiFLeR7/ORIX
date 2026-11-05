@@ -7,38 +7,38 @@
   "pages": [
     {
       "path": "/",
-      "title": "ORIX — Free desktop layer for Windows",
+      "title": "ORIX | Free desktop layer for Windows",
       "description": "ORIX is a free, open-source desktop layer for Windows with AI session status, notes, clipboard history, focus tools and optional Spotify controls.",
       "h1": "Your desktop, within reach.",
       "canonical": "https://orix.stifler.in/",
       "robots": "index, follow, max-image-preview:large",
       "openGraphType": "website",
-      "socialImage": "https://orix.stifler.in/images/dashboard-dark.png",
-      "socialImageAlt": "ORIX beta dashboard showing desktop tools and connections",
+      "socialImage": "https://orix.stifler.in/images/orix-social-card.png",
+      "socialImageAlt": "ORIX logo and desktop layer tagline beside the actual beta dashboard",
       "twitterCard": "summary_large_image"
     },
     {
       "path": "/docs/",
-      "title": "ORIX documentation — Setup, tools and integrations",
+      "title": "ORIX Documentation | Setup, tools and integrations",
       "description": "Find ORIX setup instructions, local tool guidance, AI and Spotify connection details, appearance settings, updates, troubleshooting and removal information.",
       "h1": "ORIX documentation",
       "canonical": "https://orix.stifler.in/docs/",
       "robots": "index, follow, max-image-preview:large",
       "openGraphType": "website",
-      "socialImage": "https://orix.stifler.in/images/dashboard-dark.png",
-      "socialImageAlt": "ORIX beta dashboard showing desktop tools and connections",
+      "socialImage": "https://orix.stifler.in/images/orix-social-card.png",
+      "socialImageAlt": "ORIX logo and desktop layer tagline beside the actual beta dashboard",
       "twitterCard": "summary_large_image"
     },
     {
       "path": "/privacy/",
-      "title": "ORIX privacy — Local data and connected services",
+      "title": "ORIX Privacy | Local data and connected services",
       "description": "Understand ORIX's local data, clipboard history, optional AI and Spotify connections, weather and calendar requests, retention and removal controls.",
       "h1": "ORIX privacy",
       "canonical": "https://orix.stifler.in/privacy/",
       "robots": "index, follow, max-image-preview:large",
       "openGraphType": "website",
-      "socialImage": "https://orix.stifler.in/images/dashboard-dark.png",
-      "socialImageAlt": "ORIX beta dashboard showing desktop tools and connections",
+      "socialImage": "https://orix.stifler.in/images/orix-social-card.png",
+      "socialImageAlt": "ORIX logo and desktop layer tagline beside the actual beta dashboard",
       "twitterCard": "summary_large_image"
     }
   ]

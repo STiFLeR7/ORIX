@@ -2,7 +2,7 @@
 
 ## Metadata source
 
-Use [page-metadata.json](page-metadata.json) as the initial route metadata inventory. It follows the proposed three-page structure and English draft. Confirm the final routes and language before implementation.
+Use [page-metadata.json](page-metadata.json) as the deployed three-route English metadata inventory.
 
 | Element | Implementation rule |
 | --- | --- |
@@ -12,11 +12,11 @@ Use [page-metadata.json](page-metadata.json) as the initial route metadata inven
 | Language | Set the HTML language to the actual content language |
 | Robots meta | Public production pages use the approved indexing policy, with preview rules handled per environment |
 | Open Graph | Set page title, description, canonical URL, site name and appropriate type |
-| Social image | Add an absolute image URL and meaningful image description after the approved file is published |
-| Twitter/X card | Use a summary card initially, and the large-image variant when an appropriate approved image is available |
+| Social image | Use the absolute 1200 × 630 ORIX social card URL with meaningful alternative text, MIME type and dimensions |
+| Twitter/X card | Use the large-image variant with page-specific title and description |
 | Site verification | Add real owner-issued verification values only when needed for the selected verification method |
 
-The inventory uses the actual isolated-profile beta dashboard capture at `/images/dashboard-dark.png` for the initial social card. Its 1402 × 953 pixel dimensions and descriptive alternative text are reflected in the generated metadata. Replace this image only after reviewing a better production asset and update the inventory and route output together. Local creative-reference JPGs remain outside the public bundle.
+The inventory uses the purpose-built `/images/orix-social-card.png` for all three routes. Its 1200 × 630 composition uses the approved logo, brand colors and an actual beta dashboard capture. The reproducible artwork source is [social-card.html](../tools/social-card.html). Route-specific titles and descriptions accompany the shared image. Local creative-reference JPGs remain outside the public bundle.
 
 ## Title and description writing
 

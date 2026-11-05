@@ -1,6 +1,6 @@
 # ORIX website production validation
 
-Checked 2026-11-05. Production origin: <https://orix.stifler.in/>. Cloudflare Worker: `orix-website`; deployed version `30bbdd03-a110-462f-9c1f-ee5c15c784e5`.
+Checked 2026-11-05. Production origin: <https://orix.stifler.in/>. Cloudflare Worker: `orix-website`; deployed version `67681b96-f3b4-4da9-87e0-716519be623e`.
 
 ## Build and release
 
@@ -20,6 +20,12 @@ Checked 2026-11-05. Production origin: <https://orix.stifler.in/>. Cloudflare Wo
 - DNS resolves to Cloudflare. HTTPS returned 200 with certificate verification success for `/`, `/docs/` and `/privacy/`.
 - Each route has one H1, an absolute production canonical, indexable robots metadata, Open Graph image and valid JSON-LD. `robots.txt`, `sitemap.xml`, `llms.txt`, `llms-full.txt`, the interaction script and no-JavaScript stylesheet returned 200. The sitemap lists three page URLs.
 - An unknown URL returned a real 404. The live homepage loaded its dashboard image, and the pause control worked at a 390-pixel browser viewport with no horizontal overflow.
+
+## Sharing preview
+
+- The public 1200 × 630 PNG at `/images/orix-social-card.png` uses the approved ORIX lockup and an actual beta dashboard capture. The live image returned `image/png`, and its bytes matched the local asset.
+- Home, Documentation and Privacy each returned a unique title and description, canonical URL, valid JSON-LD, and one set of Open Graph and Twitter large-card tags. Image URL, MIME type, dimensions and alternative text were checked in the live HTML. Published titles, schema names and visible page copy contain no em dashes.
+- User-agent probes for Facebook, X/Twitter, LinkedIn, Discord, Slack, Telegram and WhatsApp returned 200 for both the homepage and image. These are access checks, not a guarantee that each platform has refreshed its cached preview.
 
 ## Effective crawler policy and follow-up
 

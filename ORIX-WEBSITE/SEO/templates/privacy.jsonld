@@ -5,7 +5,7 @@
       "@type": "WebPage",
       "@id": "https://orix.stifler.in/privacy/#webpage",
       "url": "https://orix.stifler.in/privacy/",
-      "name": "ORIX privacy — Local data and connected services",
+      "name": "ORIX Privacy | Local data and connected services",
       "description": "Understand ORIX's local data, clipboard history, optional AI and Spotify connections, weather and calendar requests, retention and removal controls.",
       "inLanguage": "en",
       "isPartOf": {"@id": "https://orix.stifler.in/#website"},

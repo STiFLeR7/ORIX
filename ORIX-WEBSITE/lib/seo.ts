@@ -14,9 +14,10 @@ export function metadataFor(path: SiteRoute): Metadata {
 
   const image = {
     url: page.socialImage,
-    width: 1402,
-    height: 953,
+    width: 1200,
+    height: 630,
     alt: page.socialImageAlt,
+    type: "image/png",
   };
 
   return {
@@ -37,7 +38,7 @@ export function metadataFor(path: SiteRoute): Metadata {
       card: page.twitterCard as "summary_large_image",
       title: page.title,
       description: page.description,
-      images: [image.url],
+      images: [{ url: image.url, alt: image.alt }],
     },
   };
 }

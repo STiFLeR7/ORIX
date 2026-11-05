@@ -25,7 +25,7 @@ Prepared 2026-11-05 for the planned `https://orix.stifler.in` website. This exte
 
 The four files from `ORIX-WEBSITE/public/` are published at the production origin root. Page-specific schema is embedded in each HTML document, and `page-metadata.json` supplies build-time metadata. The handoff documents and creative-reference JPGs remain development material with separate publication/rights requirements.
 
-The `/`, `/docs/` and `/privacy/` routes follow the site structure. The initial social image is the actual isolated-profile dashboard capture. The live route responses, image URL, sitemap, canonical tags and schema were checked in [production validation](../PRODUCTION-VALIDATION.md).
+The `/`, `/docs/` and `/privacy/` routes follow the site structure. Their shared social card uses the approved ORIX identity and an actual beta dashboard capture. The live route responses, image URL, sitemap, canonical tags and schema are checked in [production validation](../PRODUCTION-VALIDATION.md).
 
 ## Working policy choices
 
