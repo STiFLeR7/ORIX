@@ -4,6 +4,8 @@ Plan: [execution plan](superpowers/plans/2026-11-02-orix-redesign.md). Started 2
 
 ## Execution ledger
 
+- 2026-11-05: Clean hosted Windows run 41992769011 passed all 234 tests and built ZIP/setup from the final beta.3 release commit d3ea0c22925a22f3659d4cc15cab48135aa6efe3. Signing and artifact-upload steps were skipped in the default unsigned workflow. The separately validated local assets are uploaded through the release draft.
+
 - 2026-11-05: Prepared beta.3 to distribute the hook fixes. A further installed run exposed out-of-order background lifecycle callbacks. The final source serializes all Codex callbacks and detects stale background definitions for migration. Four regressions and all 234 workspace tests passed. Fresh setup exited 0, 193 installed files matched staging and 11 native files matched beta.2. Startup upgraded legacy hooks and retained the note. The final installed live test observed ordered SessionStart/UserPromptSubmit/Stop/SessionEnd, Ready → Working → Done, an exact response, completed history and a Windows notification show event. The isolated hooks were removed and ORIX quit normally. Live checks used reviewed session-scoped definitions and left the pre-existing malformed user hooks file intact. Beta.3 remains unsigned and retains the deferred authentication and Windows validation items in RELEASE.md.
 
 - 2026-11-05: The voice-free Codex executable shipped in beta.2 returned an exact live test marker using the existing CLI account. Claude Code and both checked ORIX ChatGPT profiles reported signed out. The owner chose to continue available checks. SignPath's inquiry thread still contained only the sent message, and its sender search, including spam/blocked/unauthenticated mail, found no reply.
