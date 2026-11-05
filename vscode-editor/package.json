@@ -1,8 +1,8 @@
 {
   "name": "project-editor",
-  "publisher": "twocode",
+  "publisher": "orix",
   "displayName": "ORIX Project Editor",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "engines": {
     "vscode": "^1.85.0"
   },

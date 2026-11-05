@@ -8,16 +8,20 @@ const os = require('node:os');
 const path = require('node:path');
 const { randomBytes, timingSafeEqual } = require('node:crypto');
 const { questionFrom } = require('./ai-monitor-model.cjs');
+const { previous } = require('./orix-compat.cjs');
 
 const PORT = 47824;
-const ROUTE = '/twocode-hook';
-const STATUS_ROUTE = '/twocode-status';
-const STATUS_SCRIPT = path.join(__dirname, 'twocode-statusline.cjs');
-const WAIT_ROUTE = '/twocode-wait';
-const REPLY_SCRIPT = path.join(__dirname, 'twocode-reply.cjs');
+const ROUTE = '/orix-hook';
+const STATUS_ROUTE = '/orix-status';
+const STATUS_SCRIPT = path.join(__dirname, 'orix-statusline.cjs');
+const WAIT_ROUTE = '/orix-wait';
+const REPLY_SCRIPT = path.join(__dirname, 'orix-reply.cjs');
 const REPLY_WAIT_S = 1800; // how long an island answer can still wake Claude after it stopped
 const VERSION = 4; // Bump when the installed hook config changes; older installs are upgraded on start.
 const HOOK_URL = 'http://127.0.0.1:' + PORT + ROUTE + '?v=' + VERSION;
+const PRIOR_ROUTE = '/' + previous + '-hook';
+const PRIOR_REPLY = path.join(__dirname, previous + '-reply.cjs');
+const PRIOR_STATUS = path.join(__dirname, previous + '-statusline.cjs');
 const EVENTS = ['UserPromptSubmit', 'PreToolUse', 'PostToolUse', 'PostToolUseFailure', 'PermissionRequest',
   'Notification', 'Stop', 'StopFailure', 'SessionEnd'];
 // The terminal dialog stays usable while this hook waits; whoever answers first wins.
@@ -49,7 +53,7 @@ function createHub(options = {}) {
   let usage = { fiveHour: null, sevenDay: null, at: 0 };
   const changed = () => { checkedAt = 0; onChange(); };
   // What your AI did, for the home page of the ORIX app: the last 40 finished turns (kept on this PC only).
-  const historyFile = userData ? path.join(userData, 'twocode-history.json') : null;
+  const historyFile = userData ? path.join(userData, 'orix-history.json') : null;
   let history = [];
   try { history = JSON.parse(fs.readFileSync(historyFile, 'utf8')); if (!Array.isArray(history)) history = []; } catch {}
   function remember(s, result) {
@@ -69,8 +73,8 @@ function createHub(options = {}) {
   }
 
   // ---- settings.json ----
-  const isReplyHook = hook => hook?.type === 'command' && typeof hook.command === 'string' && hook.command.includes(REPLY_SCRIPT);
-  const isOurs = hook => (typeof hook?.url === 'string' && hook.url.startsWith('http://127.0.0.1:' + PORT + ROUTE)) || isReplyHook(hook);
+  const isReplyHook = hook => hook?.type === 'command' && typeof hook.command === 'string' && [REPLY_SCRIPT, PRIOR_REPLY].some(script => hook.command.includes(script));
+  const isOurs = hook => (typeof hook?.url === 'string' && [ROUTE, PRIOR_ROUTE].some(route => hook.url.startsWith('http://127.0.0.1:' + PORT + route))) || isReplyHook(hook);
   const replyCommand = () => `node "${REPLY_SCRIPT}" ${token()}`;
   function readSettings() {
     try { return JSON.parse(fs.readFileSync(settingsFile, 'utf8')); }
@@ -83,7 +87,7 @@ function createHub(options = {}) {
     } catch { return []; }
   }
   // Our status line forwards your 5-hour / weekly usage. A status line you made yourself is never replaced.
-  const isOurStatus = line => typeof line?.command === 'string' && line.command.includes(STATUS_SCRIPT);
+  const isOurStatus = line => typeof line?.command === 'string' && [STATUS_SCRIPT, PRIOR_STATUS].some(script => line.command.includes(script));
   const statusCommand = () => `node "${STATUS_SCRIPT}" ${token()}`;
   function statusOk() {
     try { const line = readSettings().statusLine; return !line || !isOurStatus(line) ? Boolean(line) : line.command === statusCommand(); }
@@ -156,7 +160,7 @@ function createHub(options = {}) {
     if (!hasOwnHooks(settings, isOurs)) rememberEmptyHooks('claude', settingsFile, settings, EVENTS);
     strip(settings); settings.hooks ||= {};
     for (const event of EVENTS) {
-      const hook = { type: 'http', url: HOOK_URL, timeout: event === 'PermissionRequest' ? PERMISSION_WAIT_S + 5 : 2, headers: { 'X-TwoCode-Token': token() } };
+      const hook = { type: 'http', url: HOOK_URL, timeout: event === 'PermissionRequest' ? PERMISSION_WAIT_S + 5 : 2, headers: { 'X-ORIX-Token': token() } };
       (settings.hooks[event] ||= []).push({ hooks: [hook] });
     }
     // Answer from the island: runs in the background after Claude stops; exit 2 wakes Claude with your text.
@@ -182,8 +186,8 @@ function createHub(options = {}) {
   // ---- Codex: ~/.codex/hooks.json ----
   // Codex runs a command for each event; curl.exe (in every Windows 10/11) passes the event on to ORIX.
   // Codex asks you once to trust new hooks: that is Codex keeping you safe.
-  const codexCommand = () => `curl.exe -s -m 3 -H "X-TwoCode-Token: ${token()}" -H "Content-Type: application/json" --data-binary "@-" "${HOOK_URL}&agent=codex"`;
-  const isOurCodexHook = hook => hook?.type === 'command' && typeof hook.command === 'string' && hook.command.includes('127.0.0.1:' + PORT + ROUTE);
+  const codexCommand = () => `curl.exe -s -m 3 -H "X-ORIX-Token: ${token()}" -H "Content-Type: application/json" --data-binary "@-" "${HOOK_URL}&agent=codex"`;
+  const isOurCodexHook = hook => hook?.type === 'command' && typeof hook.command === 'string' && [ROUTE, PRIOR_ROUTE].some(route => hook.command.includes('127.0.0.1:' + PORT + route));
   const codexAvailable = () => fs.existsSync(codexHome);
   function readCodex() {
     try { return JSON.parse(fs.readFileSync(codexFile, 'utf8')); }
@@ -231,7 +235,7 @@ function createHub(options = {}) {
     changed(); return { ok: true };
   }
 
-  // ---- answers typed in the island (twocode-reply.cjs waits on WAIT_ROUTE) ----
+  // ---- answers typed in the island (orix-reply.cjs waits on WAIT_ROUTE) ----
   const replies = new Map(); // session id → { res, timer }
   function answer(id, text) {
     const wait = replies.get(id); if (!wait) return false;
@@ -444,8 +448,8 @@ function createHub(options = {}) {
     } catch {}
     const expected = Buffer.from(token());
     server = http.createServer((req, res) => {
-      const given = Buffer.from(String(req.headers['x-twocode-token'] || ''));
-      const route = String(req.url).split('?')[0];
+      const given = Buffer.from(String(req.headers['x-orix-token'] || req.headers['x-' + previous + '-token'] || ''));
+      const route = String(req.url).split('?')[0].replace('/' + previous + '-', '/orix-');
       if (req.method !== 'POST' || ![ROUTE, STATUS_ROUTE, WAIT_ROUTE].includes(route) || given.length !== expected.length || !timingSafeEqual(given, expected)) {
         res.writeHead(403).end(); req.resume(); return;
       }

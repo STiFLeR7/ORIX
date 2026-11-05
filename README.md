@@ -59,7 +59,7 @@ node node_modules/electron/install.js
 npm start
 ```
 
-The explicit install step downloads the Electron runtime if dependency installation skipped it. The ORIX dependency lock selects Electron 44.10.1; do not launch the recovered runtime as the ORIX release.
+The explicit install step downloads the Electron runtime if dependency installation skipped it. The dependency lock selects Electron 44.10.1.
 
 ```powershell
 npm test
@@ -81,7 +81,9 @@ The first command runs the automated suite. The Windows check inspects supported
 - Enable Claude Code or Codex monitoring in **Settings → Connections** to follow local sessions. Window monitoring requires an open, readable conversation window; UI changes can affect recognition.
 - Quit from the island's power button or the tray menu. Optional startup behavior is available in the tray menu.
 
-Packaged ORIX uses its own application identity, settings, hooks, and `%LOCALAPPDATA%\Programs\ORIX` installation. It does not migrate TwoCode settings automatically. The original recovered runtime stays local for historical comparison and is excluded from source releases.
+Packaged ORIX uses its own application identity and `%LOCALAPPDATA%\Programs\ORIX` installation. Updates preserve existing ORIX beta settings and history.
+
+For VS Code project editing with the current source, install [ORIX Project Editor](vscode-editor/orix-project-editor.vsix) through **Extensions → Install from VSIX**. This 0.2.0 extension uses the `orix.project-editor` identity.
 
 </details>
 
@@ -90,7 +92,7 @@ Packaged ORIX uses its own application identity, settings, hooks, and `%LOCALAPP
 
 The [privacy policy](docs/PRIVACY.md) describes local data, network destinations, provider policies and removal controls.
 
-Core tools require no original TwoCode service. ORIX does not request the original update, news, or account endpoints. Updates are [manual](UPDATES.md).
+Core desktop tools run locally. Updates are [manual](UPDATES.md).
 
 The Clipboard module is enabled by default. While enabled, ORIX checks for copied text and keeps up to eight entries in memory; this history is not written to disk. To stop collection and clear ORIX’s in-memory history, switch **Clipboard** off in **Modules** and press **Save**. This does not clear the Windows clipboard. Hiding the desktop layer does not disable enabled modules.
 
@@ -126,8 +128,8 @@ The package retains the text Codex runtime and helpers. Its unused real-time voi
 
 See the [brand system](dashboard-rewamp/orix-system/BRAND-SYSTEM.md) and [interface design system](dashboard-rewamp/orix-system/DESIGN-SYSTEM.md) for the visual direction.
 
-ORIX application code is distributed under [ISC](LICENSE), retaining the recovered manifest's license choice. Dependencies, runtime components, fonts, and other third-party material retain their own terms and attribution: [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+ORIX application code is distributed under [ISC](LICENSE). Dependencies, runtime components, fonts and other third-party material retain their own terms and [attribution](THIRD_PARTY_NOTICES.md).
 
 <p align="center"><img src="assets/icon-64.png" width="36" alt="ORIX aperture mark"><br><b>ORIX</b> · Free and open source under ISC.</p>
 
-ORIX builds on the recovered TwoCode application. [Recovery provenance](RECOVERY.md) · [Release checks](RELEASE.md) · [Media credits](docs/media/README.md)
+[Release checks](RELEASE.md) · [Media credits](docs/media/README.md)

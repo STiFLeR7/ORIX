@@ -31,7 +31,7 @@ test('self-install preserves a stranded backup when the target is missing', () =
   const mod = { exports: {} };
   vm.runInNewContext('(function () {\n' + source + '\n})()', { module: mod, exports: mod.exports,
     require: name => name === 'electron' ? { app } : name === 'fs' ? fakeFs : name === './auto-update-core.cjs' ? { compareVersions: () => 1 } : require(name),
-    process: { platform: 'win32', execPath: path.join(here, 'ORIX.exe'), argv: [], env: { TWOCODE_INSTALL_DIR: home, TWOCODE_INSTALL_DRYRUN: '1' } },
+    process: { platform: 'win32', execPath: path.join(here, 'ORIX.exe'), argv: [], env: { ORIX_INSTALL_DIR: home, ORIX_INSTALL_DRYRUN: '1' } },
     SharedArrayBuffer, Atomics, Int32Array, Date });
   assert.equal(mod.exports.handedOver, false);
   assert.equal(homeExists, false);

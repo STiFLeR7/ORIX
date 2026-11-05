@@ -14,7 +14,7 @@ test('light action text has at least 4.5 contrast on its white surface', () => {
 
 test('Focus picker adjacent values use readable theme colors without an opaque fade', () => {
   const source = fs.readFileSync(require.resolve('../focus-ui.js'), 'utf8');
-  const rule = source.split('#twocode-focus .fo-num{')[1]?.split('}')[0] || '';
+  const rule = source.split('#orix-focus .fo-num{')[1]?.split('}')[0] || '';
   assert.match(rule, /color:var\(--orix-muted/);
   assert.doesNotMatch(source, /class="fo-fade"/);
   const { palette } = require('../orix-appearance-ui.js');
@@ -27,22 +27,22 @@ test('Focus picker adjacent values use readable theme colors without an opaque f
 
 test('Focus picker unit labels remain readable on the dark selection band', () => {
   const css = fs.readFileSync(require.resolve('../orix-layer.css'), 'utf8');
-  const value = css.match(/#twocode-focus \.fo-unit\{color:(#[a-f0-9]{6})/i)?.[1];
+  const value = css.match(/#orix-focus \.fo-unit\{color:(#[a-f0-9]{6})/i)?.[1];
   assert.ok(value, 'unit label needs its own color against the dark selection band');
   const levels = [luminance(value), luminance('#1c1c1e')].sort((a, b) => a - b);
   assert.ok((levels[1] + .05) / (levels[0] + .05) >= 4.5);
-  assert.match(css, /data-high-contrast=true\] #twocode-focus \.fo-unit\{color:CanvasText/);
+  assert.match(css, /data-high-contrast=true\] #orix-focus \.fo-unit\{color:CanvasText/);
 });
 
 test('high-contrast Focus selection uses system background and text together', () => {
   const css = fs.readFileSync(require.resolve('../orix-layer.css'), 'utf8');
-  assert.match(css, /data-high-contrast=true\] #twocode-focus \.fo-band\{background:Canvas;/);
-  assert.match(css, /data-high-contrast=true\] #twocode-focus \.fo-num\.on\{color:CanvasText/);
+  assert.match(css, /data-high-contrast=true\] #orix-focus \.fo-band\{background:Canvas;/);
+  assert.match(css, /data-high-contrast=true\] #orix-focus \.fo-num\.on\{color:CanvasText/);
 });
 
 test('AI session details use theme colors in light and high contrast modes', () => {
   const css = fs.readFileSync(require.resolve('../orix-layer.css'), 'utf8');
-  const rules = css.split('\n').filter(line => line.includes(':is([data-theme=light],[data-high-contrast=true]) #twocode-ai-monitor.cl-new'));
+  const rules = css.split('\n').filter(line => line.includes(':is([data-theme=light],[data-high-contrast=true]) #orix-ai-monitor.cl-new'));
   for (const selector of ['.gl-tile', '.gl-big', '.gl-sub', '.gl-md', '.gl-steps', '.gl-card', '.gl-compose', '.gl-two']) {
     assert.ok(rules.some(line => line.includes(selector) && line.includes('var(--orix-')), `${selector} needs theme-aware styling`);
   }
@@ -50,12 +50,12 @@ test('AI session details use theme colors in light and high contrast modes', () 
 
 test('AI working timer overrides its legacy light-colored text in light mode', () => {
   const css = fs.readFileSync(require.resolve('../orix-layer.css'), 'utf8');
-  assert.match(css, /:is\(\[data-theme=light\],\[data-high-contrast=true\]\) #twocode-ai-monitor\.cl-new \.cx-timer\{color:var\(--orix-text\)/);
+  assert.match(css, /:is\(\[data-theme=light\],\[data-high-contrast=true\]\) #orix-ai-monitor\.cl-new \.cx-timer\{color:var\(--orix-text\)/);
 });
 
 test('AI plan and choice controls use readable theme colors', () => {
   const css = fs.readFileSync(require.resolve('../orix-layer.css'), 'utf8');
-  const rules = css.split('\n').filter(line => line.includes(':is([data-theme=light],[data-high-contrast=true]) #twocode-ai-monitor.cl-new'));
+  const rules = css.split('\n').filter(line => line.includes(':is([data-theme=light],[data-high-contrast=true]) #orix-ai-monitor.cl-new'));
   for (const selector of ['.am-plan', '.am-said', '.am-option', '.am-note', '.am-primary']) {
     assert.ok(rules.some(line => line.includes(selector) && line.includes('var(--orix-')), `${selector} needs theme-aware styling`);
   }

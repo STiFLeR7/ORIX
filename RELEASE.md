@@ -1,5 +1,11 @@
 # ORIX release checks
 
+## Source identity cleanup — 2026-11-05
+
+The current source consistently uses ORIX filenames, renderer APIs, styles, IPC and callback identities. Existing beta settings, encrypted provider configuration, history and authenticated in-flight callbacks have compatibility coverage. The bundled VS Code extension is now `orix.project-editor` 0.2.0 and requires installation from its current VSIX.
+
+All 244 automated tests passed. A network-disabled hidden source launch initialized the renamed renderer APIs and exited 0. This source update has not been published as a new Windows binary. The native checks and signing status below continue to apply.
+
 ## Deferred native Windows session — 2026-11-05
 
 The owner chose to prepare display/accessibility checks and the real Windows sign-in cycle for later. Native captures showed the tray correctly after Desktop 3 became active. The desktop tool rejected a drag endpoint outside the source window's bounds. Tracing then observed the renderer drag-start, trusted IPC and Electron's native startDrag call. An in-process receiver recorded one matching file during a temporary native-region experiment. A later full-region attempt produced no fresh receiver receipt or additional recorded drag-start. Production incoming/outgoing drag/drop remains pending.
@@ -40,7 +46,7 @@ Release assets are listed at [v0.1.0-beta.2](https://github.com/STiFLeR7/ORIX/re
 
 ## Earlier beta.1 checks
 
-ORIX is a free, ISC-licensed desktop layer for Windows, based on recovered TwoCode 1.2.0-beta.6. This first independent beta includes the four-section dashboard redesign, Settings-only theme controls and English-only interface, hide-only layer switch, shared appearance system, unlocked tools, independent app identity, patched dependencies, and removal of original remote update/news/account defaults. Execution and final validation remain in progress. The selected ORIX aperture logo is integrated; visual Windows and small-icon validation remain open.
+ORIX is a free, ISC-licensed desktop layer for Windows. This first independent beta includes the four-section dashboard redesign, Settings-only theme controls and English-only interface, hide-only layer switch, shared appearance system, unlocked tools, independent app identity, patched dependencies, and removal of original remote update/news/account defaults. Execution and final validation remain in progress. The selected ORIX aperture logo is integrated; visual Windows and small-icon validation remain open.
 
 **Clipboard verification:** The isolated installed app captured a disposable text from the real Windows clipboard and copied it back through its history handler. The previous clipboard contents were retained in memory and restored after the check.
 
@@ -114,11 +120,11 @@ The detailed observations, dates and limits are in the [execution ledger](docs/O
 ## Validate the candidate
 
 - [ ] Confirm `package.json`, lockfile, displayed version, and artifact names agree on 0.1.0-beta.1.
-- [ ] Install with Node.js 22.12 or newer: `npm ci`, then `node node_modules/electron/install.js`. Confirm the packaged runtime is Electron 44.10.1 rather than the recovered 44.5.1 runtime.
+- [ ] Install with Node.js 22.12 or newer: `npm ci`, then `node node_modules/electron/install.js`. Confirm the packaged runtime is Electron 44.10.1.
 - [ ] Run `npm test`, JavaScript syntax checks, and `npm audit`; record exact results and unresolved advisories in TESTING.md.
 - [ ] Launch ORIX with the patched runtime and inspect the island, settings, neutral mark, keyboard access, notes, clipboard, Focus, and free feature access.
 - [ ] Verify no original account/news/update requests or staged update installation occur, including with legacy saved configuration.
-- [ ] Verify ORIX installs, stores settings, and installs/removes hooks independently while preserving existing TwoCode/custom hooks.
+- [ ] Verify ORIX installs, stores settings, and installs/removes hooks independently while preserving existing ORIX/custom hooks.
 - [ ] Test real AI monitor connections, Windows accessibility and notifications, and optional Spotify PKCE with a configured public client ID. Document unavailable accounts, unsupported app versions, and untested live flows.
 
 ## Package and distribute
@@ -127,10 +133,10 @@ Free signing preparation is tracked in [SIGNING-SETUP.md](docs/SIGNING-SETUP.md)
 
 - [x] Build `ORIX-Windows-0.1.0-beta.1.zip` and `ORIX-Setup-0.1.0-beta.1.exe` using the project's local packaging tools. Redesigned candidate rebuilt and installed in an isolated folder; rebuild again after any shipped-file changes.
 - [ ] Confirm clean install, launch, quit, startup shortcut, manual upgrade, and uninstall on Windows. Expected installation: `%LOCALAPPDATA%\Programs\ORIX`; settings shortcut: **ORIX Settings**.
-- [ ] Inspect archive contents for LICENSE, THIRD_PARTY_NOTICES.md, Inter's license, Electron's LICENSE / LICENSES.chromium.html, and applicable dependency notices. Exclude local credentials, recovery artifacts, and verification scratch files.
-- [x] Check relative Markdown links in the five top-level packaged documents without including the checksum-bearing release checklist or excluded recovery files. External links and nested documents were not checked.
+- [ ] Inspect archive contents for LICENSE, THIRD_PARTY_NOTICES.md, Inter's license, Electron's LICENSE / LICENSES.chromium.html, and applicable dependency notices. Exclude local credentials, private artifacts and verification scratch files.
+- [x] Check relative Markdown links in the five top-level packaged documents without including the checksum-bearing release checklist or private artifacts. External links and nested documents were not checked.
 - [x] Publish reviewed source and a source preview in the user-supplied repository [STiFLeR7/ORIX](https://github.com/STiFLeR7/ORIX). Windows binary assets remain pending the documented release gates.
-- [ ] Establish and verify ORIX code signing and artifact checksums before public distribution. Do not reuse the recovered updater's identity or keys. Developer credentials are handled through the vault MCP.
+- [ ] Establish and verify ORIX code signing and artifact checksums before public distribution. Developer credentials are handled through the vault MCP.
 - [x] Obtain explicit authorization for source publication. The owner authorized it on 2026-11-05. Public source and the source preview are available.
 
-The earlier 30 passing recovered-source tests are historical evidence for the original baseline. They do not validate this release's changed behavior or UI. Automated tests and local smoke checks do not establish live provider compatibility; preserve these distinctions in release notes.
+Automated tests and local smoke checks do not establish live provider compatibility. Preserve these distinctions in release notes.

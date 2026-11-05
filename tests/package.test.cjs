@@ -14,7 +14,7 @@ test('application staging includes runtime entry points and licenses, excludes l
   for (const file of ['main.js', 'preload.js', 'mascot.html', 'settings-app.html', 'LICENSE', 'THIRD_PARTY_NOTICES.md', 'ORIX-REMOVAL.md', 'assets/icon.ico', 'assets/licenses/CODEX-APACHE-2.0.txt', 'assets/licenses/CODEX-NOTICE.txt', 'assets/licenses/RIPGREP-15.2.0-MIT.txt', 'assets/licenses/PCRE2-10.45-LICENCE.md', 'vscode-editor/extension.js']) {
     assert.ok(fs.existsSync(path.join(dest, file)), file);
   }
-  for (const file of ['recovered', '.verification', 'dist', 'node_modules', '.env', 'dashboard-rewamp', 'tests', 'tools', 'docs']) {
+  for (const file of ['baseline', '.verification', 'dist', 'node_modules', '.env', 'dashboard-rewamp', 'tests', 'tools', 'docs']) {
     assert.equal(fs.existsSync(path.join(dest, file)), false, file);
   }
   assert.equal(JSON.parse(fs.readFileSync(path.join(dest, 'package.json'))).main, 'main.js');

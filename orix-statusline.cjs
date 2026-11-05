@@ -2,7 +2,7 @@
 // Claude Code status line → ORIX.
 // Claude Code runs this after each answer and passes session data on stdin, including how much
 // of your 5-hour and weekly limit you have used. We forward that to ORIX (for the ring) and
-// print a short status line in the terminal. Usage: node twocode-statusline.cjs <token>
+// print a short status line in the terminal. Usage: node orix-statusline.cjs <token>
 const http = require('node:http');
 
 let input = '';
@@ -29,8 +29,8 @@ process.stdin.on('end', () => {
   process.stdout.write(parts.join(' · ') + '\n');
 
   const body = JSON.stringify(usage);
-  const req = http.request({ host: '127.0.0.1', port: 47824, path: '/twocode-status', method: 'POST', timeout: 800,
-    headers: { 'content-type': 'application/json', 'content-length': Buffer.byteLength(body), 'x-twocode-token': process.argv[2] || '' } });
+  const req = http.request({ host: '127.0.0.1', port: 47824, path: '/orix-status', method: 'POST', timeout: 800,
+    headers: { 'content-type': 'application/json', 'content-length': Buffer.byteLength(body), 'x-orix-token': process.argv[2] || '' } });
   req.on('error', () => {}); // ORIX not running: the status line still works.
   req.on('timeout', () => req.destroy());
   req.end(body);

@@ -49,11 +49,11 @@ test('dashboard brand provides readable text in high-contrast mode', () => {
 
 test('both desktop marks pulse busy status and keep questions steady without leaking canvas alpha', () => {
   const mascot = fs.readFileSync(path.join(__dirname, '../mascot.html'), 'utf8');
-  const source = mascot.slice(mascot.indexOf('function drawGhost('), mascot.indexOf('window.__twocodeIslandEyes = drawIslandEyes;'));
+  const source = mascot.slice(mascot.indexOf('function drawGhost('), mascot.indexOf('window.__orixIslandEyes = drawIslandEyes;'));
   let status, time, alpha;
   const stack = [];
   const ctx = { globalAlpha: 0.8, save() { stack.push(this.globalAlpha); }, restore() { this.globalAlpha = stack.pop(); } };
-  const sandbox = { ctx, performance: { now: () => time }, window: { __twocodeEyes: () => status, __orixMark: () => { alpha = ctx.globalAlpha; } } };
+  const sandbox = { ctx, performance: { now: () => time }, window: { __orixEyes: () => status, __orixMark: () => { alpha = ctx.globalAlpha; } } };
   vm.runInNewContext(source, sandbox);
   for (const draw of [sandbox.drawGhost, sandbox.drawIslandEyes]) {
     status = { color: '#ff9a1f', blink: true };
@@ -90,7 +90,7 @@ test('Apps offers free tool switches without purchase or activation controls', (
   vm.runInNewContext(apps + draw + '\ndrawApps();', sandbox);
   for (const id of ['focus', 'tray', 'clips', 'note', 'spotify']) assert.ok(html.includes(`data-app="${id}"`), id);
   assert.doesNotMatch(html, /packCode|data-code=|data-url=|🔒/);
-  assert.doesNotMatch(settings, /license\.activate|unlockCode|https:\/\/twocode\.nl/);
+  assert.doesNotMatch(settings, /license\.activate|unlockCode|https:\/\/orix\.nl/);
 });
 
 test('legacy license actions keep every bundled tool unlocked without a code', () => {

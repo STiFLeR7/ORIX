@@ -239,7 +239,7 @@ const AGENTS = { claudecode: 'Claude', codex: 'Codex' };
 const choiceFile = () => path.join(app.getPath('userData'), 'robo-chat.json');
 let chosen = null;
 function connectedAgents() {
-  const providers = app.twocodeMonitor?.view?.()?.providers || [];
+  const providers = app.orixMonitor?.view?.()?.providers || [];
   return Object.keys(AGENTS).filter(id => providers.find(p => p.provider === id)?.hooksInstalled);
 }
 function currentAgent() {
@@ -266,7 +266,7 @@ function friendly(proc, title) {
 // A screenshot of the framed area, for the AI. The layer (ORIX, the frame) stays on screen: only for this
 // moment it is left out of screen captures, so it still shows up in your own screen recordings.
 async function screenshot(point, area) {
-  const shotRect = screen.dipToScreenRect(null, area), file = path.join(os.tmpdir(), 'twocode-buddy.png');
+  const shotRect = screen.dipToScreenRect(null, area), file = path.join(os.tmpdir(), 'orix-buddy.png');
   layer.setContentProtection(true);
   await new Promise(r => setTimeout(r, 30));
   try {
@@ -398,7 +398,7 @@ async function ask({ kind, text, history, lang: language }) {
 // ---------- "Fix it": ORIX knows the project (Claude Code / Codex worked in it), so the AI can change the code ----------
 // The folders your agents worked in, plus the ones Claude Code knows (only the names of its project folders).
 function knownProjects() {
-  const list = [...(app.twocodeMonitor?.projects?.() || [])];
+  const list = [...(app.orixMonitor?.projects?.() || [])];
   try {
     const cfg = JSON.parse(fs.readFileSync(path.join(os.homedir(), '.claude.json'), 'utf8'));
     for (const dir of Object.keys(cfg?.projects || {})) if (!list.some(p => path.resolve(p.cwd) === path.resolve(dir))) list.push({ name: path.basename(dir), cwd: dir, agent: 'claude' });
@@ -519,7 +519,7 @@ function onlyTheChange(fix) {
 
 async function applyFixes() {
   if (!chatTarget?.word || !fixes?.length) return { ok: false, error: nl() ? 'Er is niks om te verbeteren.' : 'Nothing to fix.' };
-  const file = path.join(os.tmpdir(), 'twocode-buddy-fixes.json');
+  const file = path.join(os.tmpdir(), 'orix-buddy-fixes.json');
   fs.writeFileSync(file, JSON.stringify(fixes.map(onlyTheChange)), 'utf8');
   try {
     const result = await ps(['word-fix', chatTarget.title, file], 60000);

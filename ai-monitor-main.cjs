@@ -303,7 +303,7 @@ function setup(electron, options = {}) {
     'ai-monitor:hooks-test': async payload => {
       const hub = demoHub;
       if (!hub) throw new Error('Not available.');
-      const id = 'twocode-test', base = { session_id: id, cwd: 'C:\\Test\\webshop' };
+      const id = 'orix-test', base = { session_id: id, cwd: 'C:\\Test\\webshop' };
       const send = events => events.forEach(e => hub.apply({ ...base, ...e }));
       const tool = (name, input) => [{ hook_event_name: 'PreToolUse', tool_name: name, tool_input: input }, { hook_event_name: 'PostToolUse', tool_name: name }];
       const scenes = {
@@ -423,7 +423,7 @@ function setup(electron, options = {}) {
   });
   app.on('will-quit', () => { closing = true; clearInterval(interval); worker.close(); hub?.stop(); demoHub?.stop(); liveNotifications.clear(); });
   // The ORIX app (settings-app-main.cjs) reads the connections and the history from here.
-  app.twocodeMonitor = { view, handlers, history: () => hub?.history() || [], projects: () => hub?.projects?.() || [] };
+  app.orixMonitor = { view, handlers, history: () => hub?.history() || [], projects: () => hub?.projects?.() || [] };
   return { view, handlers, poll, close: () => { closing = true; clearInterval(interval); worker.close(); demoHub?.stop(); } };
 }
 if (process.versions.electron) setup(require('electron'));

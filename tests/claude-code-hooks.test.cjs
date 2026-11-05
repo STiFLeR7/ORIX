@@ -7,7 +7,7 @@ const path = require('node:path');
 const { createHub, EVENTS, PORT } = require('../claude-code-hooks.cjs');
 
 function temp() {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'twocode-hooks-'));
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'orix-hooks-'));
   return { dir, settingsFile: path.join(dir, 'claude', 'settings.json'), cleanup: () => fs.rmSync(dir, { recursive: true, force: true }) };
 }
 
@@ -47,6 +47,34 @@ for (const legacy of ['unquoted stdin', 'background callbacks']) test('starting 
     hub.start();
     assert.equal(hub.codexInstalled(), true);
     assert.deepEqual(JSON.parse(fs.readFileSync(file, 'utf8')).hooks.SessionStart[0], unrelated);
+  } finally { hub.stop(); t.cleanup(); }
+});
+
+test('older beta callback identities upgrade without removing unrelated hooks', () => {
+  const t = temp(), codexHome = path.join(t.dir, 'codex');
+  const { previous } = require('../orix-compat.cjs');
+  const hub = createHub({ userData: t.dir, settingsFile: t.settingsFile, codexHome });
+  try {
+    hub.install(); hub.installCodex();
+    const codexFile = path.join(codexHome, 'hooks.json');
+    const unrelated = { hooks: [{ type: 'command', command: 'echo unrelated' }] };
+    for (const file of [t.settingsFile, codexFile]) {
+      const config = JSON.parse(fs.readFileSync(file, 'utf8').replaceAll('/orix-hook', '/' + previous + '-hook').replaceAll('X-ORIX-Token', 'X-' + previous + '-Token').replaceAll('orix-reply.cjs', previous + '-reply.cjs').replaceAll('orix-statusline.cjs', previous + '-statusline.cjs'));
+      config.hooks.Stop.unshift(unrelated);
+      fs.writeFileSync(file, JSON.stringify(config));
+    }
+    assert.equal(hub.installed(), false);
+    assert.equal(hub.codexInstalled(), false);
+    hub.start();
+    assert.equal(hub.installed(), true);
+    assert.equal(hub.codexInstalled(), true);
+    for (const file of [t.settingsFile, codexFile]) {
+      const config = JSON.parse(fs.readFileSync(file, 'utf8'));
+      assert.deepEqual(config.hooks.Stop[0], unrelated);
+      assert.ok(!JSON.stringify(config).includes(previous));
+    }
+    hub.uninstall(); hub.uninstallCodex();
+    for (const file of [t.settingsFile, codexFile]) assert.deepEqual(JSON.parse(fs.readFileSync(file, 'utf8')), { hooks: { Stop: [unrelated] } });
   } finally { hub.stop(); t.cleanup(); }
 });
 
@@ -90,23 +118,24 @@ test('hook prompts use English app labels while preserving provider text', () =>
   } finally { t.cleanup(); }
 });
 
-test('ORIX hook install and uninstall preserve a separate TwoCode installation', () => {
+test('ORIX hook install and uninstall preserve a separate earlier application', () => {
   const t = temp();
+  const { previous } = require('../orix-compat.cjs');
   try {
-    const oldHttp = { hooks: [{ type: 'http', url: 'http://127.0.0.1:47823/twocode-hook?v=4' }] };
-    const oldReply = { hooks: [{ type: 'command', command: 'node "C:\\Old\\TwoCode\\twocode-reply.cjs" old-token' }] };
+    const oldHttp = { hooks: [{ type: 'http', url: `http://127.0.0.1:47823/${previous}-hook?v=4` }] };
+    const oldReply = { hooks: [{ type: 'command', command: `node "C:\\Old\\App\\${previous}-reply.cjs" old-token` }] };
     const original = {
       hooks: { Stop: [oldHttp, oldReply] },
-      statusLine: { type: 'command', command: 'node "C:\\Old\\TwoCode\\twocode-statusline.cjs" old-token' }
+      statusLine: { type: 'command', command: `node "C:\\Old\\App\\${previous}-statusline.cjs" old-token` }
     };
     fs.mkdirSync(path.dirname(t.settingsFile), { recursive: true });
     fs.writeFileSync(t.settingsFile, JSON.stringify(original));
-    const legacyBackup = 'Existing TwoCode backup';
-    fs.writeFileSync(t.settingsFile + '.twocode-backup', legacyBackup);
+    const legacyBackup = 'Existing ORIX backup';
+    fs.writeFileSync(t.settingsFile + '.' + previous + '-backup', legacyBackup);
     const hub = createHub({ userData: t.dir, settingsFile: t.settingsFile });
     hub.install();
     const after = JSON.parse(fs.readFileSync(t.settingsFile, 'utf8'));
-    assert.equal(fs.readFileSync(t.settingsFile + '.twocode-backup', 'utf8') === legacyBackup, true, 'legacy backup was preserved');
+    assert.equal(fs.readFileSync(t.settingsFile + '.' + previous + '-backup', 'utf8') === legacyBackup, true, 'legacy backup was preserved');
     assert.equal(JSON.stringify(after.hooks.Stop.slice(0, 2)) === JSON.stringify(original.hooks.Stop), true, 'legacy hooks were preserved');
     assert.deepEqual(after.statusLine, original.statusLine);
     hub.uninstall();
@@ -174,7 +203,7 @@ test('permission waits for Toestaan in the island and answers Claude Code; a lat
     hub.install(); hub.start();
     await new Promise(resolve => setTimeout(resolve, 100));
     const token = fs.readFileSync(path.join(t.dir, 'claude-code-hook-token'), 'utf8');
-    const post = body => fetch('http://127.0.0.1:' + PORT + '/twocode-hook?v=2', { method: 'POST', headers: { 'content-type': 'application/json', 'x-twocode-token': token }, body: JSON.stringify(body) });
+    const post = body => fetch('http://127.0.0.1:' + PORT + '/orix-hook?v=2', { method: 'POST', headers: { 'content-type': 'application/json', 'x-orix-token': token }, body: JSON.stringify(body) });
     const asking = post({ session_id: 'p', cwd: '/w/site', hook_event_name: 'PermissionRequest', tool_name: 'Bash', tool_input: { command: 'npm i' } });
     await new Promise(resolve => setTimeout(resolve, 100));
     const view = hub.view(); assert.equal(view.state, 'question'); assert.equal(view.permission.what, 'npm i');
@@ -197,7 +226,7 @@ test('multiple-choice questions and plans are answered from the island; tool cou
     hub.install(); hub.start();
     await new Promise(resolve => setTimeout(resolve, 100));
     const token = fs.readFileSync(path.join(t.dir, 'claude-code-hook-token'), 'utf8');
-    const post = body => fetch('http://127.0.0.1:' + PORT + '/twocode-hook', { method: 'POST', headers: { 'content-type': 'application/json', 'x-twocode-token': token }, body: JSON.stringify(body) });
+    const post = body => fetch('http://127.0.0.1:' + PORT + '/orix-hook', { method: 'POST', headers: { 'content-type': 'application/json', 'x-orix-token': token }, body: JSON.stringify(body) });
     const questions = [{ question: 'Welke kleur?', header: 'Kleur', multiSelect: false, options: [{ label: 'Blauw', description: 'rustig' }, { label: 'Groen', description: '' }] },
       { question: 'Welke delen?', header: 'Delen', multiSelect: true, options: [{ label: 'Knop', description: '' }, { label: 'Titel', description: '' }] }];
     const asking = post({ session_id: 'q', hook_event_name: 'PermissionRequest', tool_name: 'AskUserQuestion', tool_input: { questions } });
@@ -246,13 +275,13 @@ test('status line prints usage and forwards it to the ring; your own status line
     hub.install(); hub.start();
     await new Promise(resolve => setTimeout(resolve, 100));
     const settings = JSON.parse(fs.readFileSync(t.settingsFile, 'utf8'));
-    assert.match(settings.statusLine.command, /twocode-statusline\.cjs" [a-f0-9]{48}$/);
+    assert.match(settings.statusLine.command, /orix-statusline\.cjs" [a-f0-9]{48}$/);
     const token = settings.statusLine.command.split(' ').at(-1);
     hub.apply({ session_id: 's', hook_event_name: 'UserPromptSubmit' });
     const input = JSON.stringify({ session_id: 's', context_window: { used_percentage: 8.4 },
       rate_limits: { five_hour: { used_percentage: 23.5, resets_at: Math.floor(Date.now() / 1000) + 3600 }, seven_day: { used_percentage: 41.2 } } });
     const { execFileSync } = require('node:child_process');
-    const out = execFileSync(process.execPath, [path.join(__dirname, '..', 'twocode-statusline.cjs'), token], { input, encoding: 'utf8' });
+    const out = execFileSync(process.execPath, [path.join(__dirname, '..', 'orix-statusline.cjs'), token], { input, encoding: 'utf8' });
     assert.equal(out.trim(), 'ORIX · 5 uur: 24% · week: 41% · gesprek: 8% vol');
     await new Promise(resolve => setTimeout(resolve, 150));
     const usage = hub.view().usage;
@@ -270,7 +299,7 @@ test('answer typed in the island wakes Claude (exit 2); typing in the terminal c
   const hub = createHub({ userData: t.dir, settingsFile: t.settingsFile });
   const { spawn } = require('node:child_process');
   const run = (token, sessionId) => {
-    const child = spawn(process.execPath, [path.join(__dirname, '..', 'twocode-reply.cjs'), token]);
+    const child = spawn(process.execPath, [path.join(__dirname, '..', 'orix-reply.cjs'), token]);
     let stderr = ''; child.stderr.on('data', d => { stderr += d; });
     child.stdin.end(JSON.stringify({ session_id: sessionId, hook_event_name: 'Stop' }));
     return new Promise(resolve => child.on('exit', code => resolve({ code, stderr })));
@@ -279,7 +308,7 @@ test('answer typed in the island wakes Claude (exit 2); typing in the terminal c
     hub.install(); hub.start();
     await new Promise(resolve => setTimeout(resolve, 100));
     const stop = JSON.parse(fs.readFileSync(t.settingsFile, 'utf8')).hooks.Stop.flatMap(g => g.hooks).find(h => h.type === 'command');
-    assert.equal(stop.asyncRewake, true); assert.match(stop.command, /twocode-reply\.cjs/);
+    assert.equal(stop.asyncRewake, true); assert.match(stop.command, /orix-reply\.cjs/);
     const token = stop.command.split(' ').at(-1);
 
     hub.apply({ session_id: 'r', hook_event_name: 'Stop', last_assistant_message: 'Welke kleur wil je?' });
@@ -306,12 +335,31 @@ test('server only accepts posts with the right token', async () => {
     hub.install(); hub.start();
     await new Promise(resolve => setTimeout(resolve, 100));
     const token = fs.readFileSync(path.join(t.dir, 'claude-code-hook-token'), 'utf8');
-    const post = (headers, body) => fetch('http://127.0.0.1:' + PORT + '/twocode-hook', { method: 'POST', headers, body: JSON.stringify(body) });
-    const evil = await post({ 'content-type': 'application/json', 'x-twocode-token': 'wrong' }, { session_id: 'x', hook_event_name: 'UserPromptSubmit' });
+    const post = (headers, body) => fetch('http://127.0.0.1:' + PORT + '/orix-hook', { method: 'POST', headers, body: JSON.stringify(body) });
+    const evil = await post({ 'content-type': 'application/json', 'x-orix-token': 'wrong' }, { session_id: 'x', hook_event_name: 'UserPromptSubmit' });
     assert.equal(evil.status, 403); assert.equal(hub.view().state, 'ready');
-    const good = await post({ 'content-type': 'application/json', 'x-twocode-token': token }, { session_id: 'x', cwd: '/a/project', hook_event_name: 'UserPromptSubmit' });
+    const good = await post({ 'content-type': 'application/json', 'x-orix-token': token }, { session_id: 'x', cwd: '/a/project', hook_event_name: 'UserPromptSubmit' });
     assert.equal(good.status, 200); assert.equal(await good.text(), '');
     const view = hub.view(); assert.equal(view.state, 'running'); assert.equal(view.connected, true); assert.equal(view.source.title, 'project');
+  } finally { hub.stop(); t.cleanup(); }
+});
+
+test('in-flight earlier beta callbacks retain token authentication', async () => {
+  const t = temp();
+  const { previous } = require('../orix-compat.cjs');
+  const hub = createHub({ userData: t.dir, settingsFile: t.settingsFile });
+  try {
+    hub.install(); hub.start();
+    await new Promise(resolve => setTimeout(resolve, 100));
+    const token = fs.readFileSync(path.join(t.dir, 'claude-code-hook-token'), 'utf8');
+    const post = (suffix, credential, body) => fetch(`http://127.0.0.1:${PORT}/${previous}-${suffix}`, { method: 'POST', headers: { ['x-' + previous + '-token']: credential, 'content-type': 'application/json' }, body: JSON.stringify(body) });
+    const invalid = await post('hook', 'wrong', { session_id: 'previous', hook_event_name: 'UserPromptSubmit' });
+    assert.equal(invalid.status, 403);
+    const event = await post('hook', token, { session_id: 'previous', hook_event_name: 'UserPromptSubmit' });
+    assert.equal(event.status, 200);
+    assert.equal(hub.view().state, 'running');
+    const usage = await post('status', token, { session_id: 'previous', context: 25 });
+    assert.equal(usage.status, 200);
   } finally { hub.stop(); t.cleanup(); }
 });
 

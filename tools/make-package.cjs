@@ -4,12 +4,12 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { execFileSync } = require('node:child_process');
 
-// Explicit runtime allowlist: local profiles and design/recovery files never enter a package.
+// Explicit runtime allowlist: local profiles and design/restoration files never enter a package.
 const SOURCE = [
   'main.js', 'preload.js', 'mascot.html', 'orix-brand-ui.js', 'orix-layer-main.cjs',
   'orix-appearance-ui.js', 'orix-theme.css', 'orix-icons-ui.js', 'orix-navigation-ui.js', 'orix-dashboard.css',
   'orix-layer.css', 'orix-layer-ui.js',
-  'orix-copy.cjs',
+  'orix-copy.cjs', 'orix-compat.cjs',
   'ai-monitor-main.cjs', 'ai-monitor-model.cjs', 'ai-monitor-ui.js', 'ai-settings-ui.js',
   'auto-update-core.cjs', 'auto-update.cjs', 'buddy-helper.ps1', 'buddy-look.ps1',
   'buddy-main.cjs', 'buddy-preload.js', 'buddy-ui.js', 'buddy.html', 'chat-ui.js',
@@ -18,8 +18,8 @@ const SOURCE = [
   'island-window-main.js', 'island-window-ui.js', 'license-main.cjs', 'pages-ui.js',
   'project-agent-main.js', 'project-editor-main.js', 'project-mode-main.js', 'project-mode-ui.js',
   'self-install.cjs', 'settings-app-main.cjs', 'settings-app-preload.js', 'settings-app.html',
-  'settings-bridge-ui.js', 'spotify-ui.js', 'tools-ui.js', 'tray-main.cjs', 'twocode-fun.js',
-  'twocode-reply.cjs', 'twocode-statusline.cjs', 'volume-watch.ps1', 'windows-ai-access.cs',
+  'settings-bridge-ui.js', 'spotify-ui.js', 'tools-ui.js', 'tray-main.cjs', 'orix-fun.js',
+  'orix-reply.cjs', 'orix-statusline.cjs', 'volume-watch.ps1', 'windows-ai-access.cs',
   'windows-ai-access.ps1', 'package.json', 'package-lock.json', 'LICENSE', 'THIRD_PARTY_NOTICES.md',
   'README.md', 'LEES-MIJ.md', 'UPDATES.md', 'assets', 'vscode-editor'
 ];

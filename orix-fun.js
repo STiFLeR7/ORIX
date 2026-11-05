@@ -1,9 +1,9 @@
 'use strict';
 // ORIX fun: faces, blinking, startup show, sounds, confetti, sleeping, dancing, outfits,
 // limit warnings, a focus timer, and all the "make it yours" options in Settings.
-// Reads the Claude Code status from ai-monitor-ui.js (window.__twocodeStatus) and draws through
-// the hooks in drawGhost (mascot.html): __twocodeGhostFx, __twocodeGhostDecor and __twocodeLook.
-(function twocodeFun() {
+// Reads the Claude Code status from ai-monitor-ui.js (window.__orixStatus) and draws through
+// the hooks in drawGhost (mascot.html): __orixGhostFx, __orixGhostDecor and __orixLook.
+(function orixFun() {
   const now = () => performance.now();
   const store = {
     get: (key, fallback) => { try { const v = localStorage.getItem(key); return v == null ? fallback : JSON.parse(v); } catch { return fallback; } },
@@ -15,10 +15,10 @@
     dance: true, confetti: true, chimes: true, notify: true, startup: true, outfit: 'geen', sleepMin: 10, warnAt: 80,
     pack: 'klassiek', seasonal: false, hunger: false, volumeHud: true, batteryWarn: true, appAnim: true,
     testMode: false, name: 'ORIX', lightBusy: '#ff9a1f', lightDone: '#22e05a', lightError: '#ff3b3b' };
-  const loadedPrefs = store.get('twocode:prefs', {});
+  const loadedPrefs = store.get('orix:prefs', {});
   const savedPrefs = loadedPrefs && typeof loadedPrefs === 'object' && !Array.isArray(loadedPrefs) ? loadedPrefs : {};
-  if (savedPrefs.lang && savedPrefs.lang !== 'en') { savedPrefs.lang = 'en'; store.set('twocode:prefs', savedPrefs); }
-  if (!savedPrefs.newLook) { savedPrefs.body = 'wolk'; savedPrefs.newLook = true; store.set('twocode:prefs', savedPrefs); } // switch once to the new white look
+  if (savedPrefs.lang && savedPrefs.lang !== 'en') { savedPrefs.lang = 'en'; store.set('orix:prefs', savedPrefs); }
+  if (!savedPrefs.newLook) { savedPrefs.body = 'wolk'; savedPrefs.newLook = true; store.set('orix:prefs', savedPrefs); } // switch once to the new white look
   const prefs = { ...DEFAULTS, ...savedPrefs, ...window.ORIXAppearance.normalize(savedPrefs, null, navigator.language), hunger: false, seasonal: false, outfit: 'geen' };
   // Old saves only had a palette preset: start the own colours from that preset.
   if (savedPrefs.lightBusy === undefined && savedPrefs.palette && savedPrefs.palette !== 'klassiek') {
@@ -28,7 +28,7 @@
   const petName = () => 'ORIX';
   if (!['snel', 'normaal'].includes(prefs.speed)) prefs.speed = 'normaal'; // 'rustig' no longer exists
   let drafting = false; // ORIX Instellingen is trying something out (settings-bridge-ui.js): not saved, not on the real ORIX
-  const save = () => { if (drafting) return; store.set('twocode:prefs', prefs); apply(); };
+  const save = () => { if (drafting) return; store.set('orix:prefs', prefs); apply(); };
 
   const EYES = { mint: '#00c48a', wit: '#ffffff', blauw: '#8fd3ff', roze: '#ffb3d9', paars: '#c9a7ff', geel: '#fff3a3' };
   // 'wolk' is the bright white blob (default since the new look); the others are the classic dark ghost.
@@ -43,10 +43,10 @@
   const SPEEDS = { snel: { t: 0.5, peek: 140, home: 300, view: 1500, mon: 600 }, normaal: { t: 0.8, peek: 260, home: 400, view: 2200, mon: 800 } };
 
   const BLOBS = ['wolk', 'munt', 'lucht', 'roos'];
-  window.__twocodeLook = () => ({ eye: EYES[prefs.eye], shell1: BODIES[prefs.body]?.[0], shell2: BODIES[prefs.body]?.[1], style: BLOBS.includes(prefs.body) ? 'blob' : 'ghost' });
+  window.__orixLook = () => ({ eye: EYES[prefs.eye], shell1: BODIES[prefs.body]?.[0], shell2: BODIES[prefs.body]?.[1], style: BLOBS.includes(prefs.body) ? 'blob' : 'ghost' });
   // The traffic-light colours are your own choice (Settings → Karakter → Statuskleuren).
-  window.__twocodePalette = () => ({ busy: prefs.lightBusy, question: prefs.lightBusy, done: prefs.lightDone, error: prefs.lightError });
-  window.__twocodeName = petName;
+  window.__orixPalette = () => ({ busy: prefs.lightBusy, question: prefs.lightBusy, done: prefs.lightDone, error: prefs.lightError });
+  window.__orixName = petName;
 
   // Faster (or calmer) opening and closing, and how quickly the island reacts to your mouse.
   const baseSetMode = setMode;
@@ -65,15 +65,15 @@
     window.ORIXAppearance.apply(document.documentElement, resolved);
     window.dispatchEvent(new CustomEvent('orix-appearance-changed', { detail: resolved }));
   }
-  window.__twocodeInitAppearance = legacyTheme => {
+  window.__orixInitAppearance = legacyTheme => {
     if (appearanceInitialized) return;
-    const current = store.get('twocode:prefs', {});
+    const current = store.get('orix:prefs', {});
     commitPreferences({ ...prefs, ...window.ORIXAppearance.normalize(current, legacyTheme, systemAppearance.locale) });
     appearanceInitialized = true;
   };
-  const stopSystem = window.twocode?.system?.onChange?.(state => { systemAppearance = state; applyAppearance(); });
+  const stopSystem = window.orix?.system?.onChange?.(state => { systemAppearance = state; applyAppearance(); });
   motionQuery.addEventListener('change', applyAppearance);
-  window.twocode?.system?.get?.().then(state => {
+  window.orix?.system?.get?.().then(state => {
     if (!state) return;
     systemAppearance = state;
     if (!['en', 'nl'].includes(savedPrefs.lang) && !appearanceInitialized) prefs.lang = window.ORIXAppearance.normalize(savedPrefs, null, state.locale).lang;
@@ -83,15 +83,15 @@
   function apply() {
     const s = SPEEDS[prefs.speed];
     UI.NORMAL_PEEK_DELAY = s.peek; UI.HOME_LEAVE_DELAY = s.home; UI.VIEW_LEAVE_DELAY = s.view; UI.MONITOR_LEAVE_DELAY = s.mon;
-    window.twocode?.aiMonitorSetNotify?.(prefs.notify).catch?.(() => {});
+    window.orix?.aiMonitorSetNotify?.(prefs.notify).catch?.(() => {});
     applyAppearance();
-    window.twocode?.appearance?.commit?.(window.ORIXAppearance.normalize(prefs)).catch(() => {});
+    window.orix?.appearance?.commit?.(window.ORIXAppearance.normalize(prefs)).catch(() => {});
   }
   apply();
 
   const say = (title, body) => { if (!prefs.notify) return; try { new Notification(title, { body, silent: true }); } catch {} };
-  window.__twocodePrefs = () => prefs;
-  window.__twocodeSay = say;
+  window.__orixPrefs = () => prefs;
+  window.__orixSay = say;
 
   // ---------- sounds: the same melodies in different sound packs ----------
   const PACKS = { klassiek: { wave: 'sine', vol: 1, mul: 1, len: 1, label: 'Klassiek' }, '8bit': { wave: 'square', vol: 0.45, mul: 1, len: 0.8, label: '8-bit' },
@@ -130,8 +130,8 @@
 
   // ---------- outfits: unlocked by finishing tasks ----------
   const OUTFITS = [{ at: 5, id: 'hat', name: 'feesthoedje' }, { at: 15, id: 'shades', name: 'zonnebril' }, { at: 30, id: 'crown', name: 'kroon' }];
-  let doneCount = store.get('twocode:done-count', 0);
-  const unlocked = id => doneCount >= (OUTFITS.find(o => o.id === id)?.at ?? Infinity) || (!!OUTFITS.find(o => o.id === id) && !window.__twocodeLicense?.().locked.includes('outfits'));
+  let doneCount = store.get('orix:done-count', 0);
+  const unlocked = id => doneCount >= (OUTFITS.find(o => o.id === id)?.at ?? Infinity) || (!!OUTFITS.find(o => o.id === id) && !window.__orixLicense?.().locked.includes('outfits'));
   // Holidays: ORIX dresses up by himself (Settings → Seizoensoutfits).
   function season() {
     if (!prefs.seasonal) return null;
@@ -145,11 +145,11 @@
   const outfit = () => prefs.outfit === 'geen' ? null
     : prefs.outfit !== 'auto' && unlocked(prefs.outfit) ? prefs.outfit
     : season() || [...OUTFITS].reverse().find(o => unlocked(o.id))?.id || null;
-  window.__twocodeOutfitOn = () => { const o = outfit(); return Boolean(o && o !== 'shades'); }; // something on his head (the antenna grows above it)
-  window.__twocodeOutfits = { count: () => doneCount, next: () => OUTFITS.find(o => doneCount < o.at) || null };
+  window.__orixOutfitOn = () => { const o = outfit(); return Boolean(o && o !== 'shades'); }; // something on his head (the antenna grows above it)
+  window.__orixOutfits = { count: () => doneCount, next: () => OUTFITS.find(o => doneCount < o.at) || null };
   function countDone(status) {
-    doneCount++; store.set('twocode:done-count', doneCount);
-    window.__twocodeMonitor?.refresh?.(); // the Claude screen shows the new task count right away
+    doneCount++; store.set('orix:done-count', doneCount);
+    window.__orixMonitor?.refresh?.(); // the Claude screen shows the new task count right away
     feed(25);
     const hour = new Date().getHours();
     earn('first'); if (doneCount >= 10) earn('ten'); if (doneCount >= 50) earn('fifty');
@@ -172,16 +172,16 @@
     { id: 'mirror', icon: '🪞', name: 'Looking good', how: 'Use the mirror' },
     { id: 'fashion', icon: '👑', name: 'Style icon', how: 'Earn every outfit' }
   ];
-  const badges = new Set(store.get('twocode:badges', []));
-  const counters = store.get('twocode:counters', {});
+  const badges = new Set(store.get('orix:badges', []));
+  const counters = store.get('orix:counters', {});
   function earn(id) {
     if (badges.has(id)) return;
     const b = BADGES.find(x => x.id === id); if (!b) return;
-    badges.add(id); store.set('twocode:badges', [...badges]);
+    badges.add(id); store.set('orix:badges', [...badges]);
     say(`${b.icon} Achievement: ${b.name}`, b.how); chime('badge'); confetti(50); jump(); feel('heart', 1500);
   }
-  function bump(name, goal, id) { counters[name] = (counters[name] || 0) + 1; store.set('twocode:counters', counters); if (counters[name] >= goal) earn(id); }
-  window.addEventListener('twocode:badge', e => {
+  function bump(name, goal, id) { counters[name] = (counters[name] || 0) + 1; store.set('orix:counters', counters); if (counters[name] >= goal) earn(id); }
+  window.addEventListener('orix:badge', e => {
     const what = String(e.detail || '');
     if (what === 'dj') bump('dj', 10, 'dj');
     else if (what === 'mirror') earn('mirror');
@@ -189,25 +189,25 @@
   });
 
   // ---------- hunger: finishing tasks feeds ORIX (like a Tamagotchi) ----------
-  let food = store.get('twocode:food', { value: 80, at: Date.now() });
+  let food = store.get('orix:food', { value: 80, at: Date.now() });
   const hunger = () => {
     // Loses 1 point every 10 minutes while the app runs (time while closed does not count).
     const lost = Math.floor((Date.now() - food.at) / 600000);
-    if (lost > 0) { food = { value: Math.max(0, food.value - lost), at: food.at + lost * 600000 }; store.set('twocode:food', food); }
+    if (lost > 0) { food = { value: Math.max(0, food.value - lost), at: food.at + lost * 600000 }; store.set('orix:food', food); }
     return food.value;
   };
   function feed(points) {
     if (!prefs.hunger) return;
-    hunger(); food = { value: Math.min(100, food.value + points), at: food.at }; store.set('twocode:food', food); chime('yum');
+    hunger(); food = { value: Math.min(100, food.value + points), at: food.at }; store.set('orix:food', food); chime('yum');
   }
   const hungry = () => prefs.hunger && hunger() < 30;
-  window.__twocodeHunger = () => (prefs.hunger ? hunger() : null);
-  window.__twocodeHomeTitle = () => ''; // no hungry message on Home (it made ORIX look sad all day)
-  if (Date.now() - food.at > 600000) { food.at = Date.now(); store.set('twocode:food', food); } // time while closed doesn't count
+  window.__orixHunger = () => (prefs.hunger ? hunger() : null);
+  window.__orixHomeTitle = () => ''; // no hungry message on Home (it made ORIX look sad all day)
+  if (Date.now() - food.at > 600000) { food.at = Date.now(); store.set('orix:food', food); } // time while closed doesn't count
 
   // ---------- focus timer (hours, minutes and seconds are chosen on the Focus page, focus-ui.js) ----------
   if (!prefs.focusSec) prefs.focusSec = (prefs.focusMin || 25) * 60;
-  let focusEnd = store.get('twocode:focus-end', 0), focusLength = store.get('twocode:focus-length', prefs.focusSec * 1000);
+  let focusEnd = store.get('orix:focus-end', 0), focusLength = store.get('orix:focus-length', prefs.focusSec * 1000);
   const clock = ms => { const s = Math.ceil(ms / 1000), h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), sec = s % 60;
     return h ? `${h}:${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}` : `${m}:${String(sec).padStart(2, '0')}`; };
   const focus = {
@@ -220,14 +220,14 @@
     choose(sec) { prefs.focusSec = Math.max(5, Math.min(24 * 3600 - 1, Math.round(sec))); save(); },
     start(sec = prefs.focusSec) {
       focusLength = sec * 1000; focusEnd = Date.now() + focusLength;
-      store.set('twocode:focus-end', focusEnd); store.set('twocode:focus-length', focusLength);
-      chime('pop'); feel('heart', 1200); wake(); window.__twocodeSettleSize?.();
+      store.set('orix:focus-end', focusEnd); store.set('orix:focus-length', focusLength);
+      chime('pop'); feel('heart', 1200); wake(); window.__orixSettleSize?.();
     },
-    add(sec) { if (!focus.active()) return; focusEnd += sec * 1000; focusLength += sec * 1000; store.set('twocode:focus-end', focusEnd); store.set('twocode:focus-length', focusLength); },
-    stop() { focusEnd = 0; store.set('twocode:focus-end', 0); chime('error'); window.__twocodeSettleSize?.(); },
+    add(sec) { if (!focus.active()) return; focusEnd += sec * 1000; focusLength += sec * 1000; store.set('orix:focus-end', focusEnd); store.set('orix:focus-length', focusLength); },
+    stop() { focusEnd = 0; store.set('orix:focus-end', 0); chime('error'); window.__orixSettleSize?.(); },
     toggle() { focus.active() ? focus.stop() : focus.start(); }
   };
-  window.__twocodeFocus = focus;
+  window.__orixFocus = focus;
   canvas.addEventListener('click', event => {
     if (inside(event.clientX, event.clientY, hit.focusApp)) { event.preventDefault(); event.stopImmediatePropagation(); setView('focus'); }
   }, true);
@@ -264,16 +264,16 @@
   const pv = { prefs: null, feeling: null, feelingUntil: 0, bounceAt: -1e9, danceUntil: 0, waveUntil: 0, nextBlink: 0 };
   function feel(mood, ms) { if (drafting) { pv.feeling = mood; pv.feelingUntil = now() + ms; return; } feeling = mood; feelingUntil = now() + ms; }
   function jump() { if (window.__orixResolvedAppearance?.().reducedMotion) return; if (drafting) { pv.bounceAt = now(); return; } bounceAt = now(); }
-  window.__twocodeFeel = feel;
-  window.__twocodeCelebrate = (kind = 'done', bits = 40) => { chime(kind); jump(); confetti(bits); }; // ORIX's chat: a fix landed
-  window.__twocodeChime = kind => chime(kind);
-  window.__twocodeCheer = () => { jump(); feel('happy', 800); chime('pop'); };
+  window.__orixFeel = feel;
+  window.__orixCelebrate = (kind = 'done', bits = 40) => { chime(kind); jump(); confetti(bits); }; // ORIX's chat: a fix landed
+  window.__orixChime = kind => chime(kind);
+  window.__orixCheer = () => { jump(); feel('happy', 800); chime('pop'); };
 
   // ---------- sleeping ----------
   let lastWake = Date.now();
   function wake() { lastWake = Date.now(); }
   canvas.addEventListener('click', wake, true);
-  const asleep = () => sleepEnabled && !window.__twocodeStatus?.() && !focus.active() && !spotifyState.is_playing
+  const asleep = () => sleepEnabled && !window.__orixStatus?.() && !focus.active() && !spotifyState.is_playing
     && !(pointer.known && inside(pointer.x, pointer.y, islandBounds)) && Date.now() - lastWake > prefs.sleepMin * 60000;
 
   // ---------- hello and goodbye: calm and smooth ----------
@@ -281,9 +281,9 @@
   // Goodbye: "Doei! Tot zo", he waves, closes his eyes, and the island shrinks away.
   let showAt = null;
   const showColours = () => [prefs.lightError, prefs.lightBusy, prefs.lightDone];
-  const baseEyes = window.__twocodeEyes;
+  const baseEyes = window.__orixEyes;
   // In the Settings locker ORIX shows his own look, not Claude's traffic light.
-  const inLocker = () => window.__twocodeLockerDraw === true;
+  const inLocker = () => window.__orixLockerDraw === true;
   let lightsDemoAt = -1e9; // Settings example: the traffic-light eyes test themselves once
   let lightPreview = null; // { color, until }: a just-picked traffic-light colour, shown on the eyes
   // Like a jelly blob (inspired by the iPhone's Dynamic Island springs and cartoon squash & stretch):
@@ -295,7 +295,7 @@
   const spring = (ms, amp, hz = 3, damp = 6) => ms < 0 ? 0 : amp * Math.exp(-damp * ms / 1000) * Math.sin(2 * Math.PI * hz * ms / 1000);
 
   // ---- ORIX's voice: soft, round chirps (like a Tamagotchi or Kirby), no words ----
-  const soundVolume = () => { const v = window.__twocodeVolume?.() ?? 1; return soundEnabled && v > 0 ? v : 0; };
+  const soundVolume = () => { const v = window.__orixVolume?.() ?? 1; return soundEnabled && v > 0 ? v : 0; };
   const ac = () => { audio ||= new AudioContext(); if (audio.state === 'suspended') audio.resume(); return audio; };
   // One chirp: a sine that slides in pitch, a soft octave on top, and an optional little trill at the end.
   function chirp(at, from, to, dur, trill = 0, gain = 0.055) {
@@ -326,12 +326,12 @@
   }
   const sayHi = () => { chirp(0, 760, 1180, 0.09); chirp(0.085, 1180, 1580, 0.2, 28); };                    // "hi~" (up, happy)
   const sayByeBye = () => { chirp(0, 1180, 940, 0.11); chirp(0.17, 1080, 640, 0.26, 24); };                 // "bye-bye~" (down, a bit sad)
-  window.__twocodeVoice = { hi: sayHi, bye: sayByeBye }; // handy for testing
+  window.__orixVoice = { hi: sayHi, bye: sayByeBye }; // handy for testing
 
   // The island itself wobbles like jelly: each "kick" starts a spring.
   const kicks = [];
   const kick = (amp, hz = 2.6, damp = 5.5) => { kicks.push({ at: now(), amp, hz, damp }); if (kicks.length > 6) kicks.shift(); };
-  window.__twocodeKick = kick; // a little jelly wobble of the island (used by swipe)
+  window.__orixKick = kick; // a little jelly wobble of the island (used by swipe)
   const baseDrawIsland = drawIsland;
   // During hello and bye he stands in the middle of the island (a bit bigger): he is the show.
   const baseDrawGhost = drawGhost;
@@ -340,7 +340,7 @@
     return baseDrawGhost(x, y, size, ...rest);
   };
   drawIsland = function () {
-    const out = window.__twocodeOutro?.() || 0;
+    const out = window.__orixOutro?.() || 0;
     if (out > 0) { // goodbye: narrower and lower, faster at the end (it slips into the edge)
       const e = out * out, w = visual.width, h = visual.height, r = visual.radius;
       visual.width = w + (18 - w) * e; visual.height = h * (1 - e); visual.radius = Math.min(r, visual.height / 2);
@@ -355,7 +355,7 @@
     try { return baseDrawIsland(); } finally { visual.width = w; visual.height = h; }
   };
   let byeAt = null;
-  window.__twocodeEyes = () => {
+  window.__orixEyes = () => {
     if (lightPreview && now() < lightPreview.until) return { color: lightPreview.color };
     const demo = now() - lightsDemoAt; if (demo >= 0 && demo < 1500) return { color: showColours()[Math.min(2, Math.floor(demo / 500))] };
     if (inLocker()) return null;
@@ -364,7 +364,7 @@
   let waveUntil = 0, popAt = -1e9;
   const waving = () => now() < waveUntil;
   // No text during hello and bye: the animation says it all. (A space keeps the island open without showing anything.)
-  window.__twocodeCompactMessage = () => byeAt != null ? (now() - byeAt < BYE.off ? ' ' : '') : showAt != null && now() - showAt < HELLO.end ? ' ' : '';
+  window.__orixCompactMessage = () => byeAt != null ? (now() - byeAt < BYE.off ? ' ' : '') : showAt != null && now() - showAt < HELLO.end ? ' ' : '';
 
   let showId = 0;
   const step = (id, ms, fn) => setTimeout(() => { if (id === showId) fn(); }, ms); // a newer show cancels the old steps
@@ -387,8 +387,8 @@
     if (prefs.startup) startHello();
   }, 100);
   // While ORIX says hi (or bye) he stands big in the middle of the island: other messages wait (extras-ui.js).
-  window.__twocodeHelloBusy = () => (helloQueued && prefs.startup) || showAt != null || byeAt != null;
-  window.__twocodeHello = startHello; // also used by the Settings example
+  window.__orixHelloBusy = () => (helloQueued && prefs.startup) || showAt != null || byeAt != null;
+  window.__orixHello = startHello; // also used by the Settings example
   // Goodbye, calm and quick: "bye-bye", the island goes small, ORIX closes his eyes and the island shrinks back into the
   // top edge, then the app is gone (main.js quits after OUT.end). No moment where the island hangs around empty.
   const OUT = { eyes: 260, shrink: 300, end: 950 };
@@ -399,15 +399,15 @@
     const k = Math.max(0, Math.min(1, (now() - outAt) / OUT.eyes)); if (k >= 1) return;
     ctx.save(); ctx.translate(cx, cy); ctx.scale(1, Math.max(0.06, 1 - k * k)); ctx.translate(-cx, -cy); baseIslandEyes(cx, cy, size); ctx.restore();
   };
-  window.__twocodeIslandEyes = drawIslandEyes;
-  window.__twocodeOutro = () => outAt == null ? 0 : Math.max(0, Math.min(1, (now() - outAt - OUT.eyes * 0.7) / OUT.shrink));
-  window.__twocodeBye = () => {
+  window.__orixIslandEyes = drawIslandEyes;
+  window.__orixOutro = () => outAt == null ? 0 : Math.max(0, Math.min(1, (now() - outAt - OUT.eyes * 0.7) / OUT.shrink));
+  window.__orixBye = () => {
     ++showId; byeAt = null; showAt = null; sayByeBye();
     const wasOpen = mode !== 'rest'; if (wasOpen) setMode('rest', false);
     outAt = now() + (wasOpen ? 320 : 120);
     setTimeout(() => blobTone(0, 520, 160, 0.18, 0.05), (wasOpen ? 320 : 120) + OUT.eyes); // a soft "bloop" as it closes
   };
-  window.__twocodeByeReset = () => { outAt = null; };
+  window.__orixByeReset = () => { outAt = null; };
   // while the eyes close, everything else in the small island (cover, bars, time) fades with them; after that only the shape is left
   const baseSmall = drawSmall;
   drawSmall = function (...args) {
@@ -415,20 +415,20 @@
     const k = Math.max(0, Math.min(1, (now() - outAt) / OUT.eyes)); if (k >= 1) return;
     ctx.save(); ctx.globalAlpha *= 1 - k; try { return baseSmall.apply(this, args); } finally { ctx.restore(); }
   };
-  window.twocode?.onGoodbye?.(() => window.__twocodeBye());
+  window.orix?.onGoodbye?.(() => window.__orixBye());
 
   let dizzyUntil = 0, pokeMessage = '', pokeMessageUntil = 0;
   setInterval(() => {
     angry = Math.max(0, angry - 0.12);                             // red anger fades away
     dizzy = now() < dizzyUntil ? 1 : Math.max(0, dizzy - 0.15);   // wobbling (drawGhost rotates with it)
   }, 100);
-  const startMessage = window.__twocodeCompactMessage;
-  window.__twocodeCompactMessage = () => (now() < pokeMessageUntil ? pokeMessage : '') || startMessage?.() || '';
+  const startMessage = window.__orixCompactMessage;
+  window.__orixCompactMessage = () => (now() < pokeMessageUntil ? pokeMessage : '') || startMessage?.() || '';
 
   // ---------- watch Claude Code ----------
   let lastState = null, lastDetail = '', wasFocus = focus.active();
   setInterval(() => {
-    const status = window.__twocodeStatus?.(), state = status?.state || null;
+    const status = window.__orixStatus?.(), state = status?.state || null;
     if (pointer.known && inside(pointer.x, pointer.y, islandBounds)) wake();
     if (state !== lastState) {
       if (state) wake();
@@ -444,19 +444,19 @@
     if (wasFocus && !focus.active()) {
       say('Focus complete!', `${clock(focusLength)} focused. Take a break.`); chime('party'); confetti(); jump(); feel('happy', 2000);
       bump('focus', 5, 'focus'); feed(10);
-      window.__twocodeSettleSize?.();
+      window.__orixSettleSize?.();
     }
     wasFocus = focus.active();
     warnLimit();
   }, 300);
 
   function warnLimit() {
-    const usage = window.__twocodeMonitor?.state()?.providers?.find(p => p.provider === 'claudecode')?.usage?.fiveHour;
+    const usage = window.__orixMonitor?.state()?.providers?.find(p => p.provider === 'claudecode')?.usage?.fiveHour;
     if (!usage || !prefs.warnAt) return;
     const level = usage.used >= 95 ? 95 : usage.used >= prefs.warnAt ? prefs.warnAt : 0;
     const key = `${usage.resetsAt || 'x'}:${level}`;
-    if (!level || store.get('twocode:limit-warned', '') === key) return;
-    store.set('twocode:limit-warned', key);
+    if (!level || store.get('orix:limit-warned', '') === key) return;
+    store.set('orix:limit-warned', key);
     const at = usage.resetsAt ? new Date(usage.resetsAt * 1000).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : '';
     say(`You have used ${usage.used}% of your Claude limit`, at ? `Your limit resets at ${at}.` : 'Consider taking a break.');
     chime('warn'); feel('surprised', 1500);
@@ -478,13 +478,13 @@
   const MOODS = { running: 'focus', sending: 'focus', question: 'curious', done: 'happy' }; // never a lasting sad face: an error shows in the eyes' colour
   function fx() {
     if (window.__orixResolvedAppearance?.().reducedMotion) return { dy: 0, tilt: 0, scale: 1, sx: 1, sy: 1, mood: null };
-    const t = now(), status = window.__twocodeStatus?.();
+    const t = now(), status = window.__orixStatus?.();
     let dy = 0, tilt = 0, scale = 1;
     let mood = prefs.faces && !inLocker() ? (status?.permission ? 'surprised' : MOODS[status?.state] || null) : null;
     if (feeling && t < feelingUntil) mood = feeling;
     const hop = (t - bounceAt) / 700;
     if (hop >= 0 && hop < 1) { dy -= Math.abs(Math.sin(hop * Math.PI)) * 11 * (1 - hop * 0.5); scale = 1 + Math.sin(hop * Math.PI) * 0.06; }
-    else if ((prefs.dance && spotifyState.is_playing && window.__twocodeHearing || now() < danceDemoUntil) && !mood) { // dance to the music: every song gets its own move
+    else if ((prefs.dance && spotifyState.is_playing && window.__orixHearing || now() < danceDemoUntil) && !mood) { // dance to the music: every song gets its own move
       const id = spotifyState.track?.id || spotifyState.track?.name || '';
       const move = [...id].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) >>> 0, 7) % 4;
       if (move === 0) { dy -= Math.abs(Math.sin(t / 250)) * 3; tilt = Math.sin(t / 500) * 0.07; } // bob
@@ -514,11 +514,11 @@
       if (zip > 0) { const z = Math.min(1, zip); scale *= Math.max(0, 1 - z * z); sx *= 1 - 0.35 * z; sy *= 1 + 0.5 * z; dy -= 4 * z; } // zips away
     }
     // Leaning into the walk while carrying the basket.
-    const b = window.__twocodeBasket?.(); if (b?.show) tilt += Math.max(-0.25, Math.min(0.25, b.vx * 0.03));
+    const b = window.__orixBasket?.(); if (b?.show) tilt += Math.max(-0.25, Math.min(0.25, b.vx * 0.03));
     return { dy, tilt, scale, sx, sy, mood };
   }
-  window.__twocodeGhostFx = fx;
-  window.__twocodeGhostDecor = c => {
+  window.__orixGhostFx = fx;
+  window.__orixGhostDecor = c => {
     if (window.__orixResolvedAppearance?.().reducedMotion) return;
     // A little heart floats up when he says hi.
     const hk = showAt != null ? (now() - showAt - HELLO.hi - 120) / 900 : -1;
@@ -568,7 +568,7 @@
       c.beginPath(); c.arc(0, 0, 50, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * part); c.strokeStyle = '#ffc93c'; c.stroke();
     }
     const hand = (x, y, angle = 0) => { // a small round mitten in the body colour
-      const look = window.__twocodeLook?.() || {};
+      const look = window.__orixLook?.() || {};
       c.save(); c.translate(x, y); c.rotate(angle); c.globalAlpha = 1;
       c.beginPath(); c.ellipse(0, 0, 8, 10, 0, 0, Math.PI * 2); c.fillStyle = look.shell1 || '#59695d'; c.fill();
       c.beginPath(); c.ellipse(-6, 3, 3.5, 4.5, -0.6, 0, Math.PI * 2); c.fill();
@@ -578,7 +578,7 @@
     // Waving hello / goodbye
     if (waving()) hand(50, -14, Math.sin(now() / 85) * 0.55);
     // Holding a basket under a file you are dragging
-    const b = window.__twocodeBasket?.();
+    const b = window.__orixBasket?.();
     if (b?.show) {
       c.save(); c.translate(0, 48); c.rotate(b.wobble * 0.3); c.globalAlpha = 1;
       c.beginPath(); c.moveTo(-36, -8); c.lineTo(36, -8); c.lineTo(26, 24); c.lineTo(-26, 24); c.closePath();
@@ -596,33 +596,33 @@
   // ---------- Settings: make ORIX yours ----------
   const style = document.createElement('style');
   style.textContent = `
-#twocode-settings-v2 .tc-group{margin:14px 2px 6px;color:#00c48a;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
-#twocode-settings-v2 .tc-chips{display:flex;flex-wrap:wrap;gap:4px;justify-content:flex-end;max-width:62%}
-#twocode-settings-v2 .tc-chip{border:0;border-radius:12px;padding:6px 10px;background:#262e23;color:#dfe7da;font-size:10px}
-#twocode-settings-v2 .tc-chip.on{background:#00c48a;color:#11180d;font-weight:700}
-#twocode-settings-v2 .tc-swatch{width:22px;height:22px;border-radius:50%;border:2px solid transparent;padding:0}
-#twocode-settings-v2 .tc-swatch.on{border-color:#fff;box-shadow:0 0 0 2px #00c48a}
-#twocode-settings-v2 .tc-lights{flex-direction:column;align-items:stretch !important;gap:8px}
-#twocode-settings-v2 .tc-lights-head{display:flex;flex-direction:column;gap:8px}
-#twocode-settings-v2 .tc-lights-head .tc-chips,#twocode-settings-v2 .tc-light-line .tc-chips{justify-content:flex-start;max-width:none}
-#twocode-settings-v2 .tc-light-line{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 10px;border-radius:10px;background:rgba(255,255,255,.03)}
-#twocode-settings-v2 .tc-light-line > span{display:flex;align-items:center;gap:8px;font-size:11px;font-weight:600;color:#dfe7da;white-space:nowrap}
-#twocode-settings-v2 .tc-light-line > span i{width:10px;height:10px;border-radius:50%;display:block}
-#twocode-settings-v2 .tc-light-line .tc-swatch{width:20px;height:20px}
-#twocode-settings-v2 .tc-tests{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:8px 0 4px}
-#twocode-settings-v2 .tc-tests .tc-chip{padding:9px 8px;font-size:11px;border-radius:11px}
-#twocode-settings-v2 .tc-name{width:140px;font-size:12px;font-weight:600}
-#twocode-settings-v2 .tc-step{display:flex;align-items:center;gap:6px}
-#twocode-settings-v2 .tc-step b{min-width:46px;text-align:center;font-size:12px}
-#twocode-settings-v2 .tc-input{width:170px;border:1px solid #4b5943;border-radius:10px;padding:6px 9px;background:#1b2219;color:#f0f5ed;font-size:10px;user-select:text}
-#twocode-settings-v2 .tc-badges{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px}
-#twocode-settings-v2 .tc-badge{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 6px;border-radius:12px;background:#121611;opacity:.55;text-align:center}
-#twocode-settings-v2 .tc-badge.on{opacity:1;background:#1d2619;box-shadow:inset 0 0 0 1px #00c48a}
-#twocode-settings-v2 .tc-badge span{font-size:18px}
-#twocode-settings-v2 .tc-badge b{font-size:10px}
-#twocode-settings-v2 .tc-badge small{font-size:8px;color:#aab4a5}
-#twocode-settings-v2 .tc-preview{display:inline-flex;gap:3px;margin-right:6px;vertical-align:middle}
-#twocode-settings-v2 .tc-preview i{width:5px;height:8px;border-radius:50%;display:block}`;
+#orix-settings-v2 .tc-group{margin:14px 2px 6px;color:#00c48a;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+#orix-settings-v2 .tc-chips{display:flex;flex-wrap:wrap;gap:4px;justify-content:flex-end;max-width:62%}
+#orix-settings-v2 .tc-chip{border:0;border-radius:12px;padding:6px 10px;background:#262e23;color:#dfe7da;font-size:10px}
+#orix-settings-v2 .tc-chip.on{background:#00c48a;color:#11180d;font-weight:700}
+#orix-settings-v2 .tc-swatch{width:22px;height:22px;border-radius:50%;border:2px solid transparent;padding:0}
+#orix-settings-v2 .tc-swatch.on{border-color:#fff;box-shadow:0 0 0 2px #00c48a}
+#orix-settings-v2 .tc-lights{flex-direction:column;align-items:stretch !important;gap:8px}
+#orix-settings-v2 .tc-lights-head{display:flex;flex-direction:column;gap:8px}
+#orix-settings-v2 .tc-lights-head .tc-chips,#orix-settings-v2 .tc-light-line .tc-chips{justify-content:flex-start;max-width:none}
+#orix-settings-v2 .tc-light-line{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 10px;border-radius:10px;background:rgba(255,255,255,.03)}
+#orix-settings-v2 .tc-light-line > span{display:flex;align-items:center;gap:8px;font-size:11px;font-weight:600;color:#dfe7da;white-space:nowrap}
+#orix-settings-v2 .tc-light-line > span i{width:10px;height:10px;border-radius:50%;display:block}
+#orix-settings-v2 .tc-light-line .tc-swatch{width:20px;height:20px}
+#orix-settings-v2 .tc-tests{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:8px 0 4px}
+#orix-settings-v2 .tc-tests .tc-chip{padding:9px 8px;font-size:11px;border-radius:11px}
+#orix-settings-v2 .tc-name{width:140px;font-size:12px;font-weight:600}
+#orix-settings-v2 .tc-step{display:flex;align-items:center;gap:6px}
+#orix-settings-v2 .tc-step b{min-width:46px;text-align:center;font-size:12px}
+#orix-settings-v2 .tc-input{width:170px;border:1px solid #4b5943;border-radius:10px;padding:6px 9px;background:#1b2219;color:#f0f5ed;font-size:10px;user-select:text}
+#orix-settings-v2 .tc-badges{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px}
+#orix-settings-v2 .tc-badge{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 6px;border-radius:12px;background:#121611;opacity:.55;text-align:center}
+#orix-settings-v2 .tc-badge.on{opacity:1;background:#1d2619;box-shadow:inset 0 0 0 1px #00c48a}
+#orix-settings-v2 .tc-badge span{font-size:18px}
+#orix-settings-v2 .tc-badge b{font-size:10px}
+#orix-settings-v2 .tc-badge small{font-size:8px;color:#aab4a5}
+#orix-settings-v2 .tc-preview{display:inline-flex;gap:3px;margin-right:6px;vertical-align:middle}
+#orix-settings-v2 .tc-preview i{width:5px;height:8px;border-radius:50%;display:block}`;
   document.head.appendChild(style);
 
   const esc = s => String(s).replace(/[&<>"]/g, x => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[x]));
@@ -647,18 +647,18 @@
     ${[['lightBusy', 'Working or a question'], ['lightDone', 'Done'], ['lightError', 'Error']].map(([key, label]) => `<div class="tc-light-line"><span><i style="background:${prefs[key]};box-shadow:0 0 8px ${prefs[key]}"></i>${label}</span><div class="tc-chips">${LIGHT_OPTIONS[key].map(c => `<button type="button" class="tc-swatch ${prefs[key] === c ? 'on' : ''}" aria-pressed="${prefs[key] === c}" style="background:${c}" data-pref="${key}" data-value="${c}" aria-label="${label}: ${c}"></button>`).join('')}</div></div>`).join('')}</div>`;
   const MOOD_DEMO = [['happy', '😊 Blij'], ['heart', '😍 Verliefd'], ['surprised', '😮 Verrast'], ['curious', '🤔 Nieuwsgierig'], ['focus', '🧐 Gefocust'], ['wink', '😉 Knipoog'], ['sad', '😢 Verdrietig'], ['dizzy', '😵 Duizelig'], ['sleep', '😴 Slaperig']];
   // Settings → Karakter (the locker): everything about how ORIX looks and behaves.
-  window.__twocodeSettingsCharacter = (sleepRow = '') => [
+  window.__orixSettingsCharacter = (sleepRow = '') => [
     '<div class="tc-group" style="--g:#00c48a">Desktop layer</div>',
     lightsBlock(),
     sleepRow
   ].join('');
   // What the locker shows under ORIX.
-  window.__twocodeLocker = () => ({ name: petName(), done: doneCount, badges: badges.size, total: BADGES.length });
+  window.__orixLocker = () => ({ name: petName(), done: doneCount, badges: badges.size, total: BADGES.length });
 
   // Settings → Algemeen: the island itself.
   const TESTS = [['hello', '👋 Opstarten'], ['bye', '😴 Afsluiten'], ['busy', '🟠 Claude bezig'], ['question', '❓ Claude vraagt'],
     ['done', '🟢 Claude klaar'], ['error', '🔴 Claude fout'], ['music', '🎵 Nep-muziek'], ['focus', '⏱️ Focus 1 min'], ['clear', '🧹 Alles stoppen']];
-  window.__twocodeSettingsExtra = () => [
+  window.__orixSettingsExtra = () => [
     '<div class="tc-group" data-icon="🧪" style="--g:#b98cff">Testen</div>',
     row('Testmodus', 'Knoppen om alles te bekijken zonder echte Claude of muziek', toggle('testMode')),
     prefs.testMode ? `<div class="tc-tests">${TESTS.map(([k, label]) => `<button type="button" class="tc-chip" data-test="${k}">${label}</button>`).join('')}</div>` : '',
@@ -699,63 +699,63 @@
     confetti: () => { confetti(30); jump(); feel('happy', 900); },
     chimes: () => chime('done')
   };
-  window.__twocodeDemo = name => { if (drafting) previewDemo(name); else DEMOS[name]?.(); };
+  window.__orixDemo = name => { if (drafting) previewDemo(name); else DEMOS[name]?.(); };
   // ---------- test mode: see every state without a real Claude Code session or music ----------
   let fakeMusicUntil = 0;
   function fakeMusic() {
-    const realRefresh = window.__twocodeRealRefresh || refreshSpotify;
-    window.__twocodeRealRefresh = realRefresh;
+    const realRefresh = window.__orixRealRefresh || refreshSpotify;
+    window.__orixRealRefresh = realRefresh;
     refreshSpotify = async () => {}; // the real Spotify check would replace the fake song
     const c = document.createElement('canvas'); c.width = c.height = 200; const g = c.getContext('2d');
     const gr = g.createLinearGradient(0, 0, 200, 200); gr.addColorStop(0, '#ff5ac8'); gr.addColorStop(1, '#3d1a8e'); g.fillStyle = gr; g.fillRect(0, 0, 200, 200);
     g.fillStyle = '#ffd23f'; g.beginPath(); g.arc(100, 100, 46, 0, Math.PI * 2); g.fill();
-    albumImage = new Image(); albumImage.src = c.toDataURL(); window.__twocodeAlbumColour = '#ff5ac8';
+    albumImage = new Image(); albumImage.src = c.toDataURL(); window.__orixAlbumColour = '#ff5ac8';
     spotifyConnected = true; spotifyState = { is_playing: true, progress_ms: 0, duration_ms: 210000, track: { name: 'Testnummer', artist: 'ORIX', id: 'test' } }; spotifySyncAt = performance.now();
-    fakeMusicUntil = now() + 30000; window.__twocodeSettleSize?.();
+    fakeMusicUntil = now() + 30000; window.__orixSettleSize?.();
     setTimeout(() => { if (now() >= fakeMusicUntil) stopFakeMusic(); }, 30100);
   }
   function stopFakeMusic() {
     fakeMusicUntil = 0;
-    if (window.__twocodeRealRefresh) { refreshSpotify = window.__twocodeRealRefresh; window.__twocodeRealRefresh = null; }
-    spotifyState = { is_playing: false, track: null }; albumImage = null; window.__twocodeAlbumColour = null; refreshSpotify(); window.__twocodeSettleSize?.();
+    if (window.__orixRealRefresh) { refreshSpotify = window.__orixRealRefresh; window.__orixRealRefresh = null; }
+    spotifyState = { is_playing: false, track: null }; albumImage = null; window.__orixAlbumColour = null; refreshSpotify(); window.__orixSettleSize?.();
   }
   function runTest(kind) {
-    const claude = k => window.twocode?.aiMonitorHooksTest?.(k).then(() => window.__twocodeMonitor?.refresh()).catch(() => {});
+    const claude = k => window.orix?.aiMonitorHooksTest?.(k).then(() => window.__orixMonitor?.refresh()).catch(() => {});
     if (kind === 'hello') startHello();
-    else if (kind === 'bye') { window.__twocodeBye(); setTimeout(() => { window.__twocodeByeReset(); jump(); feel('happy', 900); }, 1600); } // a test: he comes back
+    else if (kind === 'bye') { window.__orixBye(); setTimeout(() => { window.__orixByeReset(); jump(); feel('happy', 900); }, 1600); } // a test: he comes back
     else if (kind === 'music') fakeMusic();
     else if (kind === 'focus') focus.start(60);
     else if (kind === 'clear') { claude('clear'); if (fakeMusicUntil) stopFakeMusic(); if (focus.active()) focus.stop(); }
-    else if (kind === 'hungry') { food = { value: 12, at: Date.now() }; store.set('twocode:food', food); } // hungry right away: the next finished task feeds him
+    else if (kind === 'hungry') { food = { value: 12, at: Date.now() }; store.set('orix:food', food); } // hungry right away: the next finished task feeds him
     else claude(kind);
   }
-  window.__twocodeTest = runTest; // the same test scenes from the console (or a video recording)
+  window.__orixTest = runTest; // the same test scenes from the console (or a video recording)
   // City and calendar link live in the main process (extras-main.cjs).
   let extrasCfg = {}, extrasError = '';
-  const rerender = () => window.dispatchEvent(new Event('twocode:open-ai-settings'));
-  window.twocode?.extrasConfig?.().then(r => { if (r.ok) extrasCfg = r.config; }).catch(() => {});
+  const rerender = () => window.dispatchEvent(new Event('orix:open-ai-settings'));
+  window.orix?.extrasConfig?.().then(r => { if (r.ok) extrasCfg = r.config; }).catch(() => {});
   // Start with Windows lives in the main process (tray-main.cjs).
   let loginOn = false;
-  window.twocode?.loginGet?.().then(r => { if (r?.ok) loginOn = r.on; }).catch(() => {});
-  window.__twocodeSaveSettingsServices = async (extras, login) => {
+  window.orix?.loginGet?.().then(r => { if (r?.ok) loginOn = r.on; }).catch(() => {});
+  window.__orixSaveSettingsServices = async (extras, login) => {
     try {
       if (Object.keys(extras).length) {
-        const result = await window.twocode.extrasConfig(extras);
+        const result = await window.orix.extrasConfig(extras);
         if (!result?.ok) throw new Error(result?.error || 'Could not save calendar and weather settings. Try again.');
-        extrasCfg = result.config; window.__twocodeRefreshInfo?.();
+        extrasCfg = result.config; window.__orixRefreshInfo?.();
       }
       if (login !== null) {
-        const result = await window.twocode.loginSet(login);
+        const result = await window.orix.loginSet(login);
         if (!result?.ok || result.on !== login) throw new Error('Could not change startup settings. Try again.');
         loginOn = result.on;
       }
       extrasError = ''; rerender();
     } catch (error) { extrasError = error.message || 'Could not save settings. Try again.'; rerender(); throw new Error(extrasError); }
   };
-  window.__twocodeSettingsAction = target => {
-    if (target.dataset.quit) { window.twocode?.close?.(); return true; }
-    if (target.dataset.restart) { window.twocode?.restart?.(); return true; }
-    if (target.dataset.login) { window.twocode?.loginSet?.(!loginOn).then(r => { if (r?.ok) loginOn = r.on; rerender(); }).catch(() => {}); return true; }
+  window.__orixSettingsAction = target => {
+    if (target.dataset.quit) { window.orix?.close?.(); return true; }
+    if (target.dataset.restart) { window.orix?.restart?.(); return true; }
+    if (target.dataset.login) { window.orix?.loginSet?.(!loginOn).then(r => { if (r?.ok) loginOn = r.on; rerender(); }).catch(() => {}); return true; }
     if (target.dataset.mood) { feel(target.dataset.mood, 2600); jump(); return true; } // emotion preview in the locker
     if (target.dataset.test) { runTest(target.dataset.test); return true; }
     if (target.dataset.setname) {
@@ -769,9 +769,9 @@
     const key = target.dataset.pref; if (!key) return false;
     if (target.dataset.save) {
       const value = document.getElementById('tc-in-' + key)?.value || '';
-      window.twocode.extrasConfig({ [key]: value }).then(r => {
+      window.orix.extrasConfig({ [key]: value }).then(r => {
         extrasError = r.ok ? '' : r.error; if (r.ok) extrasCfg = r.config;
-        window.__twocodeRefreshInfo?.(); rerender();
+        window.__orixRefreshInfo?.(); rerender();
       });
       return true;
     }
@@ -806,11 +806,11 @@
       chimes: () => { chime('done'); pFeel('happy', 700); }
     })[name]?.();
   }
-  window.__twocodePreviewPrefs = p => { pv.prefs = p ? { ...p } : null; };
-  window.__twocodeRealPrefs = () => ({ ...prefs });
+  window.__orixPreviewPrefs = p => { pv.prefs = p ? { ...p } : null; };
+  window.__orixRealPrefs = () => ({ ...prefs });
   // Run a click from the settings app on a draft: prefs become the draft for this moment, nothing is saved,
   // feelings go to the app's ORIX, and afterwards the real prefs are back.
-  window.__twocodeWithDraft = (draft, fn) => {
+  window.__orixWithDraft = (draft, fn) => {
     const real = { ...prefs };
     for (const k of Object.keys(prefs)) delete prefs[k];
     Object.assign(prefs, draft); drafting = true;
@@ -826,21 +826,21 @@
   // Save: the draft becomes the real thing, and the real ORIX is happy with it.
   function commitPreferences(draft) {
     const next = { ...prefs, ...draft };
-    try { localStorage.setItem('twocode:prefs', JSON.stringify(next)); }
+    try { localStorage.setItem('orix:prefs', JSON.stringify(next)); }
     catch { throw new Error('Could not save preferences. Try again.'); }
     Object.assign(prefs, next);
     apply();
   }
-  window.__twocodeSaveDraft = draft => { commitPreferences(draft); jump(); feel('happy', 1400); chime('pop'); };
+  window.__orixSaveDraft = draft => { commitPreferences(draft); jump(); feel('happy', 1400); chime('pop'); };
   // Draw the app's ORIX: for this one drawing everything he reads comes from the preview, then the real
   // ORIX's state is put back. So a test timer, Claude or music never shows on him, and nothing leaks out.
-  window.__twocodeDrawPreview = draw => {
+  window.__orixDrawPreview = draw => {
     const keep = { prefs: { ...prefs }, feeling, feelingUntil, bounceAt, danceDemoUntil, waveUntil, showAt, byeAt, popAt, nextBlink, lastWake,
-      spotify: spotifyState, angry: typeof angry === 'number' ? angry : 0, dizzy: typeof dizzy === 'number' ? dizzy : 0, basket: window.__twocodeBasket, locker: window.__twocodeLockerDraw };
+      spotify: spotifyState, angry: typeof angry === 'number' ? angry : 0, dizzy: typeof dizzy === 'number' ? dizzy : 0, basket: window.__orixBasket, locker: window.__orixLockerDraw };
     if (pv.prefs) Object.assign(prefs, pv.prefs);
     feeling = pv.feeling; feelingUntil = pv.feelingUntil; bounceAt = pv.bounceAt; danceDemoUntil = pv.danceUntil;
     waveUntil = pv.waveUntil; showAt = null; byeAt = null; popAt = -1e9; nextBlink = pv.nextBlink || now() + 2000; lastWake = Date.now();
-    spotifyState = { is_playing: false, track: null }; angry = 0; dizzy = 0; window.__twocodeBasket = null; window.__twocodeLockerDraw = true;
+    spotifyState = { is_playing: false, track: null }; angry = 0; dizzy = 0; window.__orixBasket = null; window.__orixLockerDraw = true;
     previewing = true;
     try { draw(); }
     finally {
@@ -848,7 +848,7 @@
       for (const k of Object.keys(prefs)) delete prefs[k];
       Object.assign(prefs, keep.prefs);
       ({ feeling, feelingUntil, bounceAt, danceDemoUntil, waveUntil, showAt, byeAt, popAt, nextBlink, lastWake } = keep);
-      spotifyState = keep.spotify; angry = keep.angry; dizzy = keep.dizzy; window.__twocodeBasket = keep.basket; window.__twocodeLockerDraw = keep.locker;
+      spotifyState = keep.spotify; angry = keep.angry; dizzy = keep.dizzy; window.__orixBasket = keep.basket; window.__orixLockerDraw = keep.locker;
     }
   };
 })();

@@ -1,6 +1,6 @@
 'use strict';
 (function monitorIsland() {
-  const api = window.twocode;
+  const api = window.orix;
   if (!api?.aiMonitorGet) return;
   const names = { chatgpt: 'ChatGPT', claude: 'Claude', claudecode: 'Claude Code', codex: 'Codex', 'claudecode-test': 'Claude Code (test)' };
   // The four AIs ORIX can follow: the coding agents (hooks) and the chat apps (their window).
@@ -15,546 +15,546 @@
   let state = { providers: Object.keys(names).filter(provider => provider !== 'claudecode-test').map(provider => ({ provider, name: names[provider], state: 'disconnected', detail: 'Verbind jouw gesprek' })) };
   let selected = null, choosing = false, windows = [], error = '', pending = false, lastSignature = '';
   const drafts = new Map();
-  const root = document.createElement('section'); root.id = 'twocode-ai-monitor'; document.body.appendChild(root);
-  const statusReader = document.createElement('div'); statusReader.id = 'twocode-ai-monitor-status';
+  const root = document.createElement('section'); root.id = 'orix-ai-monitor'; document.body.appendChild(root);
+  const statusReader = document.createElement('div'); statusReader.id = 'orix-ai-monitor-status';
   statusReader.setAttribute('role', 'status'); statusReader.setAttribute('aria-live', 'polite'); document.body.appendChild(statusReader);
   const style = document.createElement('style'); style.textContent = `
-#twocode-ai-monitor{position:absolute;z-index:60;display:none;color:#f4f7ef;font:12px/1.4 Inter, "Segoe UI", sans-serif;pointer-events:auto;user-select:text}
-#twocode-ai-monitor *{box-sizing:border-box}
-#twocode-ai-monitor-status{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);pointer-events:none}
-#twocode-ai-monitor .am-shell{height:100%;display:flex;flex-direction:column;gap:7px;min-height:0;padding-bottom:4px}
-#twocode-ai-monitor .am-head{display:flex;align-items:center;gap:8px;flex:none}
-#twocode-ai-monitor .am-head strong{font-size:17px;flex:1}
-#twocode-ai-monitor .am-hint{color:#c2ccbd;font-size:11px}
-#twocode-ai-monitor button{border:1px solid #394333;border-radius:12px;padding:7px 11px;color:#eef3e8;background:#252c22;font:600 11px Inter, "Segoe UI", sans-serif;cursor:pointer}
-#twocode-ai-monitor button:hover{background:#343e2d}
-#twocode-ai-monitor button:focus-visible,#twocode-ai-monitor textarea:focus-visible{outline:2px solid #00c48a;outline-offset:2px}
-#twocode-ai-monitor button:disabled{opacity:.5;cursor:default}
-#twocode-ai-monitor .am-primary{background:#00c48a;color:#172011;border-color:#00c48a}
-#twocode-ai-monitor .am-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;align-content:center;flex:1;min-height:0}
-#twocode-ai-monitor .am-card{text-align:left;border:1px solid #404939;border-radius:17px;background:#192016;padding:14px;display:flex;flex-direction:column;gap:8px;min-width:0;font-weight:400}
-#twocode-ai-monitor .am-card b{font-size:15px}
-#twocode-ai-monitor .am-card .am-row{font-weight:600}
-#twocode-ai-monitor .am-legend{display:flex;gap:14px;flex:none}
-#twocode-ai-monitor .cc-status{display:inline-flex;align-items:center;gap:7px;margin-top:8px;padding:6px 11px;border-radius:14px;background:#121512;border:1px solid rgba(255,255,255,.08);font-weight:700;font-size:11px;white-space:nowrap}
-#twocode-ai-monitor .cc-status i{width:8px;height:8px;border-radius:50%;background:var(--lamp);box-shadow:0 0 8px var(--lamp);display:block}
-#twocode-ai-monitor .cc-icon{margin-top:6px;width:32px;height:30px;padding:0;font-size:14px}
-#twocode-ai-monitor .cc-kicker{margin:6px 0 0;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#9aa596}
-#twocode-ai-monitor .cc-kicker + .tc-page-title{margin-top:1px}
-#twocode-ai-monitor .cc-grid{display:grid;grid-template-columns:168px 1fr;gap:14px;flex:1;min-height:0;align-items:start}
-#twocode-ai-monitor .cc-steps{display:flex;flex-direction:column;gap:2px;min-height:0;overflow:hidden;position:relative}
-#twocode-ai-monitor .cc-steps::before{content:'';position:absolute;left:9px;top:14px;bottom:44px;width:1px;background:rgba(255,255,255,.08)}
-#twocode-ai-monitor .cc-step{display:flex;gap:8px;align-items:flex-start;padding:5px 2px;min-width:0}
-#twocode-ai-monitor .cc-step span{display:flex;flex-direction:column;min-width:0}
-#twocode-ai-monitor .cc-step em{font-style:normal;font-weight:600;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;gap:6px;align-items:baseline}
-#twocode-ai-monitor .cc-step em i{font-style:normal;font-weight:600;font-size:10px;color:#7f8a7a}
-#twocode-ai-monitor .cc-step.todo em{color:#5d6858}
-#twocode-ai-monitor .cc-step.running em{color:#ffb35c}
-#twocode-ai-monitor .cc-step small{color:#7f8a7a;font:10px Consolas,monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#twocode-ai-monitor .cc-step.done em{color:#aab4a5}
-#twocode-ai-monitor .cc-step b{flex:none;width:19px;height:19px;border-radius:50%;display:grid;place-items:center;font-size:10px;margin-top:0;position:relative;z-index:1;background:#000}
-#twocode-ai-monitor .cc-ok{background:#163d22;color:#22e05a}
-#twocode-ai-monitor .cc-bad{background:#3d1616;color:#ff5c5c}
-#twocode-ai-monitor .cc-dot{border:1.5px solid #2c342a}
-#twocode-ai-monitor .cc-spin{border:2px solid rgba(255,154,31,.25);border-top-color:#ff9a1f;animation:cc-spin .8s linear infinite}
+#orix-ai-monitor{position:absolute;z-index:60;display:none;color:#f4f7ef;font:12px/1.4 Inter, "Segoe UI", sans-serif;pointer-events:auto;user-select:text}
+#orix-ai-monitor *{box-sizing:border-box}
+#orix-ai-monitor-status{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);pointer-events:none}
+#orix-ai-monitor .am-shell{height:100%;display:flex;flex-direction:column;gap:7px;min-height:0;padding-bottom:4px}
+#orix-ai-monitor .am-head{display:flex;align-items:center;gap:8px;flex:none}
+#orix-ai-monitor .am-head strong{font-size:17px;flex:1}
+#orix-ai-monitor .am-hint{color:#c2ccbd;font-size:11px}
+#orix-ai-monitor button{border:1px solid #394333;border-radius:12px;padding:7px 11px;color:#eef3e8;background:#252c22;font:600 11px Inter, "Segoe UI", sans-serif;cursor:pointer}
+#orix-ai-monitor button:hover{background:#343e2d}
+#orix-ai-monitor button:focus-visible,#orix-ai-monitor textarea:focus-visible{outline:2px solid #00c48a;outline-offset:2px}
+#orix-ai-monitor button:disabled{opacity:.5;cursor:default}
+#orix-ai-monitor .am-primary{background:#00c48a;color:#172011;border-color:#00c48a}
+#orix-ai-monitor .am-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;align-content:center;flex:1;min-height:0}
+#orix-ai-monitor .am-card{text-align:left;border:1px solid #404939;border-radius:17px;background:#192016;padding:14px;display:flex;flex-direction:column;gap:8px;min-width:0;font-weight:400}
+#orix-ai-monitor .am-card b{font-size:15px}
+#orix-ai-monitor .am-card .am-row{font-weight:600}
+#orix-ai-monitor .am-legend{display:flex;gap:14px;flex:none}
+#orix-ai-monitor .cc-status{display:inline-flex;align-items:center;gap:7px;margin-top:8px;padding:6px 11px;border-radius:14px;background:#121512;border:1px solid rgba(255,255,255,.08);font-weight:700;font-size:11px;white-space:nowrap}
+#orix-ai-monitor .cc-status i{width:8px;height:8px;border-radius:50%;background:var(--lamp);box-shadow:0 0 8px var(--lamp);display:block}
+#orix-ai-monitor .cc-icon{margin-top:6px;width:32px;height:30px;padding:0;font-size:14px}
+#orix-ai-monitor .cc-kicker{margin:6px 0 0;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#9aa596}
+#orix-ai-monitor .cc-kicker + .tc-page-title{margin-top:1px}
+#orix-ai-monitor .cc-grid{display:grid;grid-template-columns:168px 1fr;gap:14px;flex:1;min-height:0;align-items:start}
+#orix-ai-monitor .cc-steps{display:flex;flex-direction:column;gap:2px;min-height:0;overflow:hidden;position:relative}
+#orix-ai-monitor .cc-steps::before{content:'';position:absolute;left:9px;top:14px;bottom:44px;width:1px;background:rgba(255,255,255,.08)}
+#orix-ai-monitor .cc-step{display:flex;gap:8px;align-items:flex-start;padding:5px 2px;min-width:0}
+#orix-ai-monitor .cc-step span{display:flex;flex-direction:column;min-width:0}
+#orix-ai-monitor .cc-step em{font-style:normal;font-weight:600;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;gap:6px;align-items:baseline}
+#orix-ai-monitor .cc-step em i{font-style:normal;font-weight:600;font-size:10px;color:#7f8a7a}
+#orix-ai-monitor .cc-step.todo em{color:#5d6858}
+#orix-ai-monitor .cc-step.running em{color:#ffb35c}
+#orix-ai-monitor .cc-step small{color:#7f8a7a;font:10px Consolas,monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#orix-ai-monitor .cc-step.done em{color:#aab4a5}
+#orix-ai-monitor .cc-step b{flex:none;width:19px;height:19px;border-radius:50%;display:grid;place-items:center;font-size:10px;margin-top:0;position:relative;z-index:1;background:#000}
+#orix-ai-monitor .cc-ok{background:#163d22;color:#22e05a}
+#orix-ai-monitor .cc-bad{background:#3d1616;color:#ff5c5c}
+#orix-ai-monitor .cc-dot{border:1.5px solid #2c342a}
+#orix-ai-monitor .cc-spin{border:2px solid rgba(255,154,31,.25);border-top-color:#ff9a1f;animation:cc-spin .8s linear infinite}
 @keyframes cc-spin{to{transform:rotate(360deg)}}
-#twocode-ai-monitor .cc-limit{margin-top:auto;display:grid;grid-template-columns:1fr auto;gap:4px 8px;font-size:10px;color:#9aa596;padding:6px 2px 2px}
-#twocode-ai-monitor .cc-limit b{color:#e8eee4}
-#twocode-ai-monitor .cc-limit div{grid-column:1/-1;height:4px;border-radius:3px;background:#232a22;overflow:hidden}
-#twocode-ai-monitor .cc-limit i{display:block;height:100%;border-radius:3px}
-#twocode-ai-monitor .cc-card{background:linear-gradient(180deg,#121612,#0f171f);border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:13px 15px;display:flex;flex-direction:column;gap:8px;min-height:0;max-height:100%;overflow:auto;scrollbar-width:thin}
-#twocode-ai-monitor .cc-wide{align-items:flex-start}
-#twocode-ai-monitor .cc-center{justify-content:center}
-#twocode-ai-monitor .cc-label{color:#9aa596;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
-#twocode-ai-monitor .cc-big{margin:0;font-size:15px;font-weight:700}
-#twocode-ai-monitor .cc-red{color:#ff8a8a}
-#twocode-ai-monitor .cc-code{display:block;font:11px/1.45 Consolas,monospace;color:#ffd7ab;background:#0f171f;border-radius:8px;padding:6px 8px;white-space:pre-wrap;overflow-wrap:anywhere;max-height:56px;overflow:auto}
-#twocode-ai-monitor .cc-msg{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px;line-height:1.5;flex:1;min-height:0;overflow:auto}
-#twocode-ai-monitor .cc-actions{display:flex;gap:8px;align-items:center;margin-top:auto}
-#twocode-ai-monitor .cc-actions .am-note{flex:1}
-#twocode-ai-monitor .am-ask{margin-bottom:8px}
-#twocode-ai-monitor .am-tag{display:inline-block;background:#2a3227;color:#00c48a;border-radius:8px;padding:1px 7px;margin-right:6px;font-size:10px;font-weight:700}
-#twocode-ai-monitor .am-options{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin:8px 0}
-#twocode-ai-monitor .cc-solo{grid-template-columns:1fr}
-#twocode-ai-monitor .cc-fit{scrollbar-width:none}
-#twocode-ai-monitor .cc-fit .am-ask{margin:0}
-#twocode-ai-monitor .cc-inline{display:flex;gap:8px;align-items:center}
-#twocode-ai-monitor .cc-inline .am-note{flex:1;min-width:0}
-#twocode-ai-monitor .cc-inline .am-primary{flex:none;padding:9px 18px}
-#twocode-ai-monitor *{scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.16) transparent}
-#twocode-ai-monitor ::-webkit-scrollbar{width:6px;height:6px}
-#twocode-ai-monitor ::-webkit-scrollbar-track{background:transparent}
-#twocode-ai-monitor ::-webkit-scrollbar-thumb{background:rgba(255,255,255,.14);border-radius:3px}
-#twocode-ai-monitor ::-webkit-scrollbar-button{display:none}
-#twocode-ai-monitor .am-option:hover{border-color:rgba(255,179,92,.6);background:rgba(255,179,92,.08)}
-#twocode-ai-monitor .am-option{display:flex;flex-direction:column;align-items:flex-start;gap:3px;text-align:left;font-weight:400;padding:10px 12px;border-radius:12px;min-width:0}
-#twocode-ai-monitor .am-option small{color:#aab4a5;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
-#twocode-ai-monitor .am-option.on{background:#ff9a1f;color:#1a1206;border-color:#ff9a1f}
-#twocode-ai-monitor .am-option.on small{color:#3b2a0f}
-#twocode-ai-monitor .am-note{flex:1;min-width:0;border:1px solid #536046;border-radius:10px;padding:6px 9px;background:#141b11;color:#f5f8f1;font:12px Inter, "Segoe UI", sans-serif;width:100%}
-#twocode-ai-monitor .am-row .am-note{width:auto}
-#twocode-ai-monitor .am-plan{border-left:3px solid #4cc9f0;padding:2px 10px;font-size:12px}
-#twocode-ai-monitor .am-plan h4{margin:6px 0 2px;font-size:13px}
-#twocode-ai-monitor .am-plan p{margin:2px 0}
-#twocode-ai-monitor .am-plan code,#twocode-ai-monitor .am-li code{font:11px Consolas,monospace;color:#ffd7ab}
-#twocode-ai-monitor .am-jump{margin-left:auto}
-#twocode-ai-monitor .am-jump + .am-quiet{margin-left:0}
-#twocode-ai-monitor .am-said{color:#aab4a5;font-size:11px;margin-bottom:3px}
-#twocode-ai-monitor .am-question.am-done{border-left-color:#22e05a}
-#twocode-ai-monitor .am-usage{flex:none}
-#twocode-ai-monitor .am-lead{font-size:13px;margin:0 0 8px}
-#twocode-ai-monitor .am-question b{display:block;margin-bottom:4px}
-#twocode-ai-monitor .am-question code{display:block;font:11px/1.4 Consolas,monospace;color:#ffd7ab;white-space:pre-wrap;overflow-wrap:anywhere;max-height:70px;overflow:auto}
-#twocode-ai-monitor .am-list{margin-top:8px;display:flex;flex-direction:column;gap:4px}
-#twocode-ai-monitor .am-item{background:#151a13;border-radius:10px;padding:5px 9px;min-width:0}
-#twocode-ai-monitor .am-item b{flex:none;max-width:40%}
-#twocode-ai-monitor .am-quiet{margin-left:auto;background:transparent;border-color:transparent;color:#aab4a5}
-#twocode-ai-monitor .am-quiet:hover{background:#2a1f1d;color:#ffaba3}
-#twocode-ai-monitor .am-row{display:flex;align-items:center;gap:8px;flex:none}
-#twocode-ai-monitor .am-dot{width:9px;height:9px;border-radius:50%;background:var(--lamp);box-shadow:0 0 10px color-mix(in srgb,var(--lamp),transparent 50%);display:inline-block;flex:none}
-#twocode-ai-monitor .am-blink{animation:am-pulse 1.3s ease-in-out infinite}
-#twocode-ai-monitor .am-body{flex:1;min-height:0;overflow:auto;scrollbar-width:thin;scrollbar-color:#536248 transparent}
-#twocode-ai-monitor .am-question{white-space:pre-wrap;overflow-wrap:anywhere;font-size:13px;border-left:3px solid #ffa94b;padding:3px 10px}
-#twocode-ai-monitor .am-compose{display:flex;gap:8px;align-items:flex-end;flex:none}
-#twocode-ai-monitor textarea{resize:none;flex:1;min-width:0;height:52px;border:1px solid #536046;border-radius:12px;padding:9px;background:#141b11;color:#f5f8f1;font:12px/1.4 Inter, "Segoe UI", sans-serif;user-select:text}
-#twocode-ai-monitor .am-error{color:#ffaba3;font-size:11px;overflow-wrap:anywhere;max-height:44px;overflow:auto}
-#twocode-ai-monitor .am-track{height:4px;overflow:hidden;border-radius:6px;background:#35402d;flex:none}
-#twocode-ai-monitor .am-wave{width:35%;height:100%;background:#ffa94b;animation:am-travel 1.5s ease-in-out infinite}
-#twocode-ai-monitor .am-clock{margin-left:auto;color:#d1dacb;font-variant-numeric:tabular-nums;font-size:11px}
-#twocode-ai-monitor .am-window{display:block;width:100%;text-align:left;margin-bottom:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-#twocode-ai-monitor .am-source{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
+#orix-ai-monitor .cc-limit{margin-top:auto;display:grid;grid-template-columns:1fr auto;gap:4px 8px;font-size:10px;color:#9aa596;padding:6px 2px 2px}
+#orix-ai-monitor .cc-limit b{color:#e8eee4}
+#orix-ai-monitor .cc-limit div{grid-column:1/-1;height:4px;border-radius:3px;background:#232a22;overflow:hidden}
+#orix-ai-monitor .cc-limit i{display:block;height:100%;border-radius:3px}
+#orix-ai-monitor .cc-card{background:linear-gradient(180deg,#121612,#0f171f);border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:13px 15px;display:flex;flex-direction:column;gap:8px;min-height:0;max-height:100%;overflow:auto;scrollbar-width:thin}
+#orix-ai-monitor .cc-wide{align-items:flex-start}
+#orix-ai-monitor .cc-center{justify-content:center}
+#orix-ai-monitor .cc-label{color:#9aa596;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+#orix-ai-monitor .cc-big{margin:0;font-size:15px;font-weight:700}
+#orix-ai-monitor .cc-red{color:#ff8a8a}
+#orix-ai-monitor .cc-code{display:block;font:11px/1.45 Consolas,monospace;color:#ffd7ab;background:#0f171f;border-radius:8px;padding:6px 8px;white-space:pre-wrap;overflow-wrap:anywhere;max-height:56px;overflow:auto}
+#orix-ai-monitor .cc-msg{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px;line-height:1.5;flex:1;min-height:0;overflow:auto}
+#orix-ai-monitor .cc-actions{display:flex;gap:8px;align-items:center;margin-top:auto}
+#orix-ai-monitor .cc-actions .am-note{flex:1}
+#orix-ai-monitor .am-ask{margin-bottom:8px}
+#orix-ai-monitor .am-tag{display:inline-block;background:#2a3227;color:#00c48a;border-radius:8px;padding:1px 7px;margin-right:6px;font-size:10px;font-weight:700}
+#orix-ai-monitor .am-options{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin:8px 0}
+#orix-ai-monitor .cc-solo{grid-template-columns:1fr}
+#orix-ai-monitor .cc-fit{scrollbar-width:none}
+#orix-ai-monitor .cc-fit .am-ask{margin:0}
+#orix-ai-monitor .cc-inline{display:flex;gap:8px;align-items:center}
+#orix-ai-monitor .cc-inline .am-note{flex:1;min-width:0}
+#orix-ai-monitor .cc-inline .am-primary{flex:none;padding:9px 18px}
+#orix-ai-monitor *{scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.16) transparent}
+#orix-ai-monitor ::-webkit-scrollbar{width:6px;height:6px}
+#orix-ai-monitor ::-webkit-scrollbar-track{background:transparent}
+#orix-ai-monitor ::-webkit-scrollbar-thumb{background:rgba(255,255,255,.14);border-radius:3px}
+#orix-ai-monitor ::-webkit-scrollbar-button{display:none}
+#orix-ai-monitor .am-option:hover{border-color:rgba(255,179,92,.6);background:rgba(255,179,92,.08)}
+#orix-ai-monitor .am-option{display:flex;flex-direction:column;align-items:flex-start;gap:3px;text-align:left;font-weight:400;padding:10px 12px;border-radius:12px;min-width:0}
+#orix-ai-monitor .am-option small{color:#aab4a5;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+#orix-ai-monitor .am-option.on{background:#ff9a1f;color:#1a1206;border-color:#ff9a1f}
+#orix-ai-monitor .am-option.on small{color:#3b2a0f}
+#orix-ai-monitor .am-note{flex:1;min-width:0;border:1px solid #536046;border-radius:10px;padding:6px 9px;background:#141b11;color:#f5f8f1;font:12px Inter, "Segoe UI", sans-serif;width:100%}
+#orix-ai-monitor .am-row .am-note{width:auto}
+#orix-ai-monitor .am-plan{border-left:3px solid #4cc9f0;padding:2px 10px;font-size:12px}
+#orix-ai-monitor .am-plan h4{margin:6px 0 2px;font-size:13px}
+#orix-ai-monitor .am-plan p{margin:2px 0}
+#orix-ai-monitor .am-plan code,#orix-ai-monitor .am-li code{font:11px Consolas,monospace;color:#ffd7ab}
+#orix-ai-monitor .am-jump{margin-left:auto}
+#orix-ai-monitor .am-jump + .am-quiet{margin-left:0}
+#orix-ai-monitor .am-said{color:#aab4a5;font-size:11px;margin-bottom:3px}
+#orix-ai-monitor .am-question.am-done{border-left-color:#22e05a}
+#orix-ai-monitor .am-usage{flex:none}
+#orix-ai-monitor .am-lead{font-size:13px;margin:0 0 8px}
+#orix-ai-monitor .am-question b{display:block;margin-bottom:4px}
+#orix-ai-monitor .am-question code{display:block;font:11px/1.4 Consolas,monospace;color:#ffd7ab;white-space:pre-wrap;overflow-wrap:anywhere;max-height:70px;overflow:auto}
+#orix-ai-monitor .am-list{margin-top:8px;display:flex;flex-direction:column;gap:4px}
+#orix-ai-monitor .am-item{background:#151a13;border-radius:10px;padding:5px 9px;min-width:0}
+#orix-ai-monitor .am-item b{flex:none;max-width:40%}
+#orix-ai-monitor .am-quiet{margin-left:auto;background:transparent;border-color:transparent;color:#aab4a5}
+#orix-ai-monitor .am-quiet:hover{background:#2a1f1d;color:#ffaba3}
+#orix-ai-monitor .am-row{display:flex;align-items:center;gap:8px;flex:none}
+#orix-ai-monitor .am-dot{width:9px;height:9px;border-radius:50%;background:var(--lamp);box-shadow:0 0 10px color-mix(in srgb,var(--lamp),transparent 50%);display:inline-block;flex:none}
+#orix-ai-monitor .am-blink{animation:am-pulse 1.3s ease-in-out infinite}
+#orix-ai-monitor .am-body{flex:1;min-height:0;overflow:auto;scrollbar-width:thin;scrollbar-color:#536248 transparent}
+#orix-ai-monitor .am-question{white-space:pre-wrap;overflow-wrap:anywhere;font-size:13px;border-left:3px solid #ffa94b;padding:3px 10px}
+#orix-ai-monitor .am-compose{display:flex;gap:8px;align-items:flex-end;flex:none}
+#orix-ai-monitor textarea{resize:none;flex:1;min-width:0;height:52px;border:1px solid #536046;border-radius:12px;padding:9px;background:#141b11;color:#f5f8f1;font:12px/1.4 Inter, "Segoe UI", sans-serif;user-select:text}
+#orix-ai-monitor .am-error{color:#ffaba3;font-size:11px;overflow-wrap:anywhere;max-height:44px;overflow:auto}
+#orix-ai-monitor .am-track{height:4px;overflow:hidden;border-radius:6px;background:#35402d;flex:none}
+#orix-ai-monitor .am-wave{width:35%;height:100%;background:#ffa94b;animation:am-travel 1.5s ease-in-out infinite}
+#orix-ai-monitor .am-clock{margin-left:auto;color:#d1dacb;font-variant-numeric:tabular-nums;font-size:11px}
+#orix-ai-monitor .am-window{display:block;width:100%;text-align:left;margin-bottom:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#orix-ai-monitor .am-source{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
 @keyframes am-pulse{0%,100%{opacity:1}50%{opacity:.25}}
 @keyframes am-travel{0%{transform:translateX(-100%)}100%{transform:translateX(380%)}}
-#twocode-ai-monitor .cx-jump{margin-top:10px;display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:12px;background:#0f171f;border:1px solid rgba(255,255,255,.1);color:#e8eee4;font-size:11px;font-weight:600;white-space:nowrap}
-#twocode-ai-monitor .cx-jump:hover{background:#1e241d;border-color:rgba(255,255,255,.22)}
-#twocode-ai-monitor .cx-jump span{color:#9aa596}
-#twocode-ai-monitor .cx-grid{display:grid;grid-template-columns:1.35fr 1fr;gap:12px;flex:1;min-height:0}
-#twocode-ai-monitor .cx-hero{position:relative;display:flex;gap:16px;padding:16px 18px;border-radius:18px;border:1px solid rgba(255,255,255,.07);background:linear-gradient(160deg,#0f171f,#0b0d0b);min-height:0;overflow:hidden}
-#twocode-ai-monitor .cx-hero::before{content:'';position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 0% 0%,var(--glow,transparent),transparent 60%);opacity:.18}
-#twocode-ai-monitor .cx-orange{--glow:#ff9a1f}
-#twocode-ai-monitor .cx-green{--glow:#22e05a}
-#twocode-ai-monitor .cx-red{--glow:#ff3b3b}
-#twocode-ai-monitor .cx-light{position:relative;flex:none;align-self:flex-start;display:flex;flex-direction:column;gap:6px;padding:7px 6px;border-radius:14px;background:#050605;border:1px solid rgba(255,255,255,.08)}
-#twocode-ai-monitor .cx-light i{display:block;width:14px;height:14px;border-radius:50%;opacity:.16;transition:opacity .3s}
-#twocode-ai-monitor .cx-light .red{background:#ff3b3b}
-#twocode-ai-monitor .cx-light .orange{background:#ff9a1f}
-#twocode-ai-monitor .cx-light .green{background:#22e05a}
-#twocode-ai-monitor .cx-light i.on{opacity:1;box-shadow:0 0 12px currentColor}
-#twocode-ai-monitor .cx-light .red.on{color:#ff3b3b}
-#twocode-ai-monitor .cx-light .orange.on{color:#ff9a1f}
-#twocode-ai-monitor .cx-light .green.on{color:#22e05a}
-#twocode-ai-monitor .cx-light i.blink{animation:am-pulse 1.1s ease-in-out infinite}
-#twocode-ai-monitor .cx-main{position:relative;flex:1;min-width:0;display:flex;flex-direction:column;gap:7px;min-height:0}
-#twocode-ai-monitor .cx-label{display:flex;align-items:center;gap:8px;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#9aa596}
-#twocode-ai-monitor .cx-label em{font-style:normal;color:#c2ccbd}
-#twocode-ai-monitor .cx-label em.orange{color:#ffb35c}
-#twocode-ai-monitor .cx-label em.green{color:#5ee88a}
-#twocode-ai-monitor .cx-label em.red{color:#ff8a8a}
-#twocode-ai-monitor .cx-label span{letter-spacing:0;text-transform:none;font-weight:600}
-#twocode-ai-monitor .cx-timer{font-variant-numeric:tabular-nums;color:#e8eee4}
-#twocode-ai-monitor .cx-title{margin:0;font-size:18px;font-weight:700;line-height:1.25;color:#fff;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
-#twocode-ai-monitor .cx-code{display:block;font:11px/1.4 Consolas,monospace;color:#ffd7ab;background:rgba(255,255,255,.05);border-radius:8px;padding:5px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#twocode-ai-monitor .cx-prompt{margin-top:auto;display:flex;flex-direction:column;gap:2px;padding-top:8px;border-top:1px solid rgba(255,255,255,.06)}
-#twocode-ai-monitor .cx-prompt span{font-size:10px;font-weight:700;color:#7f8a7a;letter-spacing:.06em;text-transform:uppercase}
-#twocode-ai-monitor .cx-prompt q{font-size:12px;color:#c2ccbd;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;quotes:'“' '”'}
-#twocode-ai-monitor .cx-msg{flex:1;min-height:0;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;font-size:12.5px;line-height:1.5;color:#eef3e8;padding-right:4px}
-#twocode-ai-monitor .cx-compose textarea{height:38px;padding:9px 10px;border-radius:11px;background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.12)}
-#twocode-ai-monitor .cx-compose .am-primary{padding:9px 16px}
-#twocode-ai-monitor .cx-side{display:flex;flex-direction:column;gap:6px;padding:12px 12px 10px;border-radius:18px;border:1px solid rgba(255,255,255,.07);background:#0d100d;min-height:0;min-width:0}
-#twocode-ai-monitor .cx-side-head{display:flex;justify-content:space-between;align-items:baseline;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#9aa596;padding:0 2px}
-#twocode-ai-monitor .cx-side-head small{letter-spacing:0;text-transform:none;font-weight:600;color:#7f8a7a}
-#twocode-ai-monitor .cx-feed{flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column;gap:2px;-webkit-mask-image:linear-gradient(#000 78%,transparent);mask-image:linear-gradient(#000 78%,transparent)}
-#twocode-ai-monitor .cx-step{display:flex;align-items:center;gap:9px;padding:4px 2px;min-width:0}
-#twocode-ai-monitor .cx-ico{flex:none;width:26px;height:26px;border-radius:8px;display:grid;place-items:center;background:rgba(255,255,255,.05);color:#c2ccbd}
-#twocode-ai-monitor .cx-step.running .cx-ico{background:rgba(255,154,31,.14);color:#ffb35c}
-#twocode-ai-monitor .cx-txt{flex:1;min-width:0;display:flex;flex-direction:column}
-#twocode-ai-monitor .cx-txt em{font-style:normal;font-size:11.5px;font-weight:600;color:#e8eee4}
-#twocode-ai-monitor .cx-step.done .cx-txt em{color:#aab4a5}
-#twocode-ai-monitor .cx-txt small{font:10px Consolas,monospace;color:#7f8a7a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#twocode-ai-monitor .cx-step > b{flex:none;width:16px;height:16px;border-radius:50%;display:grid;place-items:center;font-size:9px}
-#twocode-ai-monitor .cx-ok{color:#22e05a;background:rgba(34,224,90,.12)}
-#twocode-ai-monitor .cx-bad{color:#ff5c5c;background:rgba(255,92,92,.12)}
-#twocode-ai-monitor .cx-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:#5d6858;font-size:11px;text-align:center}
-#twocode-ai-monitor .cx-limit{display:flex;flex-direction:column;gap:4px;padding:8px 2px 0;border-top:1px solid rgba(255,255,255,.06);font-size:10.5px;color:#9aa596}
-#twocode-ai-monitor .cx-limit > div:first-child{display:flex;justify-content:space-between}
-#twocode-ai-monitor .cx-limit b{color:#e8eee4}
-#twocode-ai-monitor .cx-limit small{font-size:9.5px;color:#7f8a7a}
-#twocode-ai-monitor .cx-bar{height:4px;border-radius:3px;background:rgba(255,255,255,.08);overflow:hidden}
-#twocode-ai-monitor .cx-bar i{display:block;height:100%;border-radius:3px}
-#twocode-ai-monitor .cx-others{flex:none;font-size:10.5px;color:#9aa596;padding:0 4px}
-#twocode-ai-monitor .tc-page-head > .ch-head-right{flex:none}
-#twocode-ai-monitor .ch-head-right{display:flex;align-items:center;gap:8px;margin-top:10px}
-#twocode-ai-monitor .ch-head-right .cx-jump{margin-top:0}
-#twocode-ai-monitor .ch-status{display:inline-flex;align-items:center;gap:7px;padding:7px 12px;border-radius:12px;background:#121512;border:1px solid rgba(255,255,255,.08);font-weight:700;font-size:11px;white-space:nowrap}
-#twocode-ai-monitor .ch-status i{width:8px;height:8px;border-radius:50%;background:var(--lamp);box-shadow:0 0 8px var(--lamp);display:block}
-#twocode-ai-monitor .ch-status b{font-weight:600;color:#c2ccbd;font-variant-numeric:tabular-nums}
-#twocode-ai-monitor .ch-chat{flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column-reverse;padding:2px 6px 6px 0}
-#twocode-ai-monitor .ch-inner{display:flex;flex-direction:column;gap:8px}
-#twocode-ai-monitor .ch-row{display:flex;align-items:flex-end;gap:8px;min-width:0}
-#twocode-ai-monitor .ch-row.me{justify-content:flex-end}
-#twocode-ai-monitor .ch-avatar{flex:none;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:#22291f;color:#00c48a;border:1px solid rgba(198,233,148,.2)}
-#twocode-ai-monitor .ch-bubble{max-width:78%;padding:9px 13px;border-radius:16px 16px 16px 5px;background:#171c17;border:1px solid rgba(255,255,255,.07);font-size:12.5px;line-height:1.5;color:#eef3e8;white-space:pre-wrap;overflow-wrap:anywhere;min-width:0}
-#twocode-ai-monitor .ch-bubble.me{border-radius:16px 16px 5px 16px;background:#2b3a26;border-color:rgba(198,233,148,.18);color:#f2f7ec}
-#twocode-ai-monitor .ch-bubble.wide{max-width:none;flex:1;white-space:normal}
-#twocode-ai-monitor .ch-bubble.ask{border-color:rgba(255,154,31,.45);background:#1d1810}
-#twocode-ai-monitor .ch-bubble.error{border-color:rgba(255,92,92,.4);background:#1d1111;white-space:normal}
-#twocode-ai-monitor .ch-bubble.typing{display:flex;align-items:center;gap:10px;white-space:normal}
-#twocode-ai-monitor .ch-bubble .cc-actions{margin-top:8px}
-#twocode-ai-monitor .ch-bubble .cx-code{margin-top:6px}
-#twocode-ai-monitor .ch-label{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#ffb35c;margin-bottom:4px}
-#twocode-ai-monitor .ch-dim{color:#9aa596}
-#twocode-ai-monitor .ch-typing{display:inline-flex;gap:3px}
-#twocode-ai-monitor .ch-typing i{width:6px;height:6px;border-radius:50%;background:#ffb35c;animation:ch-dot 1.2s ease-in-out infinite}
-#twocode-ai-monitor .ch-typing i:nth-child(2){animation-delay:.15s}
-#twocode-ai-monitor .ch-typing i:nth-child(3){animation-delay:.3s}
+#orix-ai-monitor .cx-jump{margin-top:10px;display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:12px;background:#0f171f;border:1px solid rgba(255,255,255,.1);color:#e8eee4;font-size:11px;font-weight:600;white-space:nowrap}
+#orix-ai-monitor .cx-jump:hover{background:#1e241d;border-color:rgba(255,255,255,.22)}
+#orix-ai-monitor .cx-jump span{color:#9aa596}
+#orix-ai-monitor .cx-grid{display:grid;grid-template-columns:1.35fr 1fr;gap:12px;flex:1;min-height:0}
+#orix-ai-monitor .cx-hero{position:relative;display:flex;gap:16px;padding:16px 18px;border-radius:18px;border:1px solid rgba(255,255,255,.07);background:linear-gradient(160deg,#0f171f,#0b0d0b);min-height:0;overflow:hidden}
+#orix-ai-monitor .cx-hero::before{content:'';position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 0% 0%,var(--glow,transparent),transparent 60%);opacity:.18}
+#orix-ai-monitor .cx-orange{--glow:#ff9a1f}
+#orix-ai-monitor .cx-green{--glow:#22e05a}
+#orix-ai-monitor .cx-red{--glow:#ff3b3b}
+#orix-ai-monitor .cx-light{position:relative;flex:none;align-self:flex-start;display:flex;flex-direction:column;gap:6px;padding:7px 6px;border-radius:14px;background:#050605;border:1px solid rgba(255,255,255,.08)}
+#orix-ai-monitor .cx-light i{display:block;width:14px;height:14px;border-radius:50%;opacity:.16;transition:opacity .3s}
+#orix-ai-monitor .cx-light .red{background:#ff3b3b}
+#orix-ai-monitor .cx-light .orange{background:#ff9a1f}
+#orix-ai-monitor .cx-light .green{background:#22e05a}
+#orix-ai-monitor .cx-light i.on{opacity:1;box-shadow:0 0 12px currentColor}
+#orix-ai-monitor .cx-light .red.on{color:#ff3b3b}
+#orix-ai-monitor .cx-light .orange.on{color:#ff9a1f}
+#orix-ai-monitor .cx-light .green.on{color:#22e05a}
+#orix-ai-monitor .cx-light i.blink{animation:am-pulse 1.1s ease-in-out infinite}
+#orix-ai-monitor .cx-main{position:relative;flex:1;min-width:0;display:flex;flex-direction:column;gap:7px;min-height:0}
+#orix-ai-monitor .cx-label{display:flex;align-items:center;gap:8px;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#9aa596}
+#orix-ai-monitor .cx-label em{font-style:normal;color:#c2ccbd}
+#orix-ai-monitor .cx-label em.orange{color:#ffb35c}
+#orix-ai-monitor .cx-label em.green{color:#5ee88a}
+#orix-ai-monitor .cx-label em.red{color:#ff8a8a}
+#orix-ai-monitor .cx-label span{letter-spacing:0;text-transform:none;font-weight:600}
+#orix-ai-monitor .cx-timer{font-variant-numeric:tabular-nums;color:#e8eee4}
+#orix-ai-monitor .cx-title{margin:0;font-size:18px;font-weight:700;line-height:1.25;color:#fff;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+#orix-ai-monitor .cx-code{display:block;font:11px/1.4 Consolas,monospace;color:#ffd7ab;background:rgba(255,255,255,.05);border-radius:8px;padding:5px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#orix-ai-monitor .cx-prompt{margin-top:auto;display:flex;flex-direction:column;gap:2px;padding-top:8px;border-top:1px solid rgba(255,255,255,.06)}
+#orix-ai-monitor .cx-prompt span{font-size:10px;font-weight:700;color:#7f8a7a;letter-spacing:.06em;text-transform:uppercase}
+#orix-ai-monitor .cx-prompt q{font-size:12px;color:#c2ccbd;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;quotes:'“' '”'}
+#orix-ai-monitor .cx-msg{flex:1;min-height:0;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;font-size:12.5px;line-height:1.5;color:#eef3e8;padding-right:4px}
+#orix-ai-monitor .cx-compose textarea{height:38px;padding:9px 10px;border-radius:11px;background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.12)}
+#orix-ai-monitor .cx-compose .am-primary{padding:9px 16px}
+#orix-ai-monitor .cx-side{display:flex;flex-direction:column;gap:6px;padding:12px 12px 10px;border-radius:18px;border:1px solid rgba(255,255,255,.07);background:#0d100d;min-height:0;min-width:0}
+#orix-ai-monitor .cx-side-head{display:flex;justify-content:space-between;align-items:baseline;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#9aa596;padding:0 2px}
+#orix-ai-monitor .cx-side-head small{letter-spacing:0;text-transform:none;font-weight:600;color:#7f8a7a}
+#orix-ai-monitor .cx-feed{flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column;gap:2px;-webkit-mask-image:linear-gradient(#000 78%,transparent);mask-image:linear-gradient(#000 78%,transparent)}
+#orix-ai-monitor .cx-step{display:flex;align-items:center;gap:9px;padding:4px 2px;min-width:0}
+#orix-ai-monitor .cx-ico{flex:none;width:26px;height:26px;border-radius:8px;display:grid;place-items:center;background:rgba(255,255,255,.05);color:#c2ccbd}
+#orix-ai-monitor .cx-step.running .cx-ico{background:rgba(255,154,31,.14);color:#ffb35c}
+#orix-ai-monitor .cx-txt{flex:1;min-width:0;display:flex;flex-direction:column}
+#orix-ai-monitor .cx-txt em{font-style:normal;font-size:11.5px;font-weight:600;color:#e8eee4}
+#orix-ai-monitor .cx-step.done .cx-txt em{color:#aab4a5}
+#orix-ai-monitor .cx-txt small{font:10px Consolas,monospace;color:#7f8a7a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#orix-ai-monitor .cx-step > b{flex:none;width:16px;height:16px;border-radius:50%;display:grid;place-items:center;font-size:9px}
+#orix-ai-monitor .cx-ok{color:#22e05a;background:rgba(34,224,90,.12)}
+#orix-ai-monitor .cx-bad{color:#ff5c5c;background:rgba(255,92,92,.12)}
+#orix-ai-monitor .cx-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:#5d6858;font-size:11px;text-align:center}
+#orix-ai-monitor .cx-limit{display:flex;flex-direction:column;gap:4px;padding:8px 2px 0;border-top:1px solid rgba(255,255,255,.06);font-size:10.5px;color:#9aa596}
+#orix-ai-monitor .cx-limit > div:first-child{display:flex;justify-content:space-between}
+#orix-ai-monitor .cx-limit b{color:#e8eee4}
+#orix-ai-monitor .cx-limit small{font-size:9.5px;color:#7f8a7a}
+#orix-ai-monitor .cx-bar{height:4px;border-radius:3px;background:rgba(255,255,255,.08);overflow:hidden}
+#orix-ai-monitor .cx-bar i{display:block;height:100%;border-radius:3px}
+#orix-ai-monitor .cx-others{flex:none;font-size:10.5px;color:#9aa596;padding:0 4px}
+#orix-ai-monitor .tc-page-head > .ch-head-right{flex:none}
+#orix-ai-monitor .ch-head-right{display:flex;align-items:center;gap:8px;margin-top:10px}
+#orix-ai-monitor .ch-head-right .cx-jump{margin-top:0}
+#orix-ai-monitor .ch-status{display:inline-flex;align-items:center;gap:7px;padding:7px 12px;border-radius:12px;background:#121512;border:1px solid rgba(255,255,255,.08);font-weight:700;font-size:11px;white-space:nowrap}
+#orix-ai-monitor .ch-status i{width:8px;height:8px;border-radius:50%;background:var(--lamp);box-shadow:0 0 8px var(--lamp);display:block}
+#orix-ai-monitor .ch-status b{font-weight:600;color:#c2ccbd;font-variant-numeric:tabular-nums}
+#orix-ai-monitor .ch-chat{flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column-reverse;padding:2px 6px 6px 0}
+#orix-ai-monitor .ch-inner{display:flex;flex-direction:column;gap:8px}
+#orix-ai-monitor .ch-row{display:flex;align-items:flex-end;gap:8px;min-width:0}
+#orix-ai-monitor .ch-row.me{justify-content:flex-end}
+#orix-ai-monitor .ch-avatar{flex:none;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:#22291f;color:#00c48a;border:1px solid rgba(198,233,148,.2)}
+#orix-ai-monitor .ch-bubble{max-width:78%;padding:9px 13px;border-radius:16px 16px 16px 5px;background:#171c17;border:1px solid rgba(255,255,255,.07);font-size:12.5px;line-height:1.5;color:#eef3e8;white-space:pre-wrap;overflow-wrap:anywhere;min-width:0}
+#orix-ai-monitor .ch-bubble.me{border-radius:16px 16px 5px 16px;background:#2b3a26;border-color:rgba(198,233,148,.18);color:#f2f7ec}
+#orix-ai-monitor .ch-bubble.wide{max-width:none;flex:1;white-space:normal}
+#orix-ai-monitor .ch-bubble.ask{border-color:rgba(255,154,31,.45);background:#1d1810}
+#orix-ai-monitor .ch-bubble.error{border-color:rgba(255,92,92,.4);background:#1d1111;white-space:normal}
+#orix-ai-monitor .ch-bubble.typing{display:flex;align-items:center;gap:10px;white-space:normal}
+#orix-ai-monitor .ch-bubble .cc-actions{margin-top:8px}
+#orix-ai-monitor .ch-bubble .cx-code{margin-top:6px}
+#orix-ai-monitor .ch-label{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#ffb35c;margin-bottom:4px}
+#orix-ai-monitor .ch-dim{color:#9aa596}
+#orix-ai-monitor .ch-typing{display:inline-flex;gap:3px}
+#orix-ai-monitor .ch-typing i{width:6px;height:6px;border-radius:50%;background:#ffb35c;animation:ch-dot 1.2s ease-in-out infinite}
+#orix-ai-monitor .ch-typing i:nth-child(2){animation-delay:.15s}
+#orix-ai-monitor .ch-typing i:nth-child(3){animation-delay:.3s}
 @keyframes ch-dot{0%,60%,100%{opacity:.25;transform:none}30%{opacity:1;transform:translateY(-3px)}}
-#twocode-ai-monitor .ch-steps{display:flex;flex-direction:column;gap:1px;margin:0 0 0 32px;padding:2px 0 2px 10px;border-left:1.5px solid rgba(255,255,255,.08)}
-#twocode-ai-monitor .ch-step{display:flex;align-items:center;gap:7px;font-size:11px;color:#9aa596;min-width:0;padding:2px 0}
-#twocode-ai-monitor .ch-step .ch-ico{flex:none;display:grid;place-items:center;color:#7f8a7a}
-#twocode-ai-monitor .ch-step.running .ch-ico,#twocode-ai-monitor .ch-step.running em{color:#ffb35c}
-#twocode-ai-monitor .ch-step em{font-style:normal;font-weight:600;flex:none}
-#twocode-ai-monitor .ch-step small{font:10.5px Consolas,monospace;color:#6f7a6b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex:1}
-#twocode-ai-monitor .ch-step > b{flex:none;width:14px;height:14px;border-radius:50%;display:grid;place-items:center;font-size:8px}
-#twocode-ai-monitor .ch-step > b.cc-spin{border-width:1.5px}
-#twocode-ai-monitor .ch-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:#7f8a7a;text-align:center;font-size:11.5px}
-#twocode-ai-monitor .ch-empty svg{color:#00c48a;margin-bottom:4px}
-#twocode-ai-monitor .ch-empty b{color:#eef3e8;font-size:14px}
-#twocode-ai-monitor .ch-compose{flex:none;display:flex;gap:8px;align-items:center;padding:6px;border-radius:16px;background:#111411;border:1px solid rgba(255,255,255,.09)}
-#twocode-ai-monitor .ch-compose textarea{height:34px;border:0;background:transparent;padding:8px 8px;font-size:12.5px}
-#twocode-ai-monitor .ch-compose textarea:focus-visible{outline:none}
-#twocode-ai-monitor .ch-compose .am-primary{border-radius:11px;padding:8px 16px}
-#twocode-ai-monitor .ch-foot{flex:none;display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:10.5px;color:#7f8a7a;padding:2px 4px}
-#twocode-ai-monitor .ch-limit{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
-#twocode-ai-monitor .ch-limit b{color:#e8eee4}
-#twocode-ai-monitor .ch-limit i{display:block;width:70px;height:4px;border-radius:3px;background:rgba(255,255,255,.08);overflow:hidden}
-#twocode-ai-monitor .ch-limit s{display:block;height:100%;border-radius:3px}
-#twocode-ai-monitor .ch-summary{margin:2px 0 0 32px;padding:10px 12px;border-radius:14px;background:linear-gradient(180deg,#131813,#0f171f);border:1px solid rgba(255,255,255,.08);display:flex;flex-direction:column;gap:7px}
-#twocode-ai-monitor .ch-sum-head{display:flex;justify-content:space-between;align-items:center;font-size:11px}
-#twocode-ai-monitor .ch-sum-title{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#9aa596}
-#twocode-ai-monitor .ch-sum-head .ok{color:#5ee88a}
-#twocode-ai-monitor .ch-sum-head .ask{color:#ffb35c}
-#twocode-ai-monitor .ch-sum-head .bad{color:#ff8a8a}
-#twocode-ai-monitor .ch-sum-chips{display:flex;flex-wrap:wrap;gap:6px}
-#twocode-ai-monitor .ch-sum-chips span{display:inline-flex;align-items:center;gap:5px;padding:4px 9px;border-radius:9px;background:rgba(255,255,255,.05);font-size:11px;color:#dfe7da}
-#twocode-ai-monitor .ch-sum-chips svg{color:#9aa596}
-#twocode-ai-monitor .ch-sum-files{display:flex;flex-wrap:wrap;align-items:center;gap:5px}
-#twocode-ai-monitor .ch-sum-files small{font-size:10px;color:#7f8a7a;margin-right:2px}
-#twocode-ai-monitor .ch-sum-files code{font:10.5px Consolas,monospace;color:#ffd7ab;background:rgba(255,215,171,.07);border-radius:6px;padding:2px 6px}
-#twocode-ai-monitor .am-shell{position:relative}
-#twocode-ai-monitor .ch-model{display:inline-flex;align-items:center;gap:6px;padding:7px 11px;border-radius:12px;background:#121512;border:1px solid rgba(255,255,255,.08);font-size:11px;font-weight:700;color:#e8eee4;white-space:nowrap}
-#twocode-ai-monitor .ch-model svg{color:#00c48a}
-#twocode-ai-monitor .ch-model span{color:#7f8a7a;font-size:9px}
-#twocode-ai-monitor .ch-model-menu{position:absolute;top:50px;right:0;z-index:20;width:420px;padding:8px;border-radius:16px;background:#101310;border:1px solid rgba(255,255,255,.12);box-shadow:0 18px 40px rgba(0,0,0,.6);display:grid;grid-template-columns:1fr 1fr;gap:4px}
-#twocode-ai-monitor .ch-model-menu .ch-model-head,#twocode-ai-monitor .ch-model-menu p{grid-column:1/-1}
-#twocode-ai-monitor .ch-model-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px;padding:2px 8px 4px;font-size:11px;font-weight:700;color:#fff}
-#twocode-ai-monitor .ch-model-head small{font-weight:500;color:#9aa596;font-size:10px}
-#twocode-ai-monitor .ch-model-menu button{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:1px;text-align:left;padding:6px 26px 6px 10px;min-width:0;border:1px solid transparent;border-radius:11px;background:transparent;font-weight:400}
-#twocode-ai-monitor .ch-model-menu button:hover{background:rgba(255,255,255,.05)}
-#twocode-ai-monitor .ch-model-menu button.on{background:rgba(198,233,148,.09);border-color:rgba(198,233,148,.25)}
-#twocode-ai-monitor .ch-model-menu button b{font-size:12px}
-#twocode-ai-monitor .ch-model-menu button small{font-size:10px;line-height:1.3;color:#9aa596}
-#twocode-ai-monitor .ch-model-menu button i{position:absolute;right:11px;top:50%;transform:translateY(-50%);font-style:normal;color:#00c48a;font-weight:700}
-#twocode-ai-monitor .ch-model-menu p{margin:4px 8px 2px;font-size:10px;color:#7f8a7a}
-#twocode-ai-monitor .ch-model-menu code{font:10px Consolas,monospace;color:#ffd7ab}
-#twocode-ai-monitor .am-picks{display:flex;gap:4px;padding:3px;margin:0 0 8px;border-radius:12px;background:#111411;border:1px solid rgba(255,255,255,.07);width:max-content}
-#twocode-ai-monitor .am-pick{display:flex;align-items:center;gap:6px;border:0;background:transparent;color:#9aa596;padding:5px 11px;border-radius:9px;font:600 11px Inter, "Segoe UI", sans-serif;cursor:pointer}
-#twocode-ai-monitor .am-pick:hover{color:#fff}
-#twocode-ai-monitor .am-pick.on{background:#262d24;color:#fff}
-#twocode-ai-monitor .am-pick i{width:7px;height:7px;border-radius:50%;background:var(--lamp);box-shadow:0 0 6px var(--lamp)}
+#orix-ai-monitor .ch-steps{display:flex;flex-direction:column;gap:1px;margin:0 0 0 32px;padding:2px 0 2px 10px;border-left:1.5px solid rgba(255,255,255,.08)}
+#orix-ai-monitor .ch-step{display:flex;align-items:center;gap:7px;font-size:11px;color:#9aa596;min-width:0;padding:2px 0}
+#orix-ai-monitor .ch-step .ch-ico{flex:none;display:grid;place-items:center;color:#7f8a7a}
+#orix-ai-monitor .ch-step.running .ch-ico,#orix-ai-monitor .ch-step.running em{color:#ffb35c}
+#orix-ai-monitor .ch-step em{font-style:normal;font-weight:600;flex:none}
+#orix-ai-monitor .ch-step small{font:10.5px Consolas,monospace;color:#6f7a6b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex:1}
+#orix-ai-monitor .ch-step > b{flex:none;width:14px;height:14px;border-radius:50%;display:grid;place-items:center;font-size:8px}
+#orix-ai-monitor .ch-step > b.cc-spin{border-width:1.5px}
+#orix-ai-monitor .ch-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:#7f8a7a;text-align:center;font-size:11.5px}
+#orix-ai-monitor .ch-empty svg{color:#00c48a;margin-bottom:4px}
+#orix-ai-monitor .ch-empty b{color:#eef3e8;font-size:14px}
+#orix-ai-monitor .ch-compose{flex:none;display:flex;gap:8px;align-items:center;padding:6px;border-radius:16px;background:#111411;border:1px solid rgba(255,255,255,.09)}
+#orix-ai-monitor .ch-compose textarea{height:34px;border:0;background:transparent;padding:8px 8px;font-size:12.5px}
+#orix-ai-monitor .ch-compose textarea:focus-visible{outline:none}
+#orix-ai-monitor .ch-compose .am-primary{border-radius:11px;padding:8px 16px}
+#orix-ai-monitor .ch-foot{flex:none;display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:10.5px;color:#7f8a7a;padding:2px 4px}
+#orix-ai-monitor .ch-limit{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+#orix-ai-monitor .ch-limit b{color:#e8eee4}
+#orix-ai-monitor .ch-limit i{display:block;width:70px;height:4px;border-radius:3px;background:rgba(255,255,255,.08);overflow:hidden}
+#orix-ai-monitor .ch-limit s{display:block;height:100%;border-radius:3px}
+#orix-ai-monitor .ch-summary{margin:2px 0 0 32px;padding:10px 12px;border-radius:14px;background:linear-gradient(180deg,#131813,#0f171f);border:1px solid rgba(255,255,255,.08);display:flex;flex-direction:column;gap:7px}
+#orix-ai-monitor .ch-sum-head{display:flex;justify-content:space-between;align-items:center;font-size:11px}
+#orix-ai-monitor .ch-sum-title{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#9aa596}
+#orix-ai-monitor .ch-sum-head .ok{color:#5ee88a}
+#orix-ai-monitor .ch-sum-head .ask{color:#ffb35c}
+#orix-ai-monitor .ch-sum-head .bad{color:#ff8a8a}
+#orix-ai-monitor .ch-sum-chips{display:flex;flex-wrap:wrap;gap:6px}
+#orix-ai-monitor .ch-sum-chips span{display:inline-flex;align-items:center;gap:5px;padding:4px 9px;border-radius:9px;background:rgba(255,255,255,.05);font-size:11px;color:#dfe7da}
+#orix-ai-monitor .ch-sum-chips svg{color:#9aa596}
+#orix-ai-monitor .ch-sum-files{display:flex;flex-wrap:wrap;align-items:center;gap:5px}
+#orix-ai-monitor .ch-sum-files small{font-size:10px;color:#7f8a7a;margin-right:2px}
+#orix-ai-monitor .ch-sum-files code{font:10.5px Consolas,monospace;color:#ffd7ab;background:rgba(255,215,171,.07);border-radius:6px;padding:2px 6px}
+#orix-ai-monitor .am-shell{position:relative}
+#orix-ai-monitor .ch-model{display:inline-flex;align-items:center;gap:6px;padding:7px 11px;border-radius:12px;background:#121512;border:1px solid rgba(255,255,255,.08);font-size:11px;font-weight:700;color:#e8eee4;white-space:nowrap}
+#orix-ai-monitor .ch-model svg{color:#00c48a}
+#orix-ai-monitor .ch-model span{color:#7f8a7a;font-size:9px}
+#orix-ai-monitor .ch-model-menu{position:absolute;top:50px;right:0;z-index:20;width:420px;padding:8px;border-radius:16px;background:#101310;border:1px solid rgba(255,255,255,.12);box-shadow:0 18px 40px rgba(0,0,0,.6);display:grid;grid-template-columns:1fr 1fr;gap:4px}
+#orix-ai-monitor .ch-model-menu .ch-model-head,#orix-ai-monitor .ch-model-menu p{grid-column:1/-1}
+#orix-ai-monitor .ch-model-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px;padding:2px 8px 4px;font-size:11px;font-weight:700;color:#fff}
+#orix-ai-monitor .ch-model-head small{font-weight:500;color:#9aa596;font-size:10px}
+#orix-ai-monitor .ch-model-menu button{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:1px;text-align:left;padding:6px 26px 6px 10px;min-width:0;border:1px solid transparent;border-radius:11px;background:transparent;font-weight:400}
+#orix-ai-monitor .ch-model-menu button:hover{background:rgba(255,255,255,.05)}
+#orix-ai-monitor .ch-model-menu button.on{background:rgba(198,233,148,.09);border-color:rgba(198,233,148,.25)}
+#orix-ai-monitor .ch-model-menu button b{font-size:12px}
+#orix-ai-monitor .ch-model-menu button small{font-size:10px;line-height:1.3;color:#9aa596}
+#orix-ai-monitor .ch-model-menu button i{position:absolute;right:11px;top:50%;transform:translateY(-50%);font-style:normal;color:#00c48a;font-weight:700}
+#orix-ai-monitor .ch-model-menu p{margin:4px 8px 2px;font-size:10px;color:#7f8a7a}
+#orix-ai-monitor .ch-model-menu code{font:10px Consolas,monospace;color:#ffd7ab}
+#orix-ai-monitor .am-picks{display:flex;gap:4px;padding:3px;margin:0 0 8px;border-radius:12px;background:#111411;border:1px solid rgba(255,255,255,.07);width:max-content}
+#orix-ai-monitor .am-pick{display:flex;align-items:center;gap:6px;border:0;background:transparent;color:#9aa596;padding:5px 11px;border-radius:9px;font:600 11px Inter, "Segoe UI", sans-serif;cursor:pointer}
+#orix-ai-monitor .am-pick:hover{color:#fff}
+#orix-ai-monitor .am-pick.on{background:#262d24;color:#fff}
+#orix-ai-monitor .am-pick i{width:7px;height:7px;border-radius:50%;background:var(--lamp);box-shadow:0 0 6px var(--lamp)}
 /* on ORIX's stage (Claude Code / Codex): the chat look, ORIX bottom left */
-#twocode-ai-monitor.cc-stage .am-shell{padding:8px 14px 10px 96px;gap:8px}
-#twocode-ai-monitor.cc-stage .tc-page-head{align-items:center;margin:0;justify-content:space-between}
-#twocode-ai-monitor.cc-stage .tc-page-head > .cc-pill{flex:0 1 auto;margin-right:auto}
-#twocode-ai-monitor .cc-pill{display:inline-flex;align-items:center;gap:7px;padding:5px 12px;border-radius:999px;background:rgba(255,255,255,.1);font:600 12px Inter, "Segoe UI", sans-serif;color:#fff;max-width:340px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#twocode-ai-monitor .cc-pill i{width:8px;height:8px;border-radius:50%;background:var(--lamp);box-shadow:0 0 8px var(--lamp);flex:none}
-#twocode-ai-monitor .cc-pill span{color:rgba(255,255,255,.55);font-weight:500}
-#twocode-ai-monitor.cc-stage .ch-head-right{margin-top:0}
-#twocode-ai-monitor.cc-stage .ch-model,#twocode-ai-monitor.cc-stage .ch-status,#twocode-ai-monitor.cc-stage .cx-jump{background:rgba(255,255,255,.09);border:0;border-radius:999px;padding:6px 12px}
-#twocode-ai-monitor.cc-stage .ch-model svg{color:#ffc29a}
-#twocode-ai-monitor.cc-stage .ch-model-menu{background:#1c120d;border-color:rgba(255,170,120,.18)}
-#twocode-ai-monitor.cc-stage .ch-model-menu button.on{background:rgba(255,154,90,.14);border-color:rgba(255,154,90,.35)}
-#twocode-ai-monitor.cc-stage .ch-model-menu button i{color:#ffb07a}
-#twocode-ai-monitor.cc-stage .ch-chat{padding:0 6px 0 0}
-#twocode-ai-monitor.cc-stage .ch-inner{gap:10px}
-#twocode-ai-monitor.cc-stage .ch-avatar{display:none}
-#twocode-ai-monitor.cc-stage .ch-bubble{font:13.5px/1.5 Inter, "Segoe UI", sans-serif}
-#twocode-ai-monitor.cc-stage .ch-bubble:not(.me):not(.ask):not(.error):not(.wide){background:none;border:0;padding:0 2px;max-width:100%;color:#f6efe9}
-#twocode-ai-monitor.cc-stage .ch-bubble.me{background:rgba(255,255,255,.13);border:0;border-radius:14px;padding:7px 14px;font-weight:600;font-size:13px;max-width:75%}
-#twocode-ai-monitor.cc-stage .ch-bubble.ask{background:rgba(255,154,31,.13);border:1px solid rgba(255,179,92,.35);border-radius:14px}
-#twocode-ai-monitor.cc-stage .ch-bubble.wide{background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.08);border-radius:14px}
-#twocode-ai-monitor.cc-stage .ch-bubble.error{background:rgba(255,92,92,.12);border:1px solid rgba(255,120,120,.3);border-radius:14px}
-#twocode-ai-monitor.cc-stage .ch-bubble.typing{background:none;border:0;padding:0 2px}
-#twocode-ai-monitor.cc-stage .ch-typing i{background:#ffb07a}
-#twocode-ai-monitor.cc-stage .ch-steps{margin:0;border-left-color:rgba(255,255,255,.12)}
-#twocode-ai-monitor.cc-stage .ch-step{color:rgba(255,236,226,.62)}
-#twocode-ai-monitor.cc-stage .ch-step small{color:rgba(255,236,226,.45)}
-#twocode-ai-monitor.cc-stage .ch-summary{margin:0;background:rgba(0,0,0,.24);border:1px solid rgba(255,255,255,.08);border-radius:14px}
-#twocode-ai-monitor.cc-stage .ch-sum-chips span{background:rgba(255,255,255,.08);color:#fff3ea}
-#twocode-ai-monitor.cc-stage .ch-sum-files code{background:rgba(255,190,150,.12);color:#ffd1b0}
-#twocode-ai-monitor.cc-stage .ch-compose{background:rgba(255,255,255,.08);border:0;border-radius:12px;padding:3px 4px 3px 6px}
-#twocode-ai-monitor.cc-stage .ch-compose textarea{background:transparent;border:0;color:#fff}
-#twocode-ai-monitor.cc-stage .ch-compose .am-primary{background:#fff;color:#1a1310;border:0;border-radius:999px;padding:7px 16px}
-#twocode-ai-monitor.cc-stage .ch-foot{color:rgba(255,236,226,.55)}
-#twocode-ai-monitor.cc-stage .am-primary{background:#ffb07a;border-color:#ffb07a;color:#2a1508}
-#twocode-ai-monitor.cc-stage .ch-empty{color:rgba(255,236,226,.6)}#twocode-ai-monitor.cc-stage .ch-empty svg{color:#ffb07a}
-#twocode-ai-monitor .ch-bubble.md{white-space:normal}
-#twocode-ai-monitor .ch-bubble.md p{margin:0 0 8px}#twocode-ai-monitor .ch-bubble.md p:last-child{margin-bottom:0}
-#twocode-ai-monitor .ch-bubble.md ul,#twocode-ai-monitor .ch-bubble.md ol{margin:2px 0 8px;padding-left:20px}#twocode-ai-monitor .ch-bubble.md li{margin:2px 0}
-#twocode-ai-monitor .ch-bubble.md code{font:12px "Cascadia Code",Consolas,monospace;background:rgba(255,255,255,.1);border-radius:5px;padding:1px 5px;color:#ffe2cc}
-#twocode-ai-monitor .ch-bubble.md pre{margin:4px 0 8px;padding:8px 11px;border-radius:10px;background:rgba(0,0,0,.32);border:1px solid rgba(255,255,255,.08);font:12px/1.5 "Cascadia Code",Consolas,monospace;color:#ffe6d4;white-space:pre-wrap;overflow-wrap:anywhere}
-#twocode-ai-monitor .ch-bubble.md b{color:#fff}
+#orix-ai-monitor.cc-stage .am-shell{padding:8px 14px 10px 96px;gap:8px}
+#orix-ai-monitor.cc-stage .tc-page-head{align-items:center;margin:0;justify-content:space-between}
+#orix-ai-monitor.cc-stage .tc-page-head > .cc-pill{flex:0 1 auto;margin-right:auto}
+#orix-ai-monitor .cc-pill{display:inline-flex;align-items:center;gap:7px;padding:5px 12px;border-radius:999px;background:rgba(255,255,255,.1);font:600 12px Inter, "Segoe UI", sans-serif;color:#fff;max-width:340px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#orix-ai-monitor .cc-pill i{width:8px;height:8px;border-radius:50%;background:var(--lamp);box-shadow:0 0 8px var(--lamp);flex:none}
+#orix-ai-monitor .cc-pill span{color:rgba(255,255,255,.55);font-weight:500}
+#orix-ai-monitor.cc-stage .ch-head-right{margin-top:0}
+#orix-ai-monitor.cc-stage .ch-model,#orix-ai-monitor.cc-stage .ch-status,#orix-ai-monitor.cc-stage .cx-jump{background:rgba(255,255,255,.09);border:0;border-radius:999px;padding:6px 12px}
+#orix-ai-monitor.cc-stage .ch-model svg{color:#ffc29a}
+#orix-ai-monitor.cc-stage .ch-model-menu{background:#1c120d;border-color:rgba(255,170,120,.18)}
+#orix-ai-monitor.cc-stage .ch-model-menu button.on{background:rgba(255,154,90,.14);border-color:rgba(255,154,90,.35)}
+#orix-ai-monitor.cc-stage .ch-model-menu button i{color:#ffb07a}
+#orix-ai-monitor.cc-stage .ch-chat{padding:0 6px 0 0}
+#orix-ai-monitor.cc-stage .ch-inner{gap:10px}
+#orix-ai-monitor.cc-stage .ch-avatar{display:none}
+#orix-ai-monitor.cc-stage .ch-bubble{font:13.5px/1.5 Inter, "Segoe UI", sans-serif}
+#orix-ai-monitor.cc-stage .ch-bubble:not(.me):not(.ask):not(.error):not(.wide){background:none;border:0;padding:0 2px;max-width:100%;color:#f6efe9}
+#orix-ai-monitor.cc-stage .ch-bubble.me{background:rgba(255,255,255,.13);border:0;border-radius:14px;padding:7px 14px;font-weight:600;font-size:13px;max-width:75%}
+#orix-ai-monitor.cc-stage .ch-bubble.ask{background:rgba(255,154,31,.13);border:1px solid rgba(255,179,92,.35);border-radius:14px}
+#orix-ai-monitor.cc-stage .ch-bubble.wide{background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.08);border-radius:14px}
+#orix-ai-monitor.cc-stage .ch-bubble.error{background:rgba(255,92,92,.12);border:1px solid rgba(255,120,120,.3);border-radius:14px}
+#orix-ai-monitor.cc-stage .ch-bubble.typing{background:none;border:0;padding:0 2px}
+#orix-ai-monitor.cc-stage .ch-typing i{background:#ffb07a}
+#orix-ai-monitor.cc-stage .ch-steps{margin:0;border-left-color:rgba(255,255,255,.12)}
+#orix-ai-monitor.cc-stage .ch-step{color:rgba(255,236,226,.62)}
+#orix-ai-monitor.cc-stage .ch-step small{color:rgba(255,236,226,.45)}
+#orix-ai-monitor.cc-stage .ch-summary{margin:0;background:rgba(0,0,0,.24);border:1px solid rgba(255,255,255,.08);border-radius:14px}
+#orix-ai-monitor.cc-stage .ch-sum-chips span{background:rgba(255,255,255,.08);color:#fff3ea}
+#orix-ai-monitor.cc-stage .ch-sum-files code{background:rgba(255,190,150,.12);color:#ffd1b0}
+#orix-ai-monitor.cc-stage .ch-compose{background:rgba(255,255,255,.08);border:0;border-radius:12px;padding:3px 4px 3px 6px}
+#orix-ai-monitor.cc-stage .ch-compose textarea{background:transparent;border:0;color:#fff}
+#orix-ai-monitor.cc-stage .ch-compose .am-primary{background:#fff;color:#1a1310;border:0;border-radius:999px;padding:7px 16px}
+#orix-ai-monitor.cc-stage .ch-foot{color:rgba(255,236,226,.55)}
+#orix-ai-monitor.cc-stage .am-primary{background:#ffb07a;border-color:#ffb07a;color:#2a1508}
+#orix-ai-monitor.cc-stage .ch-empty{color:rgba(255,236,226,.6)}#orix-ai-monitor.cc-stage .ch-empty svg{color:#ffb07a}
+#orix-ai-monitor .ch-bubble.md{white-space:normal}
+#orix-ai-monitor .ch-bubble.md p{margin:0 0 8px}#orix-ai-monitor .ch-bubble.md p:last-child{margin-bottom:0}
+#orix-ai-monitor .ch-bubble.md ul,#orix-ai-monitor .ch-bubble.md ol{margin:2px 0 8px;padding-left:20px}#orix-ai-monitor .ch-bubble.md li{margin:2px 0}
+#orix-ai-monitor .ch-bubble.md code{font:12px "Cascadia Code",Consolas,monospace;background:rgba(255,255,255,.1);border-radius:5px;padding:1px 5px;color:#ffe2cc}
+#orix-ai-monitor .ch-bubble.md pre{margin:4px 0 8px;padding:8px 11px;border-radius:10px;background:rgba(0,0,0,.32);border:1px solid rgba(255,255,255,.08);font:12px/1.5 "Cascadia Code",Consolas,monospace;color:#ffe6d4;white-space:pre-wrap;overflow-wrap:anywhere}
+#orix-ai-monitor .ch-bubble.md b{color:#fff}
 /* the model menu: one clean list, the current one with a check */
-#twocode-ai-monitor .ch-model-menu{top:40px;width:340px;padding:5px;border-radius:14px;background:#1c140f;border:1px solid rgba(255,190,150,.16);box-shadow:0 22px 50px rgba(0,0,0,.65);grid-template-columns:1fr;gap:2px}
-#twocode-ai-monitor .ch-model-head{padding:5px 10px 4px;font:700 11.5px Inter, "Segoe UI", sans-serif;flex-direction:column;align-items:flex-start;gap:1px}
-#twocode-ai-monitor .ch-model-head small{color:rgba(255,236,226,.5)}
-#twocode-ai-monitor .ch-model-menu button{flex-direction:row;align-items:center;gap:10px;padding:6px 30px 6px 10px;border-radius:10px;font-family:Inter, "Segoe UI", sans-serif}
-#twocode-ai-monitor .ch-model-menu button b{font-size:12.5px;min-width:70px;color:#fff}
-#twocode-ai-monitor .ch-model-menu button small{font-size:11px;color:rgba(255,236,226,.55);line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
-#twocode-ai-monitor .ch-model-menu button:hover{background:rgba(255,255,255,.07)}
-#twocode-ai-monitor .ch-model-menu button.on{background:rgba(255,160,100,.16);border-color:transparent}
-#twocode-ai-monitor .ch-model-menu button i{color:#ffb07a;font-size:13px}
-#twocode-ai-monitor .ch-model-menu p{margin:2px 10px 3px;padding-top:5px;border-top:1px solid rgba(255,255,255,.07);font:10.5px Inter, "Segoe UI", sans-serif;color:rgba(255,236,226,.45)}
+#orix-ai-monitor .ch-model-menu{top:40px;width:340px;padding:5px;border-radius:14px;background:#1c140f;border:1px solid rgba(255,190,150,.16);box-shadow:0 22px 50px rgba(0,0,0,.65);grid-template-columns:1fr;gap:2px}
+#orix-ai-monitor .ch-model-head{padding:5px 10px 4px;font:700 11.5px Inter, "Segoe UI", sans-serif;flex-direction:column;align-items:flex-start;gap:1px}
+#orix-ai-monitor .ch-model-head small{color:rgba(255,236,226,.5)}
+#orix-ai-monitor .ch-model-menu button{flex-direction:row;align-items:center;gap:10px;padding:6px 30px 6px 10px;border-radius:10px;font-family:Inter, "Segoe UI", sans-serif}
+#orix-ai-monitor .ch-model-menu button b{font-size:12.5px;min-width:70px;color:#fff}
+#orix-ai-monitor .ch-model-menu button small{font-size:11px;color:rgba(255,236,226,.55);line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+#orix-ai-monitor .ch-model-menu button:hover{background:rgba(255,255,255,.07)}
+#orix-ai-monitor .ch-model-menu button.on{background:rgba(255,160,100,.16);border-color:transparent}
+#orix-ai-monitor .ch-model-menu button i{color:#ffb07a;font-size:13px}
+#orix-ai-monitor .ch-model-menu p{margin:2px 10px 3px;padding-top:5px;border-top:1px solid rgba(255,255,255,.07);font:10.5px Inter, "Segoe UI", sans-serif;color:rgba(255,236,226,.45)}
 /* the reply box: like the chat's */
-#twocode-ai-monitor .ch-compose{align-items:center;border-radius:14px;padding:4px 5px 4px 6px}
-#twocode-ai-monitor .ch-compose textarea{height:32px;padding:7px 8px;font:13px Inter, "Segoe UI", sans-serif;caret-color:#ffc29a}
-#twocode-ai-monitor .ch-compose:focus-within{box-shadow:inset 0 0 0 1px rgba(255,176,122,.5)}
-#twocode-ai-monitor .ch-compose #am-send{width:30px;height:30px;padding:0;border-radius:50%;background:#fff;color:#1a1310;border:0;font:700 15px Inter, "Segoe UI", sans-serif;flex:none}
-#twocode-ai-monitor .ch-compose #am-send:disabled{opacity:.4}
-#twocode-ai-monitor.cc-codex .ch-typing i,#twocode-ai-monitor.cc-codex .am-primary{background:#7fb6ff;border-color:#7fb6ff;color:#06182e}
-#twocode-ai-monitor.cc-codex .ch-bubble.ask{background:rgba(59,130,246,.14);border-color:rgba(127,182,255,.4)}
-#twocode-ai-monitor.cc-codex .ch-compose:focus-within{box-shadow:inset 0 0 0 1px rgba(127,182,255,.55)}
-#twocode-ai-monitor.cc-codex .ch-bubble.md code{color:#dbeaff}
-#twocode-ai-monitor .ch-hist-title{font:700 10.5px Inter, "Segoe UI", sans-serif;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,236,226,.5);margin:2px 2px 0}
-#twocode-ai-monitor .ch-hist{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:12px;background:rgba(255,255,255,.05);min-width:0}
-#twocode-ai-monitor .ch-hist:hover{background:rgba(255,255,255,.09)}
-#twocode-ai-monitor .ch-hist div{flex:1;min-width:0;display:flex;flex-direction:column}
-#twocode-ai-monitor .ch-hist b{font:600 12.5px Inter, "Segoe UI", sans-serif;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#twocode-ai-monitor .ch-hist small{font:11px Inter, "Segoe UI", sans-serif;color:rgba(255,236,226,.5);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#twocode-ai-monitor .ch-hist-mark{flex:none;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:11px;font-weight:800;background:rgba(255,255,255,.08);color:#fff}
-#twocode-ai-monitor .ch-hist-mark.done{background:rgba(94,232,138,.16);color:#7ef0a4}
-#twocode-ai-monitor .ch-hist-mark.question{background:rgba(255,179,92,.18);color:#ffc27a}
-#twocode-ai-monitor .ch-hist-mark.error{background:rgba(255,92,92,.16);color:#ff9a9a}
-#twocode-ai-monitor .ch-hist i{flex:none;font:600 11px Inter, "Segoe UI", sans-serif;font-style:normal;color:rgba(255,236,226,.55)}
-#twocode-ai-monitor .ch-hist i.done{color:#7ef0a4}#twocode-ai-monitor .ch-hist i.question{color:#ffc27a}#twocode-ai-monitor .ch-hist i.error{color:#ff9a9a}
+#orix-ai-monitor .ch-compose{align-items:center;border-radius:14px;padding:4px 5px 4px 6px}
+#orix-ai-monitor .ch-compose textarea{height:32px;padding:7px 8px;font:13px Inter, "Segoe UI", sans-serif;caret-color:#ffc29a}
+#orix-ai-monitor .ch-compose:focus-within{box-shadow:inset 0 0 0 1px rgba(255,176,122,.5)}
+#orix-ai-monitor .ch-compose #am-send{width:30px;height:30px;padding:0;border-radius:50%;background:#fff;color:#1a1310;border:0;font:700 15px Inter, "Segoe UI", sans-serif;flex:none}
+#orix-ai-monitor .ch-compose #am-send:disabled{opacity:.4}
+#orix-ai-monitor.cc-codex .ch-typing i,#orix-ai-monitor.cc-codex .am-primary{background:#7fb6ff;border-color:#7fb6ff;color:#06182e}
+#orix-ai-monitor.cc-codex .ch-bubble.ask{background:rgba(59,130,246,.14);border-color:rgba(127,182,255,.4)}
+#orix-ai-monitor.cc-codex .ch-compose:focus-within{box-shadow:inset 0 0 0 1px rgba(127,182,255,.55)}
+#orix-ai-monitor.cc-codex .ch-bubble.md code{color:#dbeaff}
+#orix-ai-monitor .ch-hist-title{font:700 10.5px Inter, "Segoe UI", sans-serif;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,236,226,.5);margin:2px 2px 0}
+#orix-ai-monitor .ch-hist{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:12px;background:rgba(255,255,255,.05);min-width:0}
+#orix-ai-monitor .ch-hist:hover{background:rgba(255,255,255,.09)}
+#orix-ai-monitor .ch-hist div{flex:1;min-width:0;display:flex;flex-direction:column}
+#orix-ai-monitor .ch-hist b{font:600 12.5px Inter, "Segoe UI", sans-serif;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#orix-ai-monitor .ch-hist small{font:11px Inter, "Segoe UI", sans-serif;color:rgba(255,236,226,.5);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#orix-ai-monitor .ch-hist-mark{flex:none;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:11px;font-weight:800;background:rgba(255,255,255,.08);color:#fff}
+#orix-ai-monitor .ch-hist-mark.done{background:rgba(94,232,138,.16);color:#7ef0a4}
+#orix-ai-monitor .ch-hist-mark.question{background:rgba(255,179,92,.18);color:#ffc27a}
+#orix-ai-monitor .ch-hist-mark.error{background:rgba(255,92,92,.16);color:#ff9a9a}
+#orix-ai-monitor .ch-hist i{flex:none;font:600 11px Inter, "Segoe UI", sans-serif;font-style:normal;color:rgba(255,236,226,.55)}
+#orix-ai-monitor .ch-hist i.done{color:#7ef0a4}#orix-ai-monitor .ch-hist i.question{color:#ffc27a}#orix-ai-monitor .ch-hist i.error{color:#ff9a9a}
 /* ---- the Claude page as a Live Activity: right on the black, no cards (Claude orange, Codex blue) ---- */
-#twocode-ai-monitor.cl-new{--acc:#ff9230;--ok:#30d158;--bad:#ff4245;--ask:#ffd600;--g:#8e8e93;--g1:#1c1c1e;--g2:#2c2c2e;--g3:#3a3a3c;font-family:Inter,"Segoe UI",sans-serif;color:#fff}
-#twocode-ai-monitor.cl-new.cc-codex{--acc:#0091ff}
-#twocode-ai-monitor.cl-new .am-shell{padding:0 16px 10px;gap:0}
-#twocode-ai-monitor .lv-top{display:flex;align-items:center;gap:8px;height:22px;font-size:15px;font-weight:600;color:var(--tone,var(--acc))}
-#twocode-ai-monitor .lv-hero{display:flex;align-items:center;gap:18px;margin-top:2px}
-#twocode-ai-monitor .lv-ring{position:relative;flex:none;width:76px;height:76px}
-#twocode-ai-monitor .lv-ring > svg{position:absolute;left:0;top:0;width:100%;height:100%;transform:rotate(-90deg)}
-#twocode-ai-monitor .lv-ring circle{fill:none;stroke-width:8;stroke-linecap:round}
-#twocode-ai-monitor .lv-ring i{position:absolute;inset:0;display:grid;place-items:center;color:var(--tone)}
-#twocode-ai-monitor .lv-hero > div:not(.lv-ring){flex:1;min-width:0}
-#twocode-ai-monitor .lv-who{font-size:15px;font-weight:600;color:var(--tone);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#twocode-ai-monitor .lv-hero .lv-title{font-size:26px;line-height:30px;font-weight:700}
-#twocode-ai-monitor .lv-hero .lv-sub{margin-top:2px}
-#twocode-ai-monitor .lv-clock{flex:none;align-self:flex-start;margin-top:2px;font-size:20px;font-weight:700;color:var(--tone);font-variant-numeric:tabular-nums}
-#twocode-ai-monitor .lv-top svg{flex:none}
-#twocode-ai-monitor .lv-top .lv-time{margin-left:auto;font-variant-numeric:tabular-nums}
-#twocode-ai-monitor .lv-main{display:flex;align-items:flex-end;gap:16px;margin-top:10px}
-#twocode-ai-monitor .lv-main > div{flex:1;min-width:0}
-#twocode-ai-monitor .lv-title{margin:0;font-size:28px;line-height:32px;font-weight:650;letter-spacing:-.35px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#twocode-ai-monitor .lv-sub{margin:3px 0 0;font-size:15px;line-height:20px;color:var(--g);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#twocode-ai-monitor .lv-sub code,#twocode-ai-monitor .lv-mono{font:500 13px "Cascadia Mono",Consolas,monospace}
-#twocode-ai-monitor .lv-btns{flex:none;display:flex;gap:8px}
-#twocode-ai-monitor.cl-new button{border:0;border-radius:22px;height:36px;padding:0 14px;background:var(--g2);color:#fff;font:600 13px Inter,"Segoe UI",sans-serif;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
-#twocode-ai-monitor.cl-new button:hover{background:var(--g3)}
-#twocode-ai-monitor.cl-new button:active{transform:scale(.97);transition:transform .1s ease-out}
-#twocode-ai-monitor.cl-new .am-primary{background:#fff;color:#000}
-#twocode-ai-monitor.cl-new .am-primary:hover{background:#e5e5ea}
-#twocode-ai-monitor .lv-steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;margin-top:14px}
-#twocode-ai-monitor .lv-steps i{display:block;height:6px;border-radius:3px;background:var(--g3);overflow:hidden}
-#twocode-ai-monitor .lv-steps i.d{background:#fff}#twocode-ai-monitor .lv-steps.done i{background:var(--ok)}
-#twocode-ai-monitor .lv-steps i.n s{display:block;height:100%;width:40%;border-radius:3px;background:var(--tone,var(--acc));animation:lv-run 1.6s ease-in-out infinite}
+#orix-ai-monitor.cl-new{--acc:#ff9230;--ok:#30d158;--bad:#ff4245;--ask:#ffd600;--g:#8e8e93;--g1:#1c1c1e;--g2:#2c2c2e;--g3:#3a3a3c;font-family:Inter,"Segoe UI",sans-serif;color:#fff}
+#orix-ai-monitor.cl-new.cc-codex{--acc:#0091ff}
+#orix-ai-monitor.cl-new .am-shell{padding:0 16px 10px;gap:0}
+#orix-ai-monitor .lv-top{display:flex;align-items:center;gap:8px;height:22px;font-size:15px;font-weight:600;color:var(--tone,var(--acc))}
+#orix-ai-monitor .lv-hero{display:flex;align-items:center;gap:18px;margin-top:2px}
+#orix-ai-monitor .lv-ring{position:relative;flex:none;width:76px;height:76px}
+#orix-ai-monitor .lv-ring > svg{position:absolute;left:0;top:0;width:100%;height:100%;transform:rotate(-90deg)}
+#orix-ai-monitor .lv-ring circle{fill:none;stroke-width:8;stroke-linecap:round}
+#orix-ai-monitor .lv-ring i{position:absolute;inset:0;display:grid;place-items:center;color:var(--tone)}
+#orix-ai-monitor .lv-hero > div:not(.lv-ring){flex:1;min-width:0}
+#orix-ai-monitor .lv-who{font-size:15px;font-weight:600;color:var(--tone);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#orix-ai-monitor .lv-hero .lv-title{font-size:26px;line-height:30px;font-weight:700}
+#orix-ai-monitor .lv-hero .lv-sub{margin-top:2px}
+#orix-ai-monitor .lv-clock{flex:none;align-self:flex-start;margin-top:2px;font-size:20px;font-weight:700;color:var(--tone);font-variant-numeric:tabular-nums}
+#orix-ai-monitor .lv-top svg{flex:none}
+#orix-ai-monitor .lv-top .lv-time{margin-left:auto;font-variant-numeric:tabular-nums}
+#orix-ai-monitor .lv-main{display:flex;align-items:flex-end;gap:16px;margin-top:10px}
+#orix-ai-monitor .lv-main > div{flex:1;min-width:0}
+#orix-ai-monitor .lv-title{margin:0;font-size:28px;line-height:32px;font-weight:650;letter-spacing:-.35px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#orix-ai-monitor .lv-sub{margin:3px 0 0;font-size:15px;line-height:20px;color:var(--g);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#orix-ai-monitor .lv-sub code,#orix-ai-monitor .lv-mono{font:500 13px "Cascadia Mono",Consolas,monospace}
+#orix-ai-monitor .lv-btns{flex:none;display:flex;gap:8px}
+#orix-ai-monitor.cl-new button{border:0;border-radius:22px;height:36px;padding:0 14px;background:var(--g2);color:#fff;font:600 13px Inter,"Segoe UI",sans-serif;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+#orix-ai-monitor.cl-new button:hover{background:var(--g3)}
+#orix-ai-monitor.cl-new button:active{transform:scale(.97);transition:transform .1s ease-out}
+#orix-ai-monitor.cl-new .am-primary{background:#fff;color:#000}
+#orix-ai-monitor.cl-new .am-primary:hover{background:#e5e5ea}
+#orix-ai-monitor .lv-steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;margin-top:14px}
+#orix-ai-monitor .lv-steps i{display:block;height:6px;border-radius:3px;background:var(--g3);overflow:hidden}
+#orix-ai-monitor .lv-steps i.d{background:#fff}#orix-ai-monitor .lv-steps.done i{background:var(--ok)}
+#orix-ai-monitor .lv-steps i.n s{display:block;height:100%;width:40%;border-radius:3px;background:var(--tone,var(--acc));animation:lv-run 1.6s ease-in-out infinite}
 @keyframes lv-run{50%{width:80%}}
-#twocode-ai-monitor .lv-steps span{font-size:12px;font-weight:600;color:var(--g);margin-top:7px}
-#twocode-ai-monitor .lv-steps span.n{color:#fff}
-#twocode-ai-monitor .lv-list{flex:1;min-height:0;overflow:auto;margin-top:12px;scrollbar-width:none}
-#twocode-ai-monitor .lv-cap{font-size:13px;font-weight:600;color:var(--g);margin:2px 0 2px}
-#twocode-ai-monitor .lv-row{display:flex;align-items:center;gap:12px;height:36px;border-bottom:1px solid var(--g2)}
-#twocode-ai-monitor .lv-row:last-child{border-bottom:0}
-#twocode-ai-monitor .lv-ic{flex:none;width:24px;height:24px;border-radius:7px;display:grid;place-items:center;background:var(--g2);color:#fff}
-#twocode-ai-monitor .lv-row b{flex:1;min-width:0;font:500 13px "Cascadia Mono",Consolas,monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#twocode-ai-monitor .lv-row em{font-style:normal;font-size:13px;color:var(--g)}
-#twocode-ai-monitor .lv-row em.run{color:var(--acc)}#twocode-ai-monitor .lv-row em.bad{color:var(--bad)}
-#twocode-ai-monitor .lv-answer{font-size:15px;line-height:22px;color:#fff;white-space:normal}
-#twocode-ai-monitor .lv-answer p{margin:0 0 8px}#twocode-ai-monitor .lv-answer p:last-child{margin:0}
-#twocode-ai-monitor .lv-answer code{font:13px "Cascadia Mono",Consolas,monospace;background:var(--g2);border-radius:6px;padding:1px 6px}
-#twocode-ai-monitor .lv-answer pre{margin:4px 0 8px;padding:10px 12px;border-radius:12px;background:var(--g1);font:12.5px/1.5 "Cascadia Mono",Consolas,monospace;white-space:pre-wrap}
-#twocode-ai-monitor .lv-limit{flex:none;display:flex;align-items:center;gap:10px;height:26px;font-size:12px;font-weight:600;color:var(--g)}
-#twocode-ai-monitor .lv-limit i{flex:1;max-width:220px;height:4px;border-radius:2px;background:var(--g3);overflow:hidden}
-#twocode-ai-monitor .lv-limit s{display:block;height:100%;background:#fff}
-#twocode-ai-monitor .lv-limit .ch-compose{flex:1}
+#orix-ai-monitor .lv-steps span{font-size:12px;font-weight:600;color:var(--g);margin-top:7px}
+#orix-ai-monitor .lv-steps span.n{color:#fff}
+#orix-ai-monitor .lv-list{flex:1;min-height:0;overflow:auto;margin-top:12px;scrollbar-width:none}
+#orix-ai-monitor .lv-cap{font-size:13px;font-weight:600;color:var(--g);margin:2px 0 2px}
+#orix-ai-monitor .lv-row{display:flex;align-items:center;gap:12px;height:36px;border-bottom:1px solid var(--g2)}
+#orix-ai-monitor .lv-row:last-child{border-bottom:0}
+#orix-ai-monitor .lv-ic{flex:none;width:24px;height:24px;border-radius:7px;display:grid;place-items:center;background:var(--g2);color:#fff}
+#orix-ai-monitor .lv-row b{flex:1;min-width:0;font:500 13px "Cascadia Mono",Consolas,monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#orix-ai-monitor .lv-row em{font-style:normal;font-size:13px;color:var(--g)}
+#orix-ai-monitor .lv-row em.run{color:var(--acc)}#orix-ai-monitor .lv-row em.bad{color:var(--bad)}
+#orix-ai-monitor .lv-answer{font-size:15px;line-height:22px;color:#fff;white-space:normal}
+#orix-ai-monitor .lv-answer p{margin:0 0 8px}#orix-ai-monitor .lv-answer p:last-child{margin:0}
+#orix-ai-monitor .lv-answer code{font:13px "Cascadia Mono",Consolas,monospace;background:var(--g2);border-radius:6px;padding:1px 6px}
+#orix-ai-monitor .lv-answer pre{margin:4px 0 8px;padding:10px 12px;border-radius:12px;background:var(--g1);font:12.5px/1.5 "Cascadia Mono",Consolas,monospace;white-space:pre-wrap}
+#orix-ai-monitor .lv-limit{flex:none;display:flex;align-items:center;gap:10px;height:26px;font-size:12px;font-weight:600;color:var(--g)}
+#orix-ai-monitor .lv-limit i{flex:1;max-width:220px;height:4px;border-radius:2px;background:var(--g3);overflow:hidden}
+#orix-ai-monitor .lv-limit s{display:block;height:100%;background:#fff}
+#orix-ai-monitor .lv-limit .ch-compose{flex:1}
 /* Claude needs you: a question, a plan or a permission, with two same-size buttons */
-#twocode-ai-monitor .lv-ask{flex:1;min-height:0;display:flex;flex-direction:column;margin-top:8px}
-#twocode-ai-monitor .lv-ask h3{margin:0;font-size:22px;line-height:28px;font-weight:650;letter-spacing:-.3px}
-#twocode-ai-monitor .lv-cmd{margin-top:10px;min-height:44px;border-radius:14px;background:var(--g1);display:flex;align-items:center;gap:10px;padding:10px 16px;font:500 14px "Cascadia Mono",Consolas,monospace;white-space:pre-wrap;word-break:break-all;max-height:84px;overflow:auto}
-#twocode-ai-monitor .lv-two{margin-top:auto;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;padding-top:12px}
-#twocode-ai-monitor.cl-new .lv-two button{height:44px;font-size:15px;justify-content:center;border-radius:22px}
-#twocode-ai-monitor .lv-scroll{flex:1;min-height:0;overflow:auto;margin-top:8px;font-size:14px;line-height:21px;scrollbar-width:none}
-#twocode-ai-monitor.cl-new .am-option{display:flex;flex-direction:column;align-items:flex-start;height:auto;min-height:44px;width:100%;padding:8px 14px;border-radius:14px;background:var(--g1);text-align:left;margin-top:6px}
-#twocode-ai-monitor.cl-new .am-option.on{background:#fff;color:#000}
-#twocode-ai-monitor.cl-new .am-option small{font-weight:500;color:var(--g)}#twocode-ai-monitor.cl-new .am-option.on small{color:#3a3a3c}
-#twocode-ai-monitor.cl-new .am-note{height:40px;border:0;border-radius:20px;background:var(--g1);color:#fff;padding:0 16px;font:15px Inter,"Segoe UI",sans-serif;outline:none;flex:1}
-#twocode-ai-monitor.cl-new .ch-compose{display:flex;align-items:center;gap:8px;height:40px;border-radius:20px;background:var(--g1);padding:0 4px 0 16px}
-#twocode-ai-monitor.cl-new .ch-compose textarea{flex:1;height:22px;border:0;background:transparent;color:#fff;font:15px Inter,"Segoe UI",sans-serif;resize:none;outline:none;padding:0}
-#twocode-ai-monitor.cl-new .ch-compose #am-send{width:32px;height:32px;padding:0;justify-content:center;border-radius:50%;background:#fff;color:#000}
-#twocode-ai-monitor.cl-new .ch-model-menu{top:auto;bottom:34px;right:0;background:var(--g1);border:0;border-radius:16px;box-shadow:0 18px 44px rgba(0,0,0,.6)}
-#twocode-ai-monitor.cl-new .ch-model-menu button{height:auto;border-radius:12px;background:transparent}
-#twocode-ai-monitor.cl-new .ch-model-menu button:hover{background:var(--g2)}
-#twocode-ai-monitor.cl-new .ch-model-menu button.on{background:var(--g2)}
-#twocode-ai-monitor.cl-new .ch-model-menu button i{color:var(--acc)}
-#twocode-ai-monitor.cl-new .ch-model{height:26px;padding:0 10px;background:transparent;color:var(--g)}
-#twocode-ai-monitor.cl-new .ch-model:hover{background:var(--g2);color:#fff}
+#orix-ai-monitor .lv-ask{flex:1;min-height:0;display:flex;flex-direction:column;margin-top:8px}
+#orix-ai-monitor .lv-ask h3{margin:0;font-size:22px;line-height:28px;font-weight:650;letter-spacing:-.3px}
+#orix-ai-monitor .lv-cmd{margin-top:10px;min-height:44px;border-radius:14px;background:var(--g1);display:flex;align-items:center;gap:10px;padding:10px 16px;font:500 14px "Cascadia Mono",Consolas,monospace;white-space:pre-wrap;word-break:break-all;max-height:84px;overflow:auto}
+#orix-ai-monitor .lv-two{margin-top:auto;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;padding-top:12px}
+#orix-ai-monitor.cl-new .lv-two button{height:44px;font-size:15px;justify-content:center;border-radius:22px}
+#orix-ai-monitor .lv-scroll{flex:1;min-height:0;overflow:auto;margin-top:8px;font-size:14px;line-height:21px;scrollbar-width:none}
+#orix-ai-monitor.cl-new .am-option{display:flex;flex-direction:column;align-items:flex-start;height:auto;min-height:44px;width:100%;padding:8px 14px;border-radius:14px;background:var(--g1);text-align:left;margin-top:6px}
+#orix-ai-monitor.cl-new .am-option.on{background:#fff;color:#000}
+#orix-ai-monitor.cl-new .am-option small{font-weight:500;color:var(--g)}#orix-ai-monitor.cl-new .am-option.on small{color:#3a3a3c}
+#orix-ai-monitor.cl-new .am-note{height:40px;border:0;border-radius:20px;background:var(--g1);color:#fff;padding:0 16px;font:15px Inter,"Segoe UI",sans-serif;outline:none;flex:1}
+#orix-ai-monitor.cl-new .ch-compose{display:flex;align-items:center;gap:8px;height:40px;border-radius:20px;background:var(--g1);padding:0 4px 0 16px}
+#orix-ai-monitor.cl-new .ch-compose textarea{flex:1;height:22px;border:0;background:transparent;color:#fff;font:15px Inter,"Segoe UI",sans-serif;resize:none;outline:none;padding:0}
+#orix-ai-monitor.cl-new .ch-compose #am-send{width:32px;height:32px;padding:0;justify-content:center;border-radius:50%;background:#fff;color:#000}
+#orix-ai-monitor.cl-new .ch-model-menu{top:auto;bottom:34px;right:0;background:var(--g1);border:0;border-radius:16px;box-shadow:0 18px 44px rgba(0,0,0,.6)}
+#orix-ai-monitor.cl-new .ch-model-menu button{height:auto;border-radius:12px;background:transparent}
+#orix-ai-monitor.cl-new .ch-model-menu button:hover{background:var(--g2)}
+#orix-ai-monitor.cl-new .ch-model-menu button.on{background:var(--g2)}
+#orix-ai-monitor.cl-new .ch-model-menu button i{color:var(--acc)}
+#orix-ai-monitor.cl-new .ch-model{height:26px;padding:0 10px;background:transparent;color:var(--g)}
+#orix-ai-monitor.cl-new .ch-model:hover{background:var(--g2);color:#fff}
 /* v3, calm like Apple Music: white and grey, Claude's colour only on its cover, rounded rectangles instead of pills */
-#twocode-ai-monitor.cl-new{--acc:#ffffff;--ask:#ffffff}
-#twocode-ai-monitor .lv-ring{width:76px;height:76px;border-radius:10px;background:linear-gradient(135deg,#e08a6c,#9c4126);box-shadow:0 6px 18px rgba(0,0,0,.45)}
-#twocode-ai-monitor.cc-codex .lv-ring{background:linear-gradient(135deg,#3a3a3c,#141416)}
-#twocode-ai-monitor .lv-ring i{color:#fff}
-#twocode-ai-monitor .lv-who{font-size:12px;font-weight:600;letter-spacing:.4px;text-transform:uppercase;color:var(--g)}
-#twocode-ai-monitor .lv-hero .lv-title{font-size:24px;line-height:30px;font-weight:700;letter-spacing:-.3px}
-#twocode-ai-monitor .lv-clock{font-size:13px;font-weight:600;color:var(--g)}
-#twocode-ai-monitor .lv-prog{height:4px;border-radius:2px;background:var(--g3);margin-top:9px;overflow:hidden}
-#twocode-ai-monitor .lv-prog s{display:block;height:100%;border-radius:2px;background:#fff;transition:width .4s ease-out}
-#twocode-ai-monitor .lv-prog.live s{animation:lv-breathe 1.6s ease-in-out infinite}
+#orix-ai-monitor.cl-new{--acc:#ffffff;--ask:#ffffff}
+#orix-ai-monitor .lv-ring{width:76px;height:76px;border-radius:10px;background:linear-gradient(135deg,#e08a6c,#9c4126);box-shadow:0 6px 18px rgba(0,0,0,.45)}
+#orix-ai-monitor.cc-codex .lv-ring{background:linear-gradient(135deg,#3a3a3c,#141416)}
+#orix-ai-monitor .lv-ring i{color:#fff}
+#orix-ai-monitor .lv-who{font-size:12px;font-weight:600;letter-spacing:.4px;text-transform:uppercase;color:var(--g)}
+#orix-ai-monitor .lv-hero .lv-title{font-size:24px;line-height:30px;font-weight:700;letter-spacing:-.3px}
+#orix-ai-monitor .lv-clock{font-size:13px;font-weight:600;color:var(--g)}
+#orix-ai-monitor .lv-prog{height:4px;border-radius:2px;background:var(--g3);margin-top:9px;overflow:hidden}
+#orix-ai-monitor .lv-prog s{display:block;height:100%;border-radius:2px;background:#fff;transition:width .4s ease-out}
+#orix-ai-monitor .lv-prog.live s{animation:lv-breathe 1.6s ease-in-out infinite}
 @keyframes lv-breathe{50%{opacity:.6}}
-#twocode-ai-monitor .lv-ic{border-radius:6px;background:var(--g2);color:#fff}
-#twocode-ai-monitor .lv-row em.run{color:#fff}
-#twocode-ai-monitor.cl-new button{border-radius:10px}
-#twocode-ai-monitor.cl-new .lv-two button{border-radius:10px}
-#twocode-ai-monitor.cl-new .lv-two .lv-no{background:var(--g2);color:#fff}
-#twocode-ai-monitor.cl-new .lv-two .lv-no:hover{background:var(--g3)}
-#twocode-ai-monitor.cl-new .lv-two .lv-yes{background:#fff;color:#000}
-#twocode-ai-monitor.cl-new .lv-two .lv-yes:hover{background:#e5e5ea}
-#twocode-ai-monitor .lv-cmd{border-radius:10px}
-#twocode-ai-monitor.cl-new .am-option,#twocode-ai-monitor.cl-new .am-note,#twocode-ai-monitor.cl-new .ch-compose{border-radius:10px}
-#twocode-ai-monitor.cl-new .ch-compose #am-send{border-radius:8px}
-#twocode-ai-monitor.cl-new .ch-model-menu{border-radius:12px}
-#twocode-ai-monitor.cl-new .ch-model-menu button{border-radius:8px}
+#orix-ai-monitor .lv-ic{border-radius:6px;background:var(--g2);color:#fff}
+#orix-ai-monitor .lv-row em.run{color:#fff}
+#orix-ai-monitor.cl-new button{border-radius:10px}
+#orix-ai-monitor.cl-new .lv-two button{border-radius:10px}
+#orix-ai-monitor.cl-new .lv-two .lv-no{background:var(--g2);color:#fff}
+#orix-ai-monitor.cl-new .lv-two .lv-no:hover{background:var(--g3)}
+#orix-ai-monitor.cl-new .lv-two .lv-yes{background:#fff;color:#000}
+#orix-ai-monitor.cl-new .lv-two .lv-yes:hover{background:#e5e5ea}
+#orix-ai-monitor .lv-cmd{border-radius:10px}
+#orix-ai-monitor.cl-new .am-option,#orix-ai-monitor.cl-new .am-note,#orix-ai-monitor.cl-new .ch-compose{border-radius:10px}
+#orix-ai-monitor.cl-new .ch-compose #am-send{border-radius:8px}
+#orix-ai-monitor.cl-new .ch-model-menu{border-radius:12px}
+#orix-ai-monitor.cl-new .ch-model-menu button{border-radius:8px}
 /* code live: on black, the changed lines red / green, line numbers, Xcode's dark syntax colours */
-#twocode-ai-monitor .lv-ring{width:60px;height:60px;border-radius:9px}
-#twocode-ai-monitor .lv-ring svg{width:28px;height:28px}
-#twocode-ai-monitor .lv-hero{gap:16px}
-#twocode-ai-monitor .lv-hero .lv-title{font-size:21px;line-height:26px}
-#twocode-ai-monitor .lv-hero .lv-sub{font-size:14px;line-height:18px}
-#twocode-ai-monitor .lv-code{font:500 12.5px/20px "Cascadia Mono",Consolas,monospace;color:#e5e5ea}
-#twocode-ai-monitor .lv-file{display:flex;align-items:center;gap:8px;height:24px;margin-bottom:4px;font:600 13px Inter,"Segoe UI",sans-serif;color:#fff}
-#twocode-ai-monitor .lv-file>b{font:inherit;min-width:0;overflow:hidden;text-overflow:ellipsis}
-#twocode-ai-monitor .lv-file span{height:16px;padding:0 5px;border-radius:4px;background:#2c2c2e;font:700 9.5px/16px Inter,"Segoe UI",sans-serif;color:#aeaeb2;letter-spacing:.3px}
-#twocode-ai-monitor .lv-file em{margin-left:auto;font-style:normal;font-weight:500;font-size:12px;color:var(--g)}
-#twocode-ai-monitor .lv-ln{display:flex;align-items:center;height:20px;border-radius:4px;white-space:pre;overflow:hidden;animation:lv-line .35s cubic-bezier(.2,.8,.2,1) both}
-#twocode-ai-monitor .lv-ln:nth-child(3){animation-delay:.05s}#twocode-ai-monitor .lv-ln:nth-child(4){animation-delay:.1s}#twocode-ai-monitor .lv-ln:nth-child(5){animation-delay:.15s}#twocode-ai-monitor .lv-ln:nth-child(6){animation-delay:.2s}#twocode-ai-monitor .lv-ln:nth-child(7){animation-delay:.25s}
+#orix-ai-monitor .lv-ring{width:60px;height:60px;border-radius:9px}
+#orix-ai-monitor .lv-ring svg{width:28px;height:28px}
+#orix-ai-monitor .lv-hero{gap:16px}
+#orix-ai-monitor .lv-hero .lv-title{font-size:21px;line-height:26px}
+#orix-ai-monitor .lv-hero .lv-sub{font-size:14px;line-height:18px}
+#orix-ai-monitor .lv-code{font:500 12.5px/20px "Cascadia Mono",Consolas,monospace;color:#e5e5ea}
+#orix-ai-monitor .lv-file{display:flex;align-items:center;gap:8px;height:24px;margin-bottom:4px;font:600 13px Inter,"Segoe UI",sans-serif;color:#fff}
+#orix-ai-monitor .lv-file>b{font:inherit;min-width:0;overflow:hidden;text-overflow:ellipsis}
+#orix-ai-monitor .lv-file span{height:16px;padding:0 5px;border-radius:4px;background:#2c2c2e;font:700 9.5px/16px Inter,"Segoe UI",sans-serif;color:#aeaeb2;letter-spacing:.3px}
+#orix-ai-monitor .lv-file em{margin-left:auto;font-style:normal;font-weight:500;font-size:12px;color:var(--g)}
+#orix-ai-monitor .lv-ln{display:flex;align-items:center;height:20px;border-radius:4px;white-space:pre;overflow:hidden;animation:lv-line .35s cubic-bezier(.2,.8,.2,1) both}
+#orix-ai-monitor .lv-ln:nth-child(3){animation-delay:.05s}#orix-ai-monitor .lv-ln:nth-child(4){animation-delay:.1s}#orix-ai-monitor .lv-ln:nth-child(5){animation-delay:.15s}#orix-ai-monitor .lv-ln:nth-child(6){animation-delay:.2s}#orix-ai-monitor .lv-ln:nth-child(7){animation-delay:.25s}
 @keyframes lv-line{from{opacity:0;transform:translateX(-6px)}}
-#twocode-ai-monitor .lv-ln i{flex:none;width:30px;padding-right:8px;text-align:right;font-style:normal;color:#636366}
-#twocode-ai-monitor .lv-ln b{flex:none;width:14px;font-weight:600}
-#twocode-ai-monitor .lv-ln code{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;font:inherit}
-#twocode-ai-monitor .lv-ln.del{background:rgba(255,69,58,.13)}#twocode-ai-monitor .lv-ln.del b{color:#ff6961}#twocode-ai-monitor .lv-ln.del code{opacity:.75}
-#twocode-ai-monitor .lv-ln.add{background:rgba(50,215,75,.12)}#twocode-ai-monitor .lv-ln.add b{color:#32d74b}
-#twocode-ai-monitor .sx-k{color:#ff7ab2;font-weight:600}#twocode-ai-monitor .sx-s{color:#ff8170}#twocode-ai-monitor .sx-n{color:#d9c97c}#twocode-ai-monitor .sx-c{color:#7f8c98}#twocode-ai-monitor .sx-t{color:#5dd8ff}
-#twocode-ai-monitor .lv-term .lv-file span{background:transparent;padding:0;font:600 13px "Cascadia Mono",Consolas,monospace;color:#32d74b}
-#twocode-ai-monitor .lv-term .lv-file{font:600 13px "Cascadia Mono",Consolas,monospace}
-#twocode-ai-monitor .lv-out{height:20px;white-space:pre;overflow:hidden;text-overflow:ellipsis;color:#aeaeb2;animation:lv-line .3s ease-out both}
-#twocode-ai-monitor .lv-out.bad{color:#ff6961}#twocode-ai-monitor .lv-out.dim{color:#636366}
+#orix-ai-monitor .lv-ln i{flex:none;width:30px;padding-right:8px;text-align:right;font-style:normal;color:#636366}
+#orix-ai-monitor .lv-ln b{flex:none;width:14px;font-weight:600}
+#orix-ai-monitor .lv-ln code{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;font:inherit}
+#orix-ai-monitor .lv-ln.del{background:rgba(255,69,58,.13)}#orix-ai-monitor .lv-ln.del b{color:#ff6961}#orix-ai-monitor .lv-ln.del code{opacity:.75}
+#orix-ai-monitor .lv-ln.add{background:rgba(50,215,75,.12)}#orix-ai-monitor .lv-ln.add b{color:#32d74b}
+#orix-ai-monitor .sx-k{color:#ff7ab2;font-weight:600}#orix-ai-monitor .sx-s{color:#ff8170}#orix-ai-monitor .sx-n{color:#d9c97c}#orix-ai-monitor .sx-c{color:#7f8c98}#orix-ai-monitor .sx-t{color:#5dd8ff}
+#orix-ai-monitor .lv-term .lv-file span{background:transparent;padding:0;font:600 13px "Cascadia Mono",Consolas,monospace;color:#32d74b}
+#orix-ai-monitor .lv-term .lv-file{font:600 13px "Cascadia Mono",Consolas,monospace}
+#orix-ai-monitor .lv-out{height:20px;white-space:pre;overflow:hidden;text-overflow:ellipsis;color:#aeaeb2;animation:lv-line .3s ease-out both}
+#orix-ai-monitor .lv-out.bad{color:#ff6961}#orix-ai-monitor .lv-out.dim{color:#636366}
 /* compact (notch-app size) */
-#twocode-ai-monitor .lv-ring{width:48px;height:48px;border-radius:9px}
-#twocode-ai-monitor .lv-ring svg{width:22px;height:22px}
-#twocode-ai-monitor .lv-hero{gap:12px}
-#twocode-ai-monitor .lv-who{font-size:10px}
-#twocode-ai-monitor .lv-hero .lv-title{font-size:15px;line-height:19px;font-weight:600;letter-spacing:0}
-#twocode-ai-monitor .lv-hero .lv-sub{font-size:12px;line-height:16px}
-#twocode-ai-monitor .lv-clock{font-size:11px}
-#twocode-ai-monitor .lv-prog{height:3px;margin-top:6px}
-#twocode-ai-monitor .lv-list{margin-top:8px}
-#twocode-ai-monitor .lv-row{height:30px;gap:10px}
-#twocode-ai-monitor .lv-ic{width:20px;height:20px;border-radius:5px}
-#twocode-ai-monitor .lv-row b{font-size:12px}
-#twocode-ai-monitor .lv-row em,#twocode-ai-monitor .lv-cap{font-size:11px}
-#twocode-ai-monitor .lv-answer{font-size:13px;line-height:19px}
-#twocode-ai-monitor .lv-code{font-size:11.5px;line-height:18px}
-#twocode-ai-monitor .lv-file{height:20px;font-size:12px;margin-bottom:2px}
-#twocode-ai-monitor .lv-ln{height:18px}
-#twocode-ai-monitor .lv-out{height:18px}
-#twocode-ai-monitor .lv-limit{height:22px;font-size:11px}
-#twocode-ai-monitor .lv-cmd{margin-top:8px;min-height:34px;padding:7px 12px;font-size:12px;border-radius:9px}
-#twocode-ai-monitor .lv-two{gap:8px;padding-top:8px}
-#twocode-ai-monitor.cl-new .lv-two button{height:32px;font-size:13px;border-radius:9px}
-#twocode-ai-monitor.cl-new button{height:28px;font-size:12px}
-#twocode-ai-monitor.cl-new .am-shell{padding:0 16px 4px}
+#orix-ai-monitor .lv-ring{width:48px;height:48px;border-radius:9px}
+#orix-ai-monitor .lv-ring svg{width:22px;height:22px}
+#orix-ai-monitor .lv-hero{gap:12px}
+#orix-ai-monitor .lv-who{font-size:10px}
+#orix-ai-monitor .lv-hero .lv-title{font-size:15px;line-height:19px;font-weight:600;letter-spacing:0}
+#orix-ai-monitor .lv-hero .lv-sub{font-size:12px;line-height:16px}
+#orix-ai-monitor .lv-clock{font-size:11px}
+#orix-ai-monitor .lv-prog{height:3px;margin-top:6px}
+#orix-ai-monitor .lv-list{margin-top:8px}
+#orix-ai-monitor .lv-row{height:30px;gap:10px}
+#orix-ai-monitor .lv-ic{width:20px;height:20px;border-radius:5px}
+#orix-ai-monitor .lv-row b{font-size:12px}
+#orix-ai-monitor .lv-row em,#orix-ai-monitor .lv-cap{font-size:11px}
+#orix-ai-monitor .lv-answer{font-size:13px;line-height:19px}
+#orix-ai-monitor .lv-code{font-size:11.5px;line-height:18px}
+#orix-ai-monitor .lv-file{height:20px;font-size:12px;margin-bottom:2px}
+#orix-ai-monitor .lv-ln{height:18px}
+#orix-ai-monitor .lv-out{height:18px}
+#orix-ai-monitor .lv-limit{height:22px;font-size:11px}
+#orix-ai-monitor .lv-cmd{margin-top:8px;min-height:34px;padding:7px 12px;font-size:12px;border-radius:9px}
+#orix-ai-monitor .lv-two{gap:8px;padding-top:8px}
+#orix-ai-monitor.cl-new .lv-two button{height:32px;font-size:13px;border-radius:9px}
+#orix-ai-monitor.cl-new button{height:28px;font-size:12px}
+#orix-ai-monitor.cl-new .am-shell{padding:0 16px 4px}
 /* v10: the glow (black at the top, the state's colour rising from the bottom), a big number left, a frosted card right */
 @keyframes cp-turn{to{transform:rotate(360deg)}}
 @keyframes cp-in{from{opacity:0;transform:translateY(4px)}}
 @keyframes cp-run{to{transform:translateX(122%)}}
 @keyframes cp-shine{from{background-position:100% 0}to{background-position:-100% 0}}
-#twocode-ai-monitor.cl-new .gl-main{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:20px;align-items:center;margin-top:2px}
-#twocode-ai-monitor.cl-new .gl-l{min-width:0}
-#twocode-ai-monitor.cl-new .gl-tile{display:flex;align-items:center;gap:8px;margin-bottom:10px;font-size:12px;font-weight:600;color:rgba(255,255,255,.82);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#twocode-ai-monitor.cl-new .gl-tile b{min-width:0;overflow:hidden;text-overflow:ellipsis;font:inherit}
-#twocode-ai-monitor.cl-new .gl-tile span{flex:none;width:22px;height:22px;border-radius:6px;display:grid;place-items:center;color:#fff;background:linear-gradient(150deg,#eba184,#b54e2c);box-shadow:0 2px 8px rgba(0,0,0,.3)}
-#twocode-ai-monitor.cc-codex .gl-tile span{background:linear-gradient(150deg,#6b9bff,#1d4fd8)}
-#twocode-ai-monitor.cl-new .gl-tile span.live svg{animation:cp-turn 7s linear infinite}
-#twocode-ai-monitor.cl-new .gl-big{margin:0;font-size:56px;line-height:52px;font-weight:700;letter-spacing:-2.6px;font-variant-numeric:tabular-nums;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#twocode-ai-monitor.cl-new .gl-big.word{font-size:38px;line-height:42px;letter-spacing:-1.4px}
-#twocode-ai-monitor.cl-new .gl-sub{margin:6px 0 0;font-size:13px;line-height:17px;color:rgba(255,255,255,.75);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#twocode-ai-monitor.cl-new .gl-card{min-width:0;max-height:136px;overflow:hidden;box-sizing:border-box;border-radius:14px;background:rgba(255,255,255,.08);box-shadow:inset 0 0 0 1px rgba(255,255,255,.1);backdrop-filter:blur(14px);padding:10px 12px;display:flex;flex-direction:column;animation:cp-in .3s cubic-bezier(.2,.8,.2,1) both}
-#twocode-ai-monitor.cl-new .gl-cap{margin:0 0 2px;font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:rgba(255,255,255,.55)}
-#twocode-ai-monitor.cl-new .gl-row{display:flex;align-items:center;gap:9px;height:26px;min-width:0;flex:none}
-#twocode-ai-monitor.cl-new .gl-row b{flex:none;font-size:12.5px;font-weight:600;color:#fff}
-#twocode-ai-monitor.cl-new .gl-row code{flex:1;min-width:0;font:500 11.5px "Cascadia Mono",Consolas,monospace;color:rgba(255,255,255,.7);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#twocode-ai-monitor.cl-new .gl-row.d b{color:rgba(255,255,255,.62)}
-#twocode-ai-monitor.cl-new .gl-row .ic{flex:none;width:20px;height:20px;border-radius:6px;display:grid;place-items:center;background:rgba(255,255,255,.12);color:#fff;font-style:normal}
-#twocode-ai-monitor.cl-new .gl-spin{flex:none;width:13px;height:13px;box-sizing:border-box;border-radius:50%;border:2px solid rgba(255,255,255,.25);border-top-color:#fff;animation:cp-turn .8s linear infinite}
-#twocode-ai-monitor.cl-new .gl-ok{flex:none;display:grid;color:rgba(255,255,255,.55)}
-#twocode-ai-monitor.cl-new .gl-row.h b{flex:1;min-width:0;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#twocode-ai-monitor.cl-new .gl-row.h em{flex:none;font-style:normal;font-size:11px;color:rgba(255,255,255,.6);font-variant-numeric:tabular-nums}
-#twocode-ai-monitor.cl-new .gl-dot{flex:none;width:16px;height:16px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-size:9px;font-weight:800;background:rgba(255,255,255,.15);color:#fff}
-#twocode-ai-monitor.cl-new .gl-dot.ok{background:#30d158;color:#000}#twocode-ai-monitor.cl-new .gl-dot.bad{background:#ff453a;color:#000}#twocode-ai-monitor.cl-new .gl-dot.ask{background:#ffd60a;color:#000}
-#twocode-ai-monitor.cl-new .gl-md{min-height:0;overflow:auto;scrollbar-width:none;font-size:12.5px;line-height:18px;color:#fff}
-#twocode-ai-monitor.cl-new .gl-md p{margin:0 0 6px}#twocode-ai-monitor.cl-new .gl-md p:last-child{margin:0}#twocode-ai-monitor.cl-new .gl-md ul,#twocode-ai-monitor.cl-new .gl-md ol{margin:0 0 6px;padding-left:18px}
-#twocode-ai-monitor.cl-new .gl-md code{font:11.5px "Cascadia Mono",Consolas,monospace;background:rgba(255,255,255,.14);border-radius:5px;padding:1px 5px}
-#twocode-ai-monitor.cl-new .gl-md pre{margin:4px 0 6px;padding:8px 10px;border-radius:8px;background:rgba(0,0,0,.35);font:11.5px/1.5 "Cascadia Mono",Consolas,monospace;white-space:pre-wrap}
-#twocode-ai-monitor.cl-new .gl-think p{margin:0;font-size:13px;line-height:18px;color:#fff;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-#twocode-ai-monitor.cl-new .gl-think span{display:inline-block;align-self:flex-start;margin-top:6px;font-size:12px;font-weight:600;background:linear-gradient(90deg,rgba(255,255,255,.4) 20%,#fff 50%,rgba(255,255,255,.4) 80%);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:cp-shine 1.8s linear infinite}
-#twocode-ai-monitor.cl-new .gl-empty{font-size:12.5px;line-height:18px;color:rgba(255,255,255,.8)}
-#twocode-ai-monitor.cl-new .gl-cmd{max-height:100%;overflow:auto;scrollbar-width:none;font:500 12px/18px "Cascadia Mono",Consolas,monospace;color:#fff;white-space:pre-wrap;word-break:break-all}
-#twocode-ai-monitor.cl-new .gl-cmd span{color:#7dffa0;margin-right:8px}
-#twocode-ai-monitor.cl-new .gl-card .lv-file{color:#fff;margin-bottom:4px}#twocode-ai-monitor.cl-new .gl-card .lv-file em{color:rgba(255,255,255,.6)}#twocode-ai-monitor.cl-new .gl-card .lv-file span{background:rgba(255,255,255,.14);color:#fff}
-#twocode-ai-monitor.cl-new .gl-card .lv-ln i{color:rgba(255,255,255,.45)}#twocode-ai-monitor.cl-new .gl-card .lv-out{color:rgba(255,255,255,.75)}#twocode-ai-monitor.cl-new .gl-card .lv-out.dim{color:rgba(255,255,255,.5)}
-#twocode-ai-monitor.cl-new .gl-foot{flex:none;position:relative;display:flex;align-items:center;gap:12px;height:32px;margin-top:10px}
-#twocode-ai-monitor.cl-new .gl-tools{margin-left:auto;flex:none;display:flex;gap:6px}
-#twocode-ai-monitor.cl-new .gl-steps{flex:1;min-width:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px}
-#twocode-ai-monitor.cl-new .gl-steps i{position:relative;display:block;height:4px;border-radius:2px;background:rgba(255,255,255,.2);overflow:hidden}
-#twocode-ai-monitor.cl-new .gl-steps .d i{background:#fff}
-#twocode-ai-monitor.cl-new .gl-steps .n i::after{content:"";position:absolute;left:0;top:0;bottom:0;width:45%;border-radius:2px;background:#fff;animation:cp-run 1.3s ease-in-out infinite alternate}
-#twocode-ai-monitor.cl-new .gl-steps span{display:block;margin-top:5px;font-size:11px;line-height:13px;font-weight:500;color:rgba(255,255,255,.5)}
-#twocode-ai-monitor.cl-new .gl-steps .d span{color:rgba(255,255,255,.72)}#twocode-ai-monitor.cl-new .gl-steps .n span{color:#fff;font-weight:600}
-#twocode-ai-monitor.cl-new .gl-steps.done div:last-child span{color:#fff;font-weight:600}
-#twocode-ai-monitor.cl-new .gl-steps.bad .n i{background:#fff}#twocode-ai-monitor.cl-new .gl-steps.bad .n i::after{display:none}
-#twocode-ai-monitor.cl-new .gl-chip{height:26px;padding:0 10px;border:0;border-radius:8px;background:rgba(255,255,255,.13);color:#fff;font:600 11.5px Inter,"Segoe UI",sans-serif;display:inline-flex;align-items:center;gap:5px;cursor:pointer}
-#twocode-ai-monitor.cl-new .gl-chip:hover{background:rgba(255,255,255,.22)}
-#twocode-ai-monitor.cl-new .gl-chip em,#twocode-ai-monitor.cl-new .gl-chip span{font-style:normal;font-weight:500;color:rgba(255,255,255,.65)}
-#twocode-ai-monitor.cl-new .gl-limit{flex:1;min-width:0;display:flex;align-items:center;gap:10px;font-size:11.5px;font-weight:600;color:rgba(255,255,255,.75)}
-#twocode-ai-monitor.cl-new .gl-limit i{flex:1;max-width:200px;height:4px;border-radius:2px;background:rgba(255,255,255,.2);overflow:hidden}
-#twocode-ai-monitor.cl-new .gl-limit s{display:block;height:100%;border-radius:2px;background:#fff}
-#twocode-ai-monitor.cl-new .gl-limit b{color:#fff;font-variant-numeric:tabular-nums}
-#twocode-ai-monitor.cl-new .gl-compose{flex:1;height:32px;padding:0 3px 0 12px;border-radius:10px;background:rgba(255,255,255,.13)}
-#twocode-ai-monitor.cl-new .gl-compose textarea{height:18px;font-size:13px;color:#fff}
-#twocode-ai-monitor.cl-new .gl-compose textarea::placeholder{color:rgba(255,255,255,.55)}
-#twocode-ai-monitor.cl-new .gl-compose #am-send{width:26px;height:26px;border-radius:7px;background:#fff;color:#000}
-#twocode-ai-monitor.cl-new .gl-two{flex:none;display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
-#twocode-ai-monitor.cl-new .gl-two button{height:34px;border:0;border-radius:10px;display:flex;align-items:center;justify-content:center;gap:6px;font:600 13px Inter,"Segoe UI",sans-serif;cursor:pointer}
-#twocode-ai-monitor.cl-new .gl-two .gl-no{background:rgba(255,255,255,.14);color:#fff}#twocode-ai-monitor.cl-new .gl-two .gl-no:hover{background:rgba(255,255,255,.22)}
-#twocode-ai-monitor.cl-new .gl-two .gl-yes{background:#fff;color:#000}#twocode-ai-monitor.cl-new .gl-two .gl-yes:hover{background:#e5e5ea}
-#twocode-ai-monitor.cl-new .gl-two button:active{transform:scale(.98)}
-#twocode-ai-monitor.cl-new .gl-col{flex:1;min-height:0;display:flex;flex-direction:column}
-#twocode-ai-monitor.cl-new .gl-col .gl-tile{margin:4px 0 4px}
-#twocode-ai-monitor.cl-new .gl-title{margin:0 0 8px;font-size:20px;line-height:24px;font-weight:700;letter-spacing:-.4px;color:#fff}
-#twocode-ai-monitor.cl-new .gl-col .gl-card{max-height:none}
-#twocode-ai-monitor.cl-new .gl-scroll{flex:1;min-height:0;overflow:auto;scrollbar-width:none}
-#twocode-ai-monitor.cl-new .gl-note{flex:none;margin-top:8px;height:32px;border:0;border-radius:10px;background:rgba(255,255,255,.13);color:#fff;padding:0 12px;font:13px Inter,"Segoe UI",sans-serif;outline:none}
-@media(prefers-reduced-motion:reduce){#twocode-ai-monitor.cl-new .gl-tile span.live svg,#twocode-ai-monitor.cl-new .gl-steps .n i::after,#twocode-ai-monitor.cl-new .gl-think span,#twocode-ai-monitor.cl-new .gl-card{animation:none}}
-@media(prefers-reduced-motion:reduce){#twocode-ai-monitor .ch-typing i{animation:none}#twocode-ai-monitor .cx-light i.blink,#twocode-ai-monitor .am-blink,#twocode-ai-monitor .am-wave{animation:none}}
+#orix-ai-monitor.cl-new .gl-main{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:20px;align-items:center;margin-top:2px}
+#orix-ai-monitor.cl-new .gl-l{min-width:0}
+#orix-ai-monitor.cl-new .gl-tile{display:flex;align-items:center;gap:8px;margin-bottom:10px;font-size:12px;font-weight:600;color:rgba(255,255,255,.82);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#orix-ai-monitor.cl-new .gl-tile b{min-width:0;overflow:hidden;text-overflow:ellipsis;font:inherit}
+#orix-ai-monitor.cl-new .gl-tile span{flex:none;width:22px;height:22px;border-radius:6px;display:grid;place-items:center;color:#fff;background:linear-gradient(150deg,#eba184,#b54e2c);box-shadow:0 2px 8px rgba(0,0,0,.3)}
+#orix-ai-monitor.cc-codex .gl-tile span{background:linear-gradient(150deg,#6b9bff,#1d4fd8)}
+#orix-ai-monitor.cl-new .gl-tile span.live svg{animation:cp-turn 7s linear infinite}
+#orix-ai-monitor.cl-new .gl-big{margin:0;font-size:56px;line-height:52px;font-weight:700;letter-spacing:-2.6px;font-variant-numeric:tabular-nums;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#orix-ai-monitor.cl-new .gl-big.word{font-size:38px;line-height:42px;letter-spacing:-1.4px}
+#orix-ai-monitor.cl-new .gl-sub{margin:6px 0 0;font-size:13px;line-height:17px;color:rgba(255,255,255,.75);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#orix-ai-monitor.cl-new .gl-card{min-width:0;max-height:136px;overflow:hidden;box-sizing:border-box;border-radius:14px;background:rgba(255,255,255,.08);box-shadow:inset 0 0 0 1px rgba(255,255,255,.1);backdrop-filter:blur(14px);padding:10px 12px;display:flex;flex-direction:column;animation:cp-in .3s cubic-bezier(.2,.8,.2,1) both}
+#orix-ai-monitor.cl-new .gl-cap{margin:0 0 2px;font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:rgba(255,255,255,.55)}
+#orix-ai-monitor.cl-new .gl-row{display:flex;align-items:center;gap:9px;height:26px;min-width:0;flex:none}
+#orix-ai-monitor.cl-new .gl-row b{flex:none;font-size:12.5px;font-weight:600;color:#fff}
+#orix-ai-monitor.cl-new .gl-row code{flex:1;min-width:0;font:500 11.5px "Cascadia Mono",Consolas,monospace;color:rgba(255,255,255,.7);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#orix-ai-monitor.cl-new .gl-row.d b{color:rgba(255,255,255,.62)}
+#orix-ai-monitor.cl-new .gl-row .ic{flex:none;width:20px;height:20px;border-radius:6px;display:grid;place-items:center;background:rgba(255,255,255,.12);color:#fff;font-style:normal}
+#orix-ai-monitor.cl-new .gl-spin{flex:none;width:13px;height:13px;box-sizing:border-box;border-radius:50%;border:2px solid rgba(255,255,255,.25);border-top-color:#fff;animation:cp-turn .8s linear infinite}
+#orix-ai-monitor.cl-new .gl-ok{flex:none;display:grid;color:rgba(255,255,255,.55)}
+#orix-ai-monitor.cl-new .gl-row.h b{flex:1;min-width:0;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#orix-ai-monitor.cl-new .gl-row.h em{flex:none;font-style:normal;font-size:11px;color:rgba(255,255,255,.6);font-variant-numeric:tabular-nums}
+#orix-ai-monitor.cl-new .gl-dot{flex:none;width:16px;height:16px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-size:9px;font-weight:800;background:rgba(255,255,255,.15);color:#fff}
+#orix-ai-monitor.cl-new .gl-dot.ok{background:#30d158;color:#000}#orix-ai-monitor.cl-new .gl-dot.bad{background:#ff453a;color:#000}#orix-ai-monitor.cl-new .gl-dot.ask{background:#ffd60a;color:#000}
+#orix-ai-monitor.cl-new .gl-md{min-height:0;overflow:auto;scrollbar-width:none;font-size:12.5px;line-height:18px;color:#fff}
+#orix-ai-monitor.cl-new .gl-md p{margin:0 0 6px}#orix-ai-monitor.cl-new .gl-md p:last-child{margin:0}#orix-ai-monitor.cl-new .gl-md ul,#orix-ai-monitor.cl-new .gl-md ol{margin:0 0 6px;padding-left:18px}
+#orix-ai-monitor.cl-new .gl-md code{font:11.5px "Cascadia Mono",Consolas,monospace;background:rgba(255,255,255,.14);border-radius:5px;padding:1px 5px}
+#orix-ai-monitor.cl-new .gl-md pre{margin:4px 0 6px;padding:8px 10px;border-radius:8px;background:rgba(0,0,0,.35);font:11.5px/1.5 "Cascadia Mono",Consolas,monospace;white-space:pre-wrap}
+#orix-ai-monitor.cl-new .gl-think p{margin:0;font-size:13px;line-height:18px;color:#fff;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+#orix-ai-monitor.cl-new .gl-think span{display:inline-block;align-self:flex-start;margin-top:6px;font-size:12px;font-weight:600;background:linear-gradient(90deg,rgba(255,255,255,.4) 20%,#fff 50%,rgba(255,255,255,.4) 80%);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:cp-shine 1.8s linear infinite}
+#orix-ai-monitor.cl-new .gl-empty{font-size:12.5px;line-height:18px;color:rgba(255,255,255,.8)}
+#orix-ai-monitor.cl-new .gl-cmd{max-height:100%;overflow:auto;scrollbar-width:none;font:500 12px/18px "Cascadia Mono",Consolas,monospace;color:#fff;white-space:pre-wrap;word-break:break-all}
+#orix-ai-monitor.cl-new .gl-cmd span{color:#7dffa0;margin-right:8px}
+#orix-ai-monitor.cl-new .gl-card .lv-file{color:#fff;margin-bottom:4px}#orix-ai-monitor.cl-new .gl-card .lv-file em{color:rgba(255,255,255,.6)}#orix-ai-monitor.cl-new .gl-card .lv-file span{background:rgba(255,255,255,.14);color:#fff}
+#orix-ai-monitor.cl-new .gl-card .lv-ln i{color:rgba(255,255,255,.45)}#orix-ai-monitor.cl-new .gl-card .lv-out{color:rgba(255,255,255,.75)}#orix-ai-monitor.cl-new .gl-card .lv-out.dim{color:rgba(255,255,255,.5)}
+#orix-ai-monitor.cl-new .gl-foot{flex:none;position:relative;display:flex;align-items:center;gap:12px;height:32px;margin-top:10px}
+#orix-ai-monitor.cl-new .gl-tools{margin-left:auto;flex:none;display:flex;gap:6px}
+#orix-ai-monitor.cl-new .gl-steps{flex:1;min-width:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px}
+#orix-ai-monitor.cl-new .gl-steps i{position:relative;display:block;height:4px;border-radius:2px;background:rgba(255,255,255,.2);overflow:hidden}
+#orix-ai-monitor.cl-new .gl-steps .d i{background:#fff}
+#orix-ai-monitor.cl-new .gl-steps .n i::after{content:"";position:absolute;left:0;top:0;bottom:0;width:45%;border-radius:2px;background:#fff;animation:cp-run 1.3s ease-in-out infinite alternate}
+#orix-ai-monitor.cl-new .gl-steps span{display:block;margin-top:5px;font-size:11px;line-height:13px;font-weight:500;color:rgba(255,255,255,.5)}
+#orix-ai-monitor.cl-new .gl-steps .d span{color:rgba(255,255,255,.72)}#orix-ai-monitor.cl-new .gl-steps .n span{color:#fff;font-weight:600}
+#orix-ai-monitor.cl-new .gl-steps.done div:last-child span{color:#fff;font-weight:600}
+#orix-ai-monitor.cl-new .gl-steps.bad .n i{background:#fff}#orix-ai-monitor.cl-new .gl-steps.bad .n i::after{display:none}
+#orix-ai-monitor.cl-new .gl-chip{height:26px;padding:0 10px;border:0;border-radius:8px;background:rgba(255,255,255,.13);color:#fff;font:600 11.5px Inter,"Segoe UI",sans-serif;display:inline-flex;align-items:center;gap:5px;cursor:pointer}
+#orix-ai-monitor.cl-new .gl-chip:hover{background:rgba(255,255,255,.22)}
+#orix-ai-monitor.cl-new .gl-chip em,#orix-ai-monitor.cl-new .gl-chip span{font-style:normal;font-weight:500;color:rgba(255,255,255,.65)}
+#orix-ai-monitor.cl-new .gl-limit{flex:1;min-width:0;display:flex;align-items:center;gap:10px;font-size:11.5px;font-weight:600;color:rgba(255,255,255,.75)}
+#orix-ai-monitor.cl-new .gl-limit i{flex:1;max-width:200px;height:4px;border-radius:2px;background:rgba(255,255,255,.2);overflow:hidden}
+#orix-ai-monitor.cl-new .gl-limit s{display:block;height:100%;border-radius:2px;background:#fff}
+#orix-ai-monitor.cl-new .gl-limit b{color:#fff;font-variant-numeric:tabular-nums}
+#orix-ai-monitor.cl-new .gl-compose{flex:1;height:32px;padding:0 3px 0 12px;border-radius:10px;background:rgba(255,255,255,.13)}
+#orix-ai-monitor.cl-new .gl-compose textarea{height:18px;font-size:13px;color:#fff}
+#orix-ai-monitor.cl-new .gl-compose textarea::placeholder{color:rgba(255,255,255,.55)}
+#orix-ai-monitor.cl-new .gl-compose #am-send{width:26px;height:26px;border-radius:7px;background:#fff;color:#000}
+#orix-ai-monitor.cl-new .gl-two{flex:none;display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+#orix-ai-monitor.cl-new .gl-two button{height:34px;border:0;border-radius:10px;display:flex;align-items:center;justify-content:center;gap:6px;font:600 13px Inter,"Segoe UI",sans-serif;cursor:pointer}
+#orix-ai-monitor.cl-new .gl-two .gl-no{background:rgba(255,255,255,.14);color:#fff}#orix-ai-monitor.cl-new .gl-two .gl-no:hover{background:rgba(255,255,255,.22)}
+#orix-ai-monitor.cl-new .gl-two .gl-yes{background:#fff;color:#000}#orix-ai-monitor.cl-new .gl-two .gl-yes:hover{background:#e5e5ea}
+#orix-ai-monitor.cl-new .gl-two button:active{transform:scale(.98)}
+#orix-ai-monitor.cl-new .gl-col{flex:1;min-height:0;display:flex;flex-direction:column}
+#orix-ai-monitor.cl-new .gl-col .gl-tile{margin:4px 0 4px}
+#orix-ai-monitor.cl-new .gl-title{margin:0 0 8px;font-size:20px;line-height:24px;font-weight:700;letter-spacing:-.4px;color:#fff}
+#orix-ai-monitor.cl-new .gl-col .gl-card{max-height:none}
+#orix-ai-monitor.cl-new .gl-scroll{flex:1;min-height:0;overflow:auto;scrollbar-width:none}
+#orix-ai-monitor.cl-new .gl-note{flex:none;margin-top:8px;height:32px;border:0;border-radius:10px;background:rgba(255,255,255,.13);color:#fff;padding:0 12px;font:13px Inter,"Segoe UI",sans-serif;outline:none}
+@media(prefers-reduced-motion:reduce){#orix-ai-monitor.cl-new .gl-tile span.live svg,#orix-ai-monitor.cl-new .gl-steps .n i::after,#orix-ai-monitor.cl-new .gl-think span,#orix-ai-monitor.cl-new .gl-card{animation:none}}
+@media(prefers-reduced-motion:reduce){#orix-ai-monitor .ch-typing i{animation:none}#orix-ai-monitor .cx-light i.blink,#orix-ai-monitor .am-blink,#orix-ai-monitor .am-wave{animation:none}}
 `; document.head.appendChild(style);
   const escape = text => String(text || '').replace(/[&<>"']/g, x => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[x]));
   function md(text) {
@@ -623,7 +623,7 @@
     bind('am-scan', scan); bind('am-launch', launch); bind('am-cancel', () => { choosing = false; error = ''; render(); });
     bind('am-disconnect', async () => { const result = await api.aiMonitorDisconnect(selected); if (result.ok) update(result); else { error = result.error; render(); } });
     bind('am-send', reply);
-    bind('am-open-connect', () => { window.twocode.settingsOpen?.('connect'); small(); }); // connecting lives in the ORIX app now
+    bind('am-open-connect', () => { window.orix.settingsOpen?.('connect'); small(); }); // connecting lives in the ORIX app now
     bind('am-hooks-install', () => hooks('aiMonitorHooksInstall', current()?.agent)); bind('am-hooks-uninstall', () => hooks('aiMonitorHooksUninstall', current()?.agent));
     root.querySelectorAll('[data-pick]').forEach(b => b.addEventListener('click', () => { if (b.dataset.pick !== selected) { markSeen(); selected = b.dataset.pick; choosing = false; error = ''; render(); } }));
     // Show the end of Claude's message (the question) when the answer box takes space.
@@ -672,7 +672,7 @@
     other: '<circle cx="12" cy="12" r="7"/><path d="M12 9v3l2 2"/>'
   };
   const svg = (name, size = 15) => `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${ICON_PATHS[name] || ICON_PATHS.other}</svg>`;
-  const EN = () => window.__twocodePrefs?.().lang === 'en', T = (nl, en) => EN() ? en : nl;
+  const EN = () => window.__orixPrefs?.().lang === 'en', T = (nl, en) => EN() ? en : nl;
   const NOW_NL = { read: 'Leest', edit: 'Bewerkt', run: 'Voert uit', search: 'Zoekt', web: 'Zoekt online', agent: 'Helper bezig', other: 'Bezig' };
   const PAST_NL = { read: 'Gelezen', edit: 'Bewerkt', run: 'Uitgevoerd', search: 'Gezocht', web: 'Online gezocht', agent: 'Helper klaar', other: 'Gedaan' };
   const NOW_EN = { read: 'Reading', edit: 'Editing', run: 'Running', search: 'Searching', web: 'Searching the web', agent: 'Helper working', other: 'Working' };
@@ -686,7 +686,7 @@
   }, 1000);
 
   // Which Claude model Claude Code uses (written to Claude Code's settings.json by the main process).
-  const MODEL_INFO = { default: [window.__twocodePrefs?.().lang === 'en' ? 'Default' : 'Standaard', 'Wat Claude Code zelf kiest'], opus: ['Opus', 'Het slimst, voor moeilijke klussen'], sonnet: ['Sonnet', 'Snel en slim, voor de meeste dingen'],
+  const MODEL_INFO = { default: [window.__orixPrefs?.().lang === 'en' ? 'Default' : 'Standaard', 'Wat Claude Code zelf kiest'], opus: ['Opus', 'Het slimst, voor moeilijke klussen'], sonnet: ['Sonnet', 'Snel en slim, voor de meeste dingen'],
     haiku: ['Haiku', 'Supersnel, voor kleine dingen'], opusplan: ['Opus plan', 'Opus plant, Sonnet bouwt'] };
   let modelMenu = false;
   function modelPicker(p) {
@@ -902,7 +902,7 @@
   let doneKey = '', doneSeenAt = 0;
   const DONE_BLUE = '#0a84ff', DONE_FADE = 2800;
   const claudeHooks = () => providers().find(q => q.kind === 'hooks' && q.agent !== 'codex' && q.connected) || providers().find(q => q.kind === 'hooks' && q.connected);
-  window.__twocodeDoneLook = p => { // null, or { colour, k } (k: how strong the glow is, 0..1)
+  window.__orixDoneLook = p => { // null, or { colour, k } (k: how strong the glow is, 0..1)
     if (!p || p.state !== 'done' || p.permission) return null;
     if (!doneSeenAt) return { colour: DONE_BLUE, k: 1, fresh: true };
     const k = 1 - (performance.now() - doneSeenAt) / DONE_FADE;
@@ -913,7 +913,7 @@
     { const q = next?.providers?.find?.(x => x.kind === 'hooks' && x.state === 'done'), key = q ? `${q.sessionId}:${q.elapsed}:${q.prompt}` : '';
       if (key && key !== doneKey) { doneKey = key; doneSeenAt = 0; } if (!key) doneKey = ''; }
     if (!next?.ok || !Array.isArray(next.providers)) return;
-    state = next; window.__twocodeMonitorIndicator = providers();
+    state = next; window.__orixMonitorIndicator = providers();
     try { askSize(); settleSize(); } catch {} // a task that starts or ends changes the small island right away
     // Ignore ticking clocks when deciding to re-render; they are updated in place below.
     const signature = JSON.stringify(providers().map(p => ({ ...p, elapsed: 0, list: p.list?.map(s => ({ ...s, elapsed: 0 })) }))) + (state.history?.[0]?.at || 0);
@@ -932,13 +932,13 @@
     done: { color: '#22e05a' }, error: { color: '#ff3b3b' }, stopped: { color: '#ff3b3b' }, unavailable: { color: '#ff3b3b' } };
   const PRIORITY = ['question', 'error', 'stopped', 'unavailable', 'running', 'sending', 'done'];
   const top = () => providers().filter(shown).sort((a, b) => Number(!!a.simulated) - Number(!!b.simulated) || PRIORITY.indexOf(a.state) - PRIORITY.indexOf(b.state))[0];
-  // A colour-blind friendly palette can be chosen in Settings (twocode-fun.js provides it).
+  // A colour-blind friendly palette can be chosen in Settings (orix-fun.js provides it).
   const paletteColour = state => {
-    const pal = window.__twocodePalette?.(); if (!pal) return null;
+    const pal = window.__orixPalette?.(); if (!pal) return null;
     return { running: pal.busy, sending: pal.busy, question: pal.question, done: pal.done, error: pal.error, stopped: pal.error, unavailable: pal.error }[state] || null;
   };
-  window.__twocodeEyes = () => { const s = top()?.state, e = EYES[s]; return e ? { ...e, color: paletteColour(s) || e.color } : null; };
-  window.__twocodeStateColour = s => paletteColour(s) || EYES[s]?.color || null; // your traffic-light colours (ORIX's stage glows in them too)
+  window.__orixEyes = () => { const s = top()?.state, e = EYES[s]; return e ? { ...e, color: paletteColour(s) || e.color } : null; };
+  window.__orixStateColour = s => paletteColour(s) || EYES[s]?.color || null; // your traffic-light colours (ORIX's stage glows in them too)
   // Leaving the Claude Code screen any other way (home, apps, settings) also counts as "seen".
   const oldSetView = setView;
   setView = function (next) { if (next !== 'monitor') markSeen(); return oldSetView(next); };
@@ -950,16 +950,16 @@
   const needsAnswer = () => { const p = top(); return Boolean(p && (p.permission || p.state === 'question')); };
   // While music plays the island shows it at medium size. The little button on it tucks the music away
   // (the island stays small, the line under it still shows how far the song is); hover the island and press it again to bring it back.
-  let musicTucked = false; try { localStorage.removeItem('twocode:music-tucked'); } catch {}
+  let musicTucked = false; try { localStorage.removeItem('orix:music-tucked'); } catch {}
   function tuckMusic(on) {
-    musicTucked = on; try { localStorage.setItem('twocode:music-tucked', on ? '1' : '0'); } catch {}
-    window.__twocodeChime?.('pop'); oldSetMode(on ? 'rest' : 'compact', false); if (on) holdClosed = true;
+    musicTucked = on; try { localStorage.setItem('orix:music-tucked', on ? '1' : '0'); } catch {}
+    window.__orixChime?.('pop'); oldSetMode(on ? 'rest' : 'compact', false); if (on) holdClosed = true;
   }
   const claudeWorking = () => { const p = top(); return Boolean(p && busy(p)); }; // a running task is a Live Activity: it stays in view, small
-  const medium = () => (music() && !musicTucked) || Boolean(window.__twocodeFocus?.active()) || Boolean(window.__twocodeCompactMessage?.()) || needsAnswer() || claudeWorking();
-  window.__twocodeStatus = () => top();
+  const medium = () => (music() && !musicTucked) || Boolean(window.__orixFocus?.active()) || Boolean(window.__orixCompactMessage?.()) || needsAnswer() || claudeWorking();
+  window.__orixStatus = () => top();
   let holdClosed = false;
-  window.__twocodeHoldClosed = () => { holdClosed = true; };
+  window.__orixHoldClosed = () => { holdClosed = true; };
   // While Claude waits for an answer the small island pops open and gets wider (room for the buttons).
   let wideFor = false;
   function askSize() {
@@ -978,17 +978,17 @@
     if (medium() && mode === 'rest') setMode('compact', false);
     else if (!medium() && mode === 'compact') oldSetMode('rest', false);
   }
-  window.__twocodeSettleSize = settleSize;
+  window.__orixSettleSize = settleSize;
   setInterval(async () => { await refreshSpotify(); settleSize(); }, 4000);
   // the Claude page's glow, only while something happens: Claude's own colour while he works, green when he is done
   // (quiet, waiting for you or stopped: plain black)
   const glowOf = p => { if (!p?.connected || p.kind !== 'hooks' || p.permission) return null;
     if (busy(p)) return { colour: p.agent === 'codex' ? '#3b82f6' : '#d97757', k: 1 };
-    return window.__twocodeDoneLook(p); };
+    return window.__orixDoneLook(p); };
   drawExpanded = function (alpha) {
     if (currentView === 'shortcuts') { drawHeader(alpha); drawShortcuts(contentRect()); return; }
     if (!['monitor', 'assistant'].includes(currentView)) return oldDrawExpanded(alpha);
-    const glow = glowOf(current()); if (glow) { window.__twocodeTintIsland = glow.colour; window.__twocodeTintStrength = glow.k; window.__twocodeTintAt = performance.now(); }
+    const glow = glowOf(current()); if (glow) { window.__orixTintIsland = glow.colour; window.__orixTintStrength = glow.k; window.__orixTintAt = performance.now(); }
     drawHeader(alpha); // the Claude page uses the full width (no ORIX, usage is shown in the page itself)
     // Claude Code / Codex: the page itself (DOM) draws its cards on the black glass
   };
@@ -1000,7 +1000,7 @@
   const short = (value, max) => { const s = String(value || ''); return s.length > max ? s.slice(0, max - 1) + '…' : s; };
   function drawWave(x, y) {
     const t = performance.now() / 160;
-    ctx.save(); ctx.fillStyle = window.__twocodeAlbumColour || '#1ed760';
+    ctx.save(); ctx.fillStyle = window.__orixAlbumColour || '#1ed760';
     for (let i = 0; i < 4; i++) {
       const h = 4 + 8 * (0.5 + 0.5 * Math.sin(t + i * 1.7)) * (0.6 + 0.4 * Math.sin(t / 2.3 + i));
       ctx.beginPath(); ctx.roundRect(x + i * 4.5, y - h / 2, 3, h, 1.5); ctx.fill();
@@ -1016,10 +1016,10 @@
   // never a fake wave. Each bar eases to its level, so it rises and settles smoothly.
   const barLevels = {};
   function bars(x0, x1, y, count, maxH = 18) {
-    const levels = window.__twocodeAudioLevels?.(), w = (x1 - x0) / count, key = count + ':' + Math.round(maxH);
+    const levels = window.__orixAudioLevels?.(), w = (x1 - x0) / count, key = count + ':' + Math.round(maxH);
     const shown = barLevels[key] ||= new Array(count).fill(0);
     const loud = levels ? Math.max(...levels) : 0;
-    ctx.save(); const colour = window.__twocodeAlbumColour || '#1ed760';
+    ctx.save(); const colour = window.__orixAlbumColour || '#1ed760';
     for (let i = 0; i < count; i++) {
       const want = levels && loud > 0.04 ? levels[Math.floor(i * levels.length / count)] : 0;
       shown[i] += (want - shown[i]) * (want > shown[i] ? 0.55 : 0.18);
@@ -1029,7 +1029,7 @@
     }
     ctx.restore();
   }
-  window.__twocodeBars = bars; // also used by the big Spotify player
+  window.__orixBars = bars; // also used by the big Spotify player
   // Medium island (36 px high): [album cover] [real sound wave] [ORIX], like the iPhone's Dynamic Island.
   // While Spotify plays (here or on your phone): a thin line along the bottom of the small island shows how far the song is.
   function songLine() {} // no progress line under the island anymore: the Dynamic Island keeps its edge clean
@@ -1052,7 +1052,7 @@
   function drawVolume(icon, level, left, cy, right) {
     const k = Math.max(0, Math.min(1, level / 100));
     volumeShown = volumeShown == null ? k : volumeShown + (k - volumeShown) * 0.35;
-    window.__twocodeIcon?.('speaker', left + 10, cy, 18, '#ffffff', level / 100, '#ffffff');
+    window.__orixIcon?.('speaker', left + 10, cy, 18, '#ffffff', level / 100, '#ffffff');
     const x = left + 34, w = Math.max(60, right - x - 2), h = 8, y = cy - h / 2;
     ctx.save();
     ctx.beginPath(); ctx.roundRect(x, y, w, h, h / 2); ctx.fillStyle = 'rgba(255,255,255,.18)'; ctx.fill();
@@ -1066,14 +1066,14 @@
     // Like the iPhone's Dynamic Island: ORIX's eyes in the middle (the camera), the leading and trailing parts snug
     // against them, in one colour for one activity (Apple: design leading + trailing as one unit).
     const H = islandBounds.height, cy = H / 2, right = islandBounds.x + islandBounds.width - 14, left = islandBounds.x + 14, mid = islandBounds.x + islandBounds.width / 2;
-    const p = top(), focus = window.__twocodeFocus, now = performance.now();
-    const message = window.__twocodeCompactMessage?.(), needsYou = p && (p.state === 'question' || p.permission);
+    const p = top(), focus = window.__orixFocus, now = performance.now();
+    const message = window.__orixCompactMessage?.(), needsYou = p && (p.state === 'question' || p.permission);
     if (p && p.state !== attentionState) { attentionState = p.state; attentionUntil = ['question', 'done', 'error'].includes(p.state) ? now + 4000 : 0; } // answered: back to work, not "Error"
     if (!p) attentionState = '';
     const focusOn = Boolean(focus?.active()), musicOn = Boolean(music()), claudeOn = Boolean(p && (needsYou || now < attentionUntil || busy(p)));
     const primary = claudeOn ? 'claude' : focusOn ? 'focus' : musicOn ? 'music' : null;
-    window.__twocodeBubbles = message ? [] : [focusOn && primary !== 'focus' ? 'focus' : null, musicOn && primary !== 'music' ? 'music' : null].filter(Boolean);
-    const eyes = () => { (window.__twocodeIslandEyes || drawGhost)(mid, cy + 0.5); hit.ghost = { x: mid - 22, y: 0, width: 44, height: H }; };
+    window.__orixBubbles = message ? [] : [focusOn && primary !== 'focus' ? 'focus' : null, musicOn && primary !== 'music' ? 'music' : null].filter(Boolean);
+    const eyes = () => { (window.__orixIslandEyes || drawGhost)(mid, cy + 0.5); hit.ghost = { x: mid - 22, y: 0, width: 44, height: H }; };
     hit.ghost = null;
     const mmss = sec => `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}`;
     const lead = (s, colour, x = left, maxW = mid - 26 - left) => text(s, x, cy + 5, 14, colour, 600, 'left', maxW);
@@ -1084,7 +1084,7 @@
     if (message) {
       const volume = /^(\S+) [▮▯]{10} (\d+)%$/u.exec(message); // the volume (extras-ui.js): a real bar instead of block characters
       if (volume) { drawVolume(volume[1], Number(volume[2]), left, cy, right); return; }
-      (window.__twocodeCompactMessageIsRaw?.() ? (window.__twocodeRawText || text) : text)(message, left + 2, cy + 5, 14, '#ffffff', 600, 'left', right - left); return;
+      (window.__orixCompactMessageIsRaw?.() ? (window.__orixRawText || text) : text)(message, left + 2, cy + 5, 14, '#ffffff', 600, 'left', right - left); return;
     }
     if (p && (needsYou || now < attentionUntil)) {
       const colour = colourFor(p.permission ? 'question' : p.state);
@@ -1130,9 +1130,9 @@
     if (primary === 'music') { // the cover left, the visualizer in its colour right
       const cs = H - 12;
       if (albumImage?.complete && albumImage.naturalWidth) { ctx.save(); ctx.beginPath(); ctx.roundRect(left - 6, cy - cs / 2, cs, cs, 7); ctx.clip(); ctx.drawImage(albumImage, left - 6, cy - cs / 2, cs, cs); ctx.restore(); }
-      else { box(left - 6, cy - cs / 2, cs, cs, 7, '#1c1c1e'); window.__twocodeIcon?.('music', left - 6 + cs / 2, cy, 14, '#8e8e93', null, 'rgba(0,0,0,0)'); }
+      else { box(left - 6, cy - cs / 2, cs, cs, 7, '#1c1c1e'); window.__orixIcon?.('music', left - 6 + cs / 2, cy, 14, '#8e8e93', null, 'rgba(0,0,0,0)'); }
       eyes();
-      window.__twocodeVisualizer?.('compact', right - 36, cy, 36, 18, window.__twocodeAlbumColour || '#ffffff', 6);
+      window.__orixVisualizer?.('compact', right - 36, cy, 36, 18, window.__orixAlbumColour || '#ffffff', 6);
       return;
     }
     if (p) { mark(); eyes(); lead(smallStatus(p), '#ffffff', left + 22); return; }
@@ -1144,7 +1144,7 @@
   const baseIslandShape = drawIsland;
   drawIsland = function (...args) {
     const result = baseIslandShape.apply(this, args);
-    const list = mode === 'compact' && visual.height < 60 && !transition ? (window.__twocodeBubbles || []) : [];
+    const list = mode === 'compact' && visual.height < 60 && !transition ? (window.__orixBubbles || []) : [];
     let x = islandBounds.x + islandBounds.width + 8;
     hit.bubbleFocus = null; hit.bubbleMusic = null;
     for (const kind of ['focus', 'music']) {
@@ -1158,9 +1158,9 @@
         ctx.save(); ctx.globalAlpha *= (e - 0.6) / 0.4;
         if (kind === 'music') {
           if (albumImage?.complete && albumImage.naturalWidth) { ctx.save(); ctx.beginPath(); ctx.arc(cx, cy, d / 2 - 6, 0, Math.PI * 2); ctx.clip(); ctx.drawImage(albumImage, cx - d / 2 + 6, cy - d / 2 + 6, d - 12, d - 12); ctx.restore(); }
-          else window.__twocodeIcon?.('music', cx, cy, 15, '#ffffff', null, 'rgba(0,0,0,0)');
+          else window.__orixIcon?.('music', cx, cy, 15, '#ffffff', null, 'rgba(0,0,0,0)');
         } else {
-          const f = window.__twocodeFocus, left = f?.active() ? f.left() / f.length() : 0;
+          const f = window.__orixFocus, left = f?.active() ? f.left() / f.length() : 0;
           ctx.lineWidth = 3; ctx.lineCap = 'round';
           ctx.beginPath(); ctx.arc(cx, cy, d / 2 - 9, 0, Math.PI * 2); ctx.strokeStyle = 'rgba(191,90,242,.3)'; ctx.stroke();
           ctx.beginPath(); ctx.arc(cx, cy, d / 2 - 9, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * left); ctx.strokeStyle = '#bf5af2'; ctx.stroke();
@@ -1200,7 +1200,7 @@
   };
   // ---- Home: a small dashboard. ORIX on the left, three live widgets: music, Claude, focus ----
   const baseHomeHeight = targetHeight;
-  targetHeight = function () { return currentView === 'home' ? (window.__twocodeGalleryOpen?.() ? 300 : homeEdit ? 200 : 236) : currentView === 'shortcuts' ? 248 : baseHomeHeight(); };
+  targetHeight = function () { return currentView === 'home' ? (window.__orixGalleryOpen?.() ? 300 : homeEdit ? 200 : 236) : currentView === 'shortcuts' ? 248 : baseHomeHeight(); };
   // A widget card: soft gradient, thin rim, lifts a little on hover. Returns whether the pointer is on it.
   function card(x, y, w, h, key, glow) {
     const bounds = { x, y, width: w, height: h }, over = inside(pointer.x, pointer.y, bounds);
@@ -1237,13 +1237,13 @@
     ctx.beginPath(); ctx.roundRect(x, y, size, size, size * .24);
     ctx.fillStyle = '#21313d'; ctx.fill();
     if (icon === 'home') window.__orixMark(ctx, x + size / 2, y + size / 2, size * .65);
-    else window.__twocodeIcon?.(icon, x + size / 2, y + size / 2, size * .47, '#ffffff', undefined, '#21313d');
+    else window.__orixIcon?.(icon, x + size / 2, y + size / 2, size * .47, '#ffffff', undefined, '#21313d');
     ctx.restore();
   }
-  window.__twocodeAppIcon = appIcon;
+  window.__orixAppIcon = appIcon;
   function mono(str, x, y, size, colour, maxW) {
     ctx.save(); ctx.font = `${size}px "Cascadia Code", Consolas, monospace`; ctx.fillStyle = colour; ctx.textBaseline = 'alphabetic';
-    let s = String(window.__twocodeTr?.(String(str || '')) ?? str ?? ''); if (maxW) while (s.length > 1 && ctx.measureText(s).width > maxW) s = s.slice(0, -2) + '…';
+    let s = String(window.__orixTr?.(String(str || '')) ?? str ?? ''); if (maxW) while (s.length > 1 && ctx.measureText(s).width > maxW) s = s.slice(0, -2) + '…';
     ctx.fillText(s, x, y); ctx.restore();
   }
   // ---- Home = widgets. Every app is a widget: Klein (1 vakje), Breed (2×1) or Groot (2×2), on a 4 × 2 grid.
@@ -1276,25 +1276,25 @@
     return { placed: out, used, ok: out.every(w => !w.hidden) };
   }
   function loadWidgets() {
-    try { const v = JSON.parse(localStorage.getItem('twocode:widgets')); if (Array.isArray(v)) return arrange(v.filter(w => APPS[w.id] && SIZES[w.size])).placed.filter(w => !w.hidden); } catch {}
+    try { const v = JSON.parse(localStorage.getItem('orix:widgets')); if (Array.isArray(v)) return arrange(v.filter(w => APPS[w.id] && SIZES[w.size])).placed.filter(w => !w.hidden); } catch {}
     // first time: start from the old home (Claude big + your shortcuts, on the side you chose)
     const old = shortcuts().filter(id => id !== 'claude').map(id => ({ id, size: 'S' }));
-    let swap = false; try { swap = localStorage.getItem('twocode:homeSwap') === '1'; } catch {}
+    let swap = false; try { swap = localStorage.getItem('orix:homeSwap') === '1'; } catch {}
     const claude = { id: 'claude', size: 'L' };
     return arrange(swap ? [...old.slice(0, 2), claude, ...old.slice(2)] : [claude, ...old]).placed.filter(w => !w.hidden);
   }
   const getWidgets = () => widgets || (widgets = loadWidgets());
   function saveWidgets(placed) {
     widgets = placed.filter(w => !w.hidden).map(({ id, size, c, r }) => ({ id, size, c, r }));
-    try { localStorage.setItem('twocode:widgets', JSON.stringify(widgets)); } catch {}
+    try { localStorage.setItem('orix:widgets', JSON.stringify(widgets)); } catch {}
   }
   const presetLayout = p => arrange(p.list.filter(([id]) => APPS[id]).map(([id, size]) => ({ id, size })));
 
-  window.__twocodeHomeEdit = on => { homeEdit = on ?? !homeEdit; setGallery(null); drag = null; sound('click'); };
-  window.__twocodeHomeEditing = () => homeEdit;
-  window.__twocodeWidgetsReload = () => { widgets = null; }; // after the saved layout changed outside the app
-  window.__twocodeGallery = () => openGallery();
-  window.__twocodeGalleryOpen = () => Boolean(gallery);
+  window.__orixHomeEdit = on => { homeEdit = on ?? !homeEdit; setGallery(null); drag = null; sound('click'); };
+  window.__orixHomeEditing = () => homeEdit;
+  window.__orixWidgetsReload = () => { widgets = null; }; // after the saved layout changed outside the app
+  window.__orixGallery = () => openGallery();
+  window.__orixGalleryOpen = () => Boolean(gallery);
   setInterval(() => { if ((homeEdit || gallery) && (currentView !== 'home' || mode !== 'expanded')) { homeEdit = false; setGallery(null); drag = null; } }, 300);
 
   // live data for the note and clipboard widgets
@@ -1321,7 +1321,7 @@
     ctx.save(); ctx.beginPath(); ctx.arc(x, y, rad, 0, Math.PI * 2); ctx.fillStyle = primary ? (over ? '#ffffff' : '#eef2ec') : over ? 'rgba(255,255,255,.16)' : 'rgba(255,255,255,.07)'; ctx.fill(); ctx.restore();
     const ink = primary ? '#0b0c0d' : '#e8ece6';
     if (kind === 'stop') { ctx.save(); ctx.fillStyle = ink; ctx.beginPath(); ctx.roundRect(x - rad * 0.3, y - rad * 0.3, rad * 0.6, rad * 0.6, 2); ctx.fill(); ctx.restore(); }
-    else window.__twocodeMediaIcon?.(kind, x, y, rad * 0.72, ink);
+    else window.__orixMediaIcon?.(kind, x, y, rad * 0.72, ink);
     if (live) hit[key] = b;
   }
   function wrapLines(str, maxW, size, max) {
@@ -1392,7 +1392,7 @@
   // Nothing going on: which AIs ORIX is watching (or where to connect one).
   function drawIdleAi(tx, y, tw, h, live) {
     const watching = providers().filter(q => q.connected || q.hooksInstalled), last = state.history?.[0];
-    const hungry = window.__twocodeHomeTitle?.(); // "I'm hungry… finish a task 🍪" (twocode-fun.js) instead of "Idle"
+    const hungry = window.__orixHomeTitle?.(); // "I'm hungry… finish a task 🍪" (orix-fun.js) instead of "Idle"
     text(hungry || 'Rustig', tx, y + 30, hungry ? 13 : 14, hungry ? '#ffc27a' : '#f2f5ef', 700, 'left', tw);
     if (last) { // the last job, so a quiet card still tells you something (click it for the whole list)
       const word = { done: '✓ Klaar', question: '● Vraag', error: '✕ Fout' }[last.result] || '', colour = { done: '#7ef0a4', question: '#ffc27a', error: '#ff9a9a' }[last.result] || '#aab2ad';
@@ -1524,7 +1524,7 @@
     if (art) ctx.drawImage(albumImage, x, y, s, s);
     else { ctx.fillStyle = APPS.spotify.tint(); ctx.globalAlpha = 0.22; ctx.fillRect(x, y, s, s); }
     ctx.restore();
-    if (!art) window.__twocodeIcon?.('music', x + s / 2, y + s / 2, s * 0.5, '#f4f7f2');
+    if (!art) window.__orixIcon?.('music', x + s / 2, y + s / 2, s * 0.5, '#f4f7f2');
   }
   function spotifyWidget(w, r, live) {
     const t = spotifyState.track;
@@ -1533,24 +1533,24 @@
     const playing = spotifyState.is_playing, part = spotifyState.duration_ms ? Math.min(1, ((spotifyState.progress_ms || 0) + (playing ? performance.now() - spotifySyncAt : 0)) / spotifyState.duration_ms) : 0;
     if (w.size === 'S') {
       const s = Math.min(40, r.height - 20); cover(r.x + 12, r.y + (r.height - s) / 2, s, 9);
-      (window.__twocodeRawText || text)(t.name, r.x + s + 22, r.y + r.height / 2 - 2, 12, '#f2f5ef', 700, 'left', r.width - s - 30);
-      (window.__twocodeRawText || text)(artist, r.x + s + 22, r.y + r.height / 2 + 13, 10.5, '#8f998d', 500, 'left', r.width - s - 30);
+      (window.__orixRawText || text)(t.name, r.x + s + 22, r.y + r.height / 2 - 2, 12, '#f2f5ef', 700, 'left', r.width - s - 30);
+      (window.__orixRawText || text)(artist, r.x + s + 22, r.y + r.height / 2 + 13, 10.5, '#8f998d', 500, 'left', r.width - s - 30);
       return;
     }
     if (w.size === 'W') {
       const s = r.height - 18; cover(r.x + 9, r.y + 9, s, 10);
       const tx = r.x + s + 22, tw = r.width - s - 22 - 90;
-      (window.__twocodeRawText || text)(t.name, tx, r.y + r.height / 2 - 2, 13, '#f2f5ef', 700, 'left', tw);
-      (window.__twocodeRawText || text)(artist, tx, r.y + r.height / 2 + 14, 11, '#8f998d', 500, 'left', tw);
+      (window.__orixRawText || text)(t.name, tx, r.y + r.height / 2 - 2, 13, '#f2f5ef', 700, 'left', tw);
+      (window.__orixRawText || text)(artist, tx, r.y + r.height / 2 + 14, 11, '#8f998d', 500, 'left', tw);
       wbtn(r.x + r.width - 62, r.y + r.height / 2, 12, 'next', 'hmNext', false, live);
       wbtn(r.x + r.width - 28, r.y + r.height / 2, 16, playing ? 'pause' : 'play', 'homePlay', true, live);
       return;
     }
     const s = Math.min(r.height - 20, r.width * 0.42); cover(r.x + 10, r.y + 10, s, 14);
     const tx = r.x + s + 24, tw = r.x + r.width - tx - 14;
-    (window.__twocodeRawText || text)(t.name, tx, r.y + 30, 14.5, '#fff', 700, 'left', tw);
-    (window.__twocodeRawText || text)(artist, tx, r.y + 48, 11.5, '#9aa596', 500, 'left', tw);
-    if (spotifyState.device && !spotifyState.device.here) text('Speelt op ' + spotifyState.device.name, tx, r.y + 68, 10.5, window.__twocodeAlbumColour || '#1ed760', 600, 'left', tw); // where it plays (no fake sound wave)
+    (window.__orixRawText || text)(t.name, tx, r.y + 30, 14.5, '#fff', 700, 'left', tw);
+    (window.__orixRawText || text)(artist, tx, r.y + 48, 11.5, '#9aa596', 500, 'left', tw);
+    if (spotifyState.device && !spotifyState.device.here) text('Speelt op ' + spotifyState.device.name, tx, r.y + 68, 10.5, window.__orixAlbumColour || '#1ed760', 600, 'left', tw); // where it plays (no fake sound wave)
     const py = r.y + r.height - 50;
     ctx.save(); ctx.fillStyle = 'rgba(255,255,255,.12)'; ctx.beginPath(); ctx.roundRect(tx, py, tw, 4, 2); ctx.fill(); ctx.fillStyle = '#f4f7f0'; ctx.beginPath(); ctx.roundRect(tx, py, Math.max(4, tw * part), 4, 2); ctx.fill(); ctx.restore();
     const cy = r.y + r.height - 24, mid = tx + tw / 2;
@@ -1559,7 +1559,7 @@
     wbtn(mid + 42, cy, 13, 'next', 'hmNext', false, live);
   }
   function focusWidget(w, r, live) {
-    const f = window.__twocodeFocus; if (!f) return genericWidget(w, r);
+    const f = window.__orixFocus; if (!f) return genericWidget(w, r);
     const on = f.active(), part = on ? Math.min(1, Math.max(0, 1 - f.left() / (f.length() || 1))) : 0, label = on ? f.label() : `${f.minutes()}:00`;
     const ring = (cx, cy, rad, lw) => {
       ctx.save(); ctx.lineWidth = lw; ctx.lineCap = 'round'; ctx.strokeStyle = 'rgba(255,179,92,.16)'; ctx.beginPath(); ctx.arc(cx, cy, rad, 0, Math.PI * 2); ctx.stroke();
@@ -1567,13 +1567,13 @@
       ctx.restore();
     };
     if (w.size === 'S') {
-      ring(r.x + 30, r.y + r.height / 2, 17, 3.5); window.__twocodeIcon?.('timer', r.x + 30, r.y + r.height / 2, 16, '#ffd3a1');
+      ring(r.x + 30, r.y + r.height / 2, 17, 3.5); window.__orixIcon?.('timer', r.x + 30, r.y + r.height / 2, 16, '#ffd3a1');
       text(label, r.x + 58, r.y + r.height / 2 - 1, 15, '#fff', 700, 'left', r.width - 66);
       text(on ? 'Focus loopt' : 'Focus', r.x + 58, r.y + r.height / 2 + 14, 10.5, '#8f998d', 500, 'left', r.width - 66);
       return;
     }
     if (w.size === 'W') {
-      const rad = r.height / 2 - 12; ring(r.x + 14 + rad, r.y + r.height / 2, rad, 4); window.__twocodeIcon?.('timer', r.x + 14 + rad, r.y + r.height / 2, 18, '#ffd3a1');
+      const rad = r.height / 2 - 12; ring(r.x + 14 + rad, r.y + r.height / 2, rad, 4); window.__orixIcon?.('timer', r.x + 14 + rad, r.y + r.height / 2, 18, '#ffd3a1');
       text(label, r.x + rad * 2 + 30, r.y + r.height / 2 + 2, 20, '#fff', 700);
       text(on ? 'Blijf gefocust' : 'Focus', r.x + rad * 2 + 30, r.y + r.height / 2 + 17, 10.5, '#8f998d', 500);
       wbtn(r.x + r.width - 28, r.y + r.height / 2, 16, on ? 'stop' : 'play', 'focusQuick', true, live);
@@ -1589,7 +1589,7 @@
   }
   function noteWidget(w, r) {
     if (w.size === 'S') return genericWidget(w, r);
-    window.__twocodeIcon?.('note', r.x + 22, r.y + 20, 16, '#ffd166');
+    window.__orixIcon?.('note', r.x + 22, r.y + 20, 16, '#ffd166');
     text('Notitie', r.x + 36, r.y + 25, 12, '#f2f5ef', 700);
     const lines = wrapLines(noteText, r.width - 32, 11.5, Math.max(1, Math.floor((r.height - 38) / 16)));
     if (!lines.length) { text('Tik om iets op te schrijven', r.x + 16, r.y + 46, 11.5, '#6f7a6b', 500); return; }
@@ -1597,7 +1597,7 @@
   }
   function clipsWidget(w, r) {
     if (w.size === 'S') return genericWidget(w, r);
-    window.__twocodeIcon?.('copy', r.x + 22, r.y + 20, 16, '#5ad1c4');
+    window.__orixIcon?.('copy', r.x + 22, r.y + 20, 16, '#5ad1c4');
     text('Klembord', r.x + 36, r.y + 25, 12, '#f2f5ef', 700);
     if (clipList.length) text(String(clipList.length), r.x + r.width - 16, r.y + 25, 11, '#7d847f', 600, 'right');
     const max = Math.max(1, Math.floor((r.height - 36) / 17));
@@ -1671,7 +1671,7 @@
   function big(str, x, y, size, colour, weight = 600, maxW = 0, align = 'left') { // display text: Inter, tighter as it grows
     ctx.save(); ctx.font = `${weight} ${size}px Inter, "Segoe UI", sans-serif`; ctx.fillStyle = colour; ctx.textAlign = align; ctx.textBaseline = 'alphabetic';
     if (size >= 20) ctx.letterSpacing = `${(-0.012 * size).toFixed(2)}px`;
-    let t = String(window.__twocodeTr?.(String(str || '')) ?? str ?? ''); if (maxW) while (t.length > 1 && ctx.measureText(t).width > maxW) t = t.slice(0, -2) + '…';
+    let t = String(window.__orixTr?.(String(str || '')) ?? str ?? ''); if (maxW) while (t.length > 1 && ctx.measureText(t).width > maxW) t = t.slice(0, -2) + '…';
     ctx.fillText(t, x, y); ctx.restore();
   }
   const dot = (x, y, r, fill) => { ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fillStyle = fill; ctx.fill(); };
@@ -1696,7 +1696,7 @@
   // ---- Home, like Apple Music: calm black, white and grey; colour only comes from a cover (the album, Claude's tile).
   // One "now playing" row on top (Claude's job, your music, or all quiet) and a tab bar of apps underneath. ----
   const alpha = (c, a) => { const m = /rgba?\((\d+),\s*(\d+),\s*(\d+)/.exec(c); if (m) return `rgba(${m[1]},${m[2]},${m[3]},${a})`; const n = parseInt(String(c).replace('#', '').slice(0, 6), 16); return `rgba(${n >> 16},${(n >> 8) & 255},${n & 255},${a})`; };
-  window.__twocodeClaudeCover = (x, y, s, r, agent) => { // a square cover like an album, Claude's own colour, the mark in the middle
+  window.__orixClaudeCover = (x, y, s, r, agent) => { // a square cover like an album, Claude's own colour, the mark in the middle
     ctx.save(); ctx.beginPath(); ctx.roundRect(x, y, s, s, r); const g = ctx.createLinearGradient(x, y, x + s, y + s);
     if (agent === 'codex') { g.addColorStop(0, '#3a3a3c'); g.addColorStop(1, '#141416'); } else { g.addColorStop(0, '#e08a6c'); g.addColorStop(1, '#9c4126'); }
     ctx.fillStyle = g; ctx.fill(); ctx.restore();
@@ -1708,7 +1708,7 @@
     if (part > 0) box(x, y, Math.max(4, w * Math.min(1, part)), 4, 2, '#ffffff');
     if (live) { const t = (performance.now() / 1400) % 1, sx = x + w * Math.min(1, part); ctx.save(); ctx.globalAlpha = 0.5 * (1 - t); box(sx, y, Math.min(w - (sx - x), 40 * t + 4), 4, 2, '#ffffff'); ctx.restore(); }
   }
-  const caps = (str, x, y, colour = C.grey, maxW = 0, align = 'left') => { ctx.save(); ctx.letterSpacing = '0.4px'; text(String(window.__twocodeTr?.(str) ?? str).toUpperCase(), x, y, 12, colour, 600, align, maxW); ctx.restore(); };
+  const caps = (str, x, y, colour = C.grey, maxW = 0, align = 'left') => { ctx.save(); ctx.letterSpacing = '0.4px'; text(String(window.__orixTr?.(str) ?? str).toUpperCase(), x, y, 12, colour, 600, align, maxW); ctx.restore(); };
   // Home, compact like a notch app: small sharp type, one thing at a time (Claude's job, your music, or all quiet).
   // The pages themselves are one hover away in the tabs at the bottom of the island (icons-ui.js).
   const tiny = (str, x, y, size, colour, weight = 500, align = 'left', maxW = 0) => text(str, x, y, size, colour, weight, align, maxW);
@@ -1744,7 +1744,7 @@
     ctx.restore();
   }
   const label = (str, x, y) => tiny(str, x, y, 11, 'rgba(255,255,255,.65)', 600);
-  const lower = (str, x, y, w) => (window.__twocodeRawText || text)(str, x, y, 12, 'rgba(255,255,255,.8)', 500, 'left', w);
+  const lower = (str, x, y, w) => (window.__orixRawText || text)(str, x, y, 12, 'rgba(255,255,255,.8)', 500, 'left', w);
   const widgetAgentLabel = p => p?.simulated ? 'Test · Claude' : p?.agent === 'codex' ? 'Codex' : 'Claude Code';
   function claudeWidget(x, y, s) {
     const info = claudeInfo(), p = info.p || providers().find(q => q.kind === 'hooks' && q.connected) || providers().find(q => q.kind === 'hooks'), st = info.p ? info.st : (p?.state || 'ready');
@@ -1757,7 +1757,7 @@
       return;
     }
     const working = busy(p), failed = ['error', 'stopped'].includes(st), steps = p.steps || [], phase = phaseOf(steps);
-    const doneLook = window.__twocodeDoneLook(st === 'done' ? p : null), recent = Boolean(doneLook), five = p.usage?.fiveHour;
+    const doneLook = window.__orixDoneLook(st === 'done' ? p : null), recent = Boolean(doneLook), five = p.usage?.fiveHour;
     const past = (state.history || []).filter(h => (h.agent || 'claude') === (p.agent || 'claude'));
     const today = past.filter(h => new Date(h.at).toDateString() === new Date().toDateString() && h.result === 'done').length;
     let colour = p.agent === 'codex' ? '#3b82f6' : '#d97757', live = false, part, head, line;
@@ -1778,12 +1778,12 @@
   }
   function musicWidget(x, y, s) {
     const pad = 14, track = spotifyState?.track, art = track && albumImage?.complete && albumImage.naturalWidth, playing = Boolean(spotifyConnected && spotifyState?.is_playing && track);
-    const colour = (track && window.__twocodeAlbumColour) || '#ff375f', cs = 44, cx0 = x + s - pad - cs, cy0 = y + pad;
+    const colour = (track && window.__orixAlbumColour) || '#ff375f', cs = 44, cx0 = x + s - pad - cs, cy0 = y + pad;
     widget(x, y, s, 'spotifyApp', colour, playing);
     label(T('Muziek', 'Music'), x + pad, y + pad + 11);
     if (!spotifyConnected || !track) {
       ctx.save(); ctx.beginPath(); ctx.arc(cx0 + cs / 2, cy0 + cs / 2, 20, 0, Math.PI * 2); ctx.fillStyle = 'rgba(255,255,255,.14)'; ctx.fill(); ctx.restore();
-      window.__twocodeIcon?.('music', cx0 + cs / 2, cy0 + cs / 2, 20, '#ffffff', null, 'rgba(0,0,0,0)');
+      window.__orixIcon?.('music', cx0 + cs / 2, cy0 + cs / 2, 20, '#ffffff', null, 'rgba(0,0,0,0)');
       big(spotifyConnected ? T('Stil', 'Quiet') : 'Spotify', x + pad, y + s - 34, 28, '#ffffff', 700, s - pad * 2);
       lower(spotifyConnected ? T('Er speelt niks', 'Nothing playing') : T('Koppel je muziek', 'Connect your music'), x + pad, y + s - 15, s - pad * 2);
       return;
@@ -1791,16 +1791,16 @@
     // the cover top right (glowing in its own colour), the song bottom left, a round white play button
     ctx.save(); ctx.shadowColor = alpha(colour, 0.6); ctx.shadowBlur = 18; ctx.shadowOffsetY = 5; box(cx0, cy0, cs, cs, 10, '#1c1c1e'); ctx.restore();
     if (art) { ctx.save(); ctx.beginPath(); ctx.roundRect(cx0, cy0, cs, cs, 10); ctx.clip(); ctx.drawImage(albumImage, cx0, cy0, cs, cs); ctx.restore(); }
-    if (playing) window.__twocodeVisualizer?.('homeTile', x + pad, y + pad + 30, 18, 12, '#ffffff', 4);
+    if (playing) window.__orixVisualizer?.('homeTile', x + pad, y + pad + 30, 18, 12, '#ffffff', 4);
     big(track.name || 'Spotify', x + pad, y + s - 32, 16, '#ffffff', 700, s - pad * 2 - 34);
     lower(playing ? (track.artist || '') : T('gepauzeerd', 'paused'), x + pad, y + s - 15, s - pad * 2 - 34);
     const pb = { x: x + s - 12 - 30, y: y + s - 12 - 30, width: 30, height: 30 }, over = inside(pointer.x, pointer.y, pb);
     ctx.save(); ctx.beginPath(); ctx.arc(pb.x + 15, pb.y + 15, 15, 0, Math.PI * 2); ctx.fillStyle = over ? '#e5e5ea' : '#ffffff'; ctx.fill(); ctx.restore();
-    window.__twocodeMediaIcon?.(playing ? 'pause' : 'play', pb.x + 15 + (playing ? 0 : 1), pb.y + 15, 11, '#000000');
+    window.__orixMediaIcon?.(playing ? 'pause' : 'play', pb.x + 15 + (playing ? 0 : 1), pb.y + 15, 11, '#000000');
     hit.homePlay = pb;
   }
   function focusWidget(x, y, s) {
-    const f = window.__twocodeFocus, on = Boolean(f?.active()), pad = 14, rx = x + s - pad - 20, ry = y + pad + 20;
+    const f = window.__orixFocus, on = Boolean(f?.active()), pad = 14, rx = x + s - pad - 20, ry = y + pad + 20;
     widget(x, y, s, 'focusApp', C.purple, on);
     label(T('Focus', 'Focus'), x + pad, y + pad + 11);
     const qb = { x: rx - 20, y: ry - 20, width: 40, height: 40 }, over = inside(pointer.x, pointer.y, qb);
@@ -1809,7 +1809,7 @@
       box(rx - 5, ry - 5, 10, 10, 2.5, over ? 'rgba(255,255,255,.7)' : '#ffffff');
     } else { // ready: a round white start button
       ctx.save(); ctx.beginPath(); ctx.arc(rx, ry, 20, 0, Math.PI * 2); ctx.fillStyle = over ? '#e5e5ea' : '#ffffff'; ctx.fill(); ctx.restore();
-      window.__twocodeMediaIcon?.('play', rx + 1.5, ry, 13, C.purple);
+      window.__orixMediaIcon?.('play', rx + 1.5, ry, 13, C.purple);
     }
     hit.focusQuick = qb;
     const chosen = (f?.chosen?.() || 1500), mmss = sec => `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}`, mins = Math.max(1, Math.ceil((f?.left() || 0) / 60000));
@@ -1826,7 +1826,7 @@
     if (currentView !== 'home' || mode !== 'expanded' || !inside(e.clientX, e.clientY, hit.allApps)) return;
     e.preventDefault(); e.stopImmediatePropagation(); setView('apps'); sound('click');
   }, true);
-  window.__twocodeEditQuick = () => { editShortcuts = true; setView('shortcuts'); setMode('expanded'); sound('click'); }; // the + button: choose your quick buttons
+  window.__orixEditQuick = () => { editShortcuts = true; setView('shortcuts'); setMode('expanded'); sound('click'); }; // the + button: choose your quick buttons
 
   drawHome = function (area) {
     if (gallery) { drawGallery(area); return; }
@@ -1852,7 +1852,7 @@
       const b = g.rect(c, r);
       ctx.save(); ctx.setLineDash([4, 4]); ctx.beginPath(); ctx.roundRect(b.x + 0.5, b.y + 0.5, b.width - 1, b.height - 1, 15.5); ctx.strokeStyle = homeEdit ? 'rgba(255,255,255,.16)' : 'rgba(255,255,255,.07)'; ctx.stroke(); ctx.restore();
       if (homeEdit) badge(b.x + b.width / 2, b.y + b.height / 2, '+');
-      else window.__twocodeIcon?.('plus', b.x + b.width / 2, b.y + b.height / 2, 18, inside(pointer.x, pointer.y, b) ? '#00c48a' : '#4a504c');
+      else window.__orixIcon?.('plus', b.x + b.width / 2, b.y + b.height / 2, 18, inside(pointer.x, pointer.y, b) ? '#00c48a' : '#4a504c');
       hit[`hmAdd_${c}_${r}`] = b;
     }
     // the widget you are dragging follows the mouse, a bit bigger
@@ -1945,7 +1945,7 @@
     if (!w) return;
     const r = homeGeo.g.rect(w.c, w.r);
     drag = { id: w.id, x0: e.clientX, y0: e.clientY, px: e.clientX, py: e.clientY, dx: e.clientX - r.x, dy: e.clientY - r.y, moved: false };
-    if (!homeEdit) { clearTimeout(longPress); longPress = setTimeout(() => { if (drag && !drag.moved) { window.__twocodeHomeEdit(true); drag = { ...drag }; swallowClick = true; } }, 500); }
+    if (!homeEdit) { clearTimeout(longPress); longPress = setTimeout(() => { if (drag && !drag.moved) { window.__orixHomeEdit(true); drag = { ...drag }; swallowClick = true; } }, 500); }
     try { canvas.setPointerCapture(e.pointerId); } catch {}
   });
   canvas.addEventListener('pointermove', e => {
@@ -1969,10 +1969,10 @@
     if (gallery) {
       stop();
       if (at(hit.hmGalClose)) { setGallery(null); sound('click'); return; }
-      for (let i = 0; i < PRESETS.length; i++) if (at(hit['hmPreset_' + i])) { saveWidgets(presetLayout(PRESETS[i]).placed); setGallery(null); window.__twocodeKick?.(0.04); sound('click'); return; }
+      for (let i = 0; i < PRESETS.length; i++) if (at(hit['hmPreset_' + i])) { saveWidgets(presetLayout(PRESETS[i]).placed); setGallery(null); window.__orixKick?.(0.04); sound('click'); return; }
       for (const id of Object.keys(APPS)) if (at(hit['hmGalApp_' + id])) { gallery.pick = id; gallery.size = getWidgets().find(w => w.id === id)?.size || gallery.size; sound('click'); return; }
       for (const s of Object.keys(SIZES)) if (at(hit['hmGalSize_' + s])) { gallery.size = s; sound('click'); return; }
-      if (at(hit.hmGalAdd)) { const res = galleryResult(); if (res.ok) { saveWidgets(res.plan.placed); setGallery(null); window.__twocodeKick?.(0.03); sound('click'); } else window.__twocodeFlash?.(res.hint || res.label, 1200); }
+      if (at(hit.hmGalAdd)) { const res = galleryResult(); if (res.ok) { saveWidgets(res.plan.placed); setGallery(null); window.__orixKick?.(0.03); sound('click'); } else window.__orixFlash?.(res.hint || res.label, 1200); }
       return;
     }
     for (const k of Object.keys(hit)) if (k.startsWith('hmAdd_') && at(hit[k])) { stop(); const [, c, r] = k.split('_'); openGallery(+c, +r); return; }
@@ -1984,9 +1984,9 @@
         const order = ['S', 'W', 'L'], list = getWidgets();
         for (let k = 1; k < 3; k++) {
           const size = order[(order.indexOf(w.size) + k) % 3], plan = arrange(list.map(x => x.id === w.id ? { ...x, size, c: Math.min(x.c, COLS - SIZES[size][0]), r: Math.min(x.r, ROWS - SIZES[size][1]) } : x), w.id);
-          if (plan.ok) { saveWidgets(plan.placed); window.__twocodeFlash?.(SIZE_NAME[size], 700); sound('click'); return; }
+          if (plan.ok) { saveWidgets(plan.placed); window.__orixFlash?.(SIZE_NAME[size], 700); sound('click'); return; }
         }
-        window.__twocodeFlash?.('Geen plek om groter te maken', 1200); return;
+        window.__orixFlash?.('Geen plek om groter te maken', 1200); return;
       }
     }
   }, true);
@@ -1996,10 +1996,10 @@
     if (currentView !== 'home' || mode !== 'expanded') return;
     const stop = () => { event.preventDefault(); event.stopImmediatePropagation(); };
     if (inside(event.clientX, event.clientY, hit.homePlay)) {
-      stop(); window.__twocodeSpotifyControl?.(spotifyState.is_playing ? 'pause' : 'play'); sound('click');
+      stop(); window.__orixSpotifyControl?.(spotifyState.is_playing ? 'pause' : 'play'); sound('click');
     } else if (inside(event.clientX, event.clientY, hit.hmPrev) || inside(event.clientX, event.clientY, hit.hmNext)) {
-      stop(); window.__twocodeSpotifyControl?.(inside(event.clientX, event.clientY, hit.hmNext) ? 'next' : 'previous'); sound('click');
-    } else if (inside(event.clientX, event.clientY, hit.focusQuick)) { stop(); window.__twocodeFocus?.toggle(); }
+      stop(); window.__orixSpotifyControl?.(inside(event.clientX, event.clientY, hit.hmNext) ? 'next' : 'previous'); sound('click');
+    } else if (inside(event.clientX, event.clientY, hit.focusQuick)) { stop(); window.__orixFocus?.toggle(); }
   }, true);
 
   // ---- Apps (the + button): a grid of app tiles, each with a live status line ----
@@ -2035,12 +2035,12 @@
       ctx.save(); ctx.strokeStyle = app.c; ctx.lineWidth = 2.2; ctx.lineJoin = 'round';
       ctx.beginPath(); ctx.roundRect(cx - s * 0.25, cy - s * 0.15, s * 0.36, s * 0.3, 5); ctx.stroke();
       ctx.beginPath(); ctx.moveTo(cx + s * 0.13, cy - s * 0.04); ctx.lineTo(cx + s * 0.26, cy - s * 0.12); ctx.lineTo(cx + s * 0.26, cy + s * 0.12); ctx.lineTo(cx + s * 0.13, cy + s * 0.04); ctx.closePath(); ctx.stroke(); ctx.restore();
-    } else window.__twocodeIcon?.(app.icon, cx, cy, s * 0.46, app.c, null, 'rgba(0,0,0,0)');
+    } else window.__orixIcon?.(app.icon, cx, cy, s * 0.46, app.c, null, 'rgba(0,0,0,0)');
     return { b, over };
   }
   drawApps = function (area) {
-    const focus = window.__twocodeFocus, p = top(), tray = window.__twocodeTrayCount?.() || 0, en = EN();
-    const off = window.__twocodeAppsOff?.() || new Set(), shown = HOME_ICONS.filter(a => !off.has(a.id));
+    const focus = window.__orixFocus, p = top(), tray = window.__orixTrayCount?.() || 0, en = EN();
+    const off = window.__orixAppsOff?.() || new Set(), shown = HOME_ICONS.filter(a => !off.has(a.id));
     for (const a of HOME_ICONS) if (!shown.includes(a)) delete hit[a.key];
     const cols = 5, rows = Math.ceil(shown.length / cols), s = 44, colW = area.width / cols, rowH = 82;
     const y0 = area.y + Math.max(8, (area.height - rows * rowH) / 2) + s / 2;
@@ -2063,7 +2063,7 @@
   }, true);
   // ---- Your shortcuts (the + button): you choose which apps are here (max 4). The same apps are on the home card. ----
   const APPS = {
-    spotify: { icon: 'music', label: 'Spotify', key: 'spotifyApp', tint: () => window.__twocodeAlbumColour || '#1ed760' },
+    spotify: { icon: 'music', label: 'Spotify', key: 'spotifyApp', tint: () => window.__orixAlbumColour || '#1ed760' },
     claude: { icon: 'terminal', label: 'AI', key: 'monitor_claudecode', tint: () => '#00c48a' },
     focus: { icon: 'timer', label: 'Focus', key: 'focusApp', tint: () => '#ffb35c' },
     tray: { icon: 'tray', label: 'Lade', key: 'trayApp', tint: () => '#7ab8ff' },
@@ -2075,13 +2075,13 @@
   };
   const APP_OF_KEY = Object.fromEntries(Object.entries(APPS).map(([id, a]) => [a.key, id]));
   const MAX_SHORTCUTS = 4, DEFAULT_SHORTCUTS = ['spotify', 'focus', 'tray', 'settings'];
-  const installed = id => !(window.__twocodeAppsOff?.() || new Set()).has(id);
-  const shortcuts = () => { try { const v = JSON.parse(localStorage.getItem('twocode:shortcuts')); if (Array.isArray(v) && v.length) return v.filter(id => APPS[id] && installed(id)).slice(0, MAX_SHORTCUTS); } catch {} return DEFAULT_SHORTCUTS.filter(installed); };
-  const saveShortcuts = list => { try { localStorage.setItem('twocode:shortcuts', JSON.stringify(list)); } catch {} };
-  window.__twocodeShortcuts = shortcuts;
+  const installed = id => !(window.__orixAppsOff?.() || new Set()).has(id);
+  const shortcuts = () => { try { const v = JSON.parse(localStorage.getItem('orix:shortcuts')); if (Array.isArray(v) && v.length) return v.filter(id => APPS[id] && installed(id)).slice(0, MAX_SHORTCUTS); } catch {} return DEFAULT_SHORTCUTS.filter(installed); };
+  const saveShortcuts = list => { try { localStorage.setItem('orix:shortcuts', JSON.stringify(list)); } catch {} };
+  window.__orixShortcuts = shortcuts;
   let editShortcuts = false;
   function appStatus(id) {
-    const focus = window.__twocodeFocus, p = top(), tray = window.__twocodeTrayCount?.() || 0;
+    const focus = window.__orixFocus, p = top(), tray = window.__orixTrayCount?.() || 0;
     if (id === 'spotify') return spotifyState.track ? short(spotifyState.track.name, 20) : 'Muziek';
     if (id === 'claude') return p ? p.detail || labels[p.state] : 'Rustig';
     if (id === 'focus') return focus?.active() ? `Nog ${focus.label()}` : `${focus?.minutes?.() || 25} min`;
@@ -2126,7 +2126,7 @@
       stop(); let list = shortcuts().filter(x => QUICK_CHOICES.includes(x));
       if (list.includes(id)) list = list.filter(x => x !== id);
       else if (list.length < MAX_SHORTCUTS) list.push(id);
-      else { window.__twocodeFlash?.(T('Max 4 · haal er eerst een uit', 'Max 4 · take one off first'), 1200); return; }
+      else { window.__orixFlash?.(T('Max 4 · haal er eerst een uit', 'Max 4 · take one off first'), 1200); return; }
       saveShortcuts(list); sound('click'); return;
     }
   }, true);
@@ -2189,11 +2189,11 @@
     if (show && doneKey && !doneSeenAt && current()?.state === 'done') doneSeenAt = performance.now(); // you looked: green, fading out
     const display = show ? 'block' : 'none'; if (root.style.display !== display) root.style.display = display;
     if (show) {
-      const p = current(), stage = Boolean(p?.kind === 'hooks' && p.connected && window.__twocodePlaceOnStage);
+      const p = current(), stage = Boolean(p?.kind === 'hooks' && p.connected && window.__orixPlaceOnStage);
       root.classList.toggle('cl-new', stage); root.classList.toggle('cc-codex', stage && p.agent === 'codex'); // Codex: blue
-      if (stage) window.__twocodePlaceOnStage(root, contentRect()); else window.__twocodePage.place(root, contentRect());
+      if (stage) window.__orixPlaceOnStage(root, contentRect()); else window.__orixPage.place(root, contentRect());
     }
     requestAnimationFrame(position);
   }
-  window.__twocodeMonitor = Object.freeze({ open, small, state: () => state, refresh: () => { lastSignature = ''; update(state); } }); render(); requestAnimationFrame(position);
+  window.__orixMonitor = Object.freeze({ open, small, state: () => state, refresh: () => { lastSignature = ''; update(state); } }); render(); requestAnimationFrame(position);
 })();

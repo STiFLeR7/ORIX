@@ -24,11 +24,11 @@ Four destinations: **Overview**, **Appearance**, **Modules**, **Settings**. Sett
 - **Buttons:** use clear action verbs, a visible focus indicator and distinct hover, pressed and disabled states. Primary buttons have one dominant action per context; secondary buttons are outlined or quiet. Do not make unavailable functionality look operational.
 - **Cards and rows:** group a title, a short explanation and the relevant control. Maintain readable hierarchy and consistent spacing; show empty, loading, success and error states where applicable.
 - **Inputs and settings:** use persistent labels, descriptions and specific errors. Preserve the existing Save/Cancel semantics for drafted settings. A visibility change is immediate and must not be undone by discarding settings.
-- **Status:** pair color with a word or icon. Never convey success, warning or error by color alone. Surface errors near their cause and offer a recovery action when one exists.
+- **Status:** pair color with a word or icon. Never convey success, warning or error by color alone. Surface errors near their cause and offer a restoration action when one exists.
 - **Icons:** use accurate, properly licensed provider artwork and preserve their brand shapes; generic icons use a consistent size and stroke. Do not fabricate provider logos.
 
 ## Accessibility and verification
 
 Target WCAG AA contrast for text and meaningful controls in their actual states; test any translucent surface over representative wallpapers. Keyboard operation, focus visibility, screen reader names and state, Windows high contrast, scaling and reduced motion must be checked in the running product. Controls should retain usable target sizes, and desktop-layer visibility must not stop ongoing work.
 
-[Brand system](BRAND-SYSTEM.md) · [Approved redesign plan](../../docs/superpowers/plans/2026-11-02-orix-redesign.md) · [Design direction](../CREATIVE-DIRECTION.md)
+[Brand system](BRAND-SYSTEM.md) · [Approved redesign plan](../../docs/ORIX-FEATURE-MAP.md) · [Design direction](../CREATIVE-DIRECTION.md)

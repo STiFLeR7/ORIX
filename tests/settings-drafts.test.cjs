@@ -9,23 +9,23 @@ function bridge(initialOff = []) {
   let prefs = { lang: 'en', themeMode: 'dark', motionMode: 'system', name: 'Keep', lightBusy: '#ff9a1f' }, preview, failSave = false;
   let failModules = false, saveServices = async () => {};
   const buttons = [], inputs = new Map();
-  const values = new Map([['twocode:apps-off', JSON.stringify(initialOff)]]), clipboardCalls = []; let clipboardFailure = false;
+  const values = new Map([['orix:apps-off', JSON.stringify(initialOff)]]), clipboardCalls = []; let clipboardFailure = false;
   const box = { innerHTML: '', setAttribute() {}, querySelector: selector => inputs.get(selector) || null,
     querySelectorAll: selector => selector === 'button' ? buttons : inputs.has(selector) ? [inputs.get(selector)] : [] };
-  const window = { twocode: { clipsSetEnabled: async enabled => { clipboardCalls.push(enabled); return { ok: !clipboardFailure }; } }, ORIXAppearance: appearance, __twocodeSettingsHtml: () => '', __twocodeRealPrefs: () => ({ ...prefs }),
-    __twocodePrefs: () => prefs, __twocodePreviewPrefs: p => { preview = p ? { ...p } : null; },
-    __twocodeWithDraft: (_prefs, fn) => fn(), __twocodeSaveDraft: p => { if (failSave) throw new Error('Save failed'); prefs = { ...p }; },
-    __twocodeSaveSettingsServices: (...args) => saveServices(...args) };
+  const window = { orix: { clipsSetEnabled: async enabled => { clipboardCalls.push(enabled); return { ok: !clipboardFailure }; } }, ORIXAppearance: appearance, __orixSettingsHtml: () => '', __orixRealPrefs: () => ({ ...prefs }),
+    __orixPrefs: () => prefs, __orixPreviewPrefs: p => { preview = p ? { ...p } : null; },
+    __orixWithDraft: (_prefs, fn) => fn(), __orixSaveDraft: p => { if (failSave) throw new Error('Save failed'); prefs = { ...p }; },
+    __orixSaveSettingsServices: (...args) => saveServices(...args) };
   vm.runInNewContext(fs.readFileSync(require.resolve('../settings-bridge-ui.js'), 'utf8'), {
     window, document: { getElementById: () => ({ appendChild() {} }), createElement: () => box, querySelectorAll: () => [] },
     setView() {}, sleepEnabled: false, performance: { now: () => 0 },
-    localStorage: { getItem: key => values.get(key) ?? null, setItem: (key, value) => { if (failModules && key === 'twocode:apps-off') throw new Error('Storage unavailable'); values.set(key, value); } },
+    localStorage: { getItem: key => values.get(key) ?? null, setItem: (key, value) => { if (failModules && key === 'orix:apps-off') throw new Error('Storage unavailable'); values.set(key, value); } },
     setTimeout: callback => { callback(); return 1; }
   });
-  const call = req => window.__twocodeRemoteSettings(req);
+  const call = req => window.__orixRemoteSettings(req);
   return { call, prefs: () => prefs, preview: () => preview, fail: () => { failSave = true; }, external: value => Object.assign(prefs, value),
-    failModules: value => { failModules = value; }, modules: () => window.__twocodeAppsOff(),
-    storedModules: () => JSON.parse(values.get('twocode:apps-off')), clipboardCalls, failClipboard: value => { clipboardFailure = value; },
+    failModules: value => { failModules = value; }, modules: () => window.__orixAppsOff(),
+    storedModules: () => JSON.parse(values.get('orix:apps-off')), clipboardCalls, failClipboard: value => { clipboardFailure = value; },
     services: fn => { saveServices = fn; },
     extra: (key, value) => { inputs.set('#tc-in-' + key, { value, setAttribute() {} }); buttons[0] = { dataset: { save: '1', pref: key } }; return call({ kind: 'click', index: 0 }); },
     startup: () => { buttons[0] = { dataset: { login: '1' }, classList: { contains: () => false } }; return call({ kind: 'click', index: 0 }); } };
@@ -92,19 +92,19 @@ test('failed startup persistence retains its settings draft', async () => {
 });
 
 test('settings service writes update caches only after successful awaited IPC', async () => {
-  const source = fs.readFileSync(require.resolve('../twocode-fun.js'), 'utf8');
-  const start = source.indexOf('window.__twocodeSaveSettingsServices =');
+  const source = fs.readFileSync(require.resolve('../orix-fun.js'), 'utf8');
+  const start = source.indexOf('window.__orixSaveSettingsServices =');
   assert.notEqual(start, -1, 'awaitable settings service writer is required');
   let configResult = { ok: false, error: 'Paste an https or webcal calendar link.' }, loginResult = { ok: false };
-  const context = { window: { twocode: { extrasConfig: async () => configResult, loginSet: async () => loginResult } },
+  const context = { window: { orix: { extrasConfig: async () => configResult, loginSet: async () => loginResult } },
     extrasCfg: { city: 'Old' }, extrasError: '', loginOn: false, rerender() {} };
-  vm.runInNewContext(source.slice(start, source.indexOf('window.__twocodeSettingsAction =', start)), context);
-  await assert.rejects(context.window.__twocodeSaveSettingsServices({ calendarUrl: 'invalid://' }, null), /https/);
+  vm.runInNewContext(source.slice(start, source.indexOf('window.__orixSettingsAction =', start)), context);
+  await assert.rejects(context.window.__orixSaveSettingsServices({ calendarUrl: 'invalid://' }, null), /https/);
   assert.equal(context.extrasCfg.city, 'Old');
   configResult = { ok: true, config: { city: 'New' } };
-  await assert.rejects(context.window.__twocodeSaveSettingsServices({ city: 'New' }, true), /startup/i);
+  await assert.rejects(context.window.__orixSaveSettingsServices({ city: 'New' }, true), /startup/i);
   assert.equal(context.loginOn, false);
-  loginResult = { ok: true, on: true }; await context.window.__twocodeSaveSettingsServices({}, true);
+  loginResult = { ok: true, on: true }; await context.window.__orixSaveSettingsServices({}, true);
   assert.equal(context.loginOn, true); assert.equal(context.extrasError, '');
 });
 
@@ -252,7 +252,7 @@ test('malformed saved module lists do not enable clipboard capture', async () =>
 
 test('project AI settings request opens the AI tab instead of General', () => {
   const source = fs.readFileSync(require.resolve('../ai-settings-ui.js'), 'utf8');
-  const start = source.indexOf("  window.addEventListener('twocode:open-ai-settings'");
+  const start = source.indexOf("  window.addEventListener('orix:open-ai-settings'");
   const end = source.indexOf('  // Algemeen:', start);
   assert.ok(start >= 0 && end > start);
   let handler, stored, rendered = 0, loaded = 0;
@@ -267,13 +267,13 @@ test('project AI settings bypass the dashboard redirect and expand the layer', (
   const start = bridgeSource.indexOf('  const openView = setView;');
   const end = bridgeSource.indexOf('  const root = document.getElementById', start);
   let opened, mode;
-  const context = { window: { twocode: { settingsOpen() {} } }, setView: value => { opened = value; }, setMode: value => { mode = value; }, license: { locked: [] }, performance: { now: () => 0 } };
+  const context = { window: { orix: { settingsOpen() {} } }, setView: value => { opened = value; }, setMode: value => { mode = value; }, license: { locked: [] }, performance: { now: () => 0 } };
   vm.runInNewContext(bridgeSource.slice(start, end), context);
-  assert.equal(typeof context.window.__twocodeOpenInlineSettings, 'function');
-  context.window.__twocodeOpenInlineSettings(); assert.equal(opened, 'settings'); assert.equal(mode, 'expanded');
+  assert.equal(typeof context.window.__orixOpenInlineSettings, 'function');
+  context.window.__orixOpenInlineSettings(); assert.equal(opened, 'settings'); assert.equal(mode, 'expanded');
   const project = fs.readFileSync(require.resolve('../project-mode-ui.js'), 'utf8');
   const body = project.slice(project.indexOf('  function settings() {'), project.indexOf('  function render() {')); 
-  assert.match(body, /__twocodeOpenInlineSettings/);
+  assert.match(body, /__orixOpenInlineSettings/);
 });
 
 test('advanced AI settings use English for provider details and key controls', () => {
@@ -285,7 +285,7 @@ test('advanced AI settings use English for provider details and key controls', (
   assert.match(context.details(), /Your OpenAI API key/); assert.match(context.details(), /Save key/);
   context.settings = { selectedProvider: 'chatgpt', chatgpt: { installed: true, ready: false } };
   assert.match(context.details(), /Sign in with ChatGPT/);
-  context.settings = { selectedProvider: 'twocode', twocode: {} };
+  context.settings = { selectedProvider: 'orix', orix: {} };
   assert.match(context.details(), /Developer settings/);
   assert.match(source, /'Use your ChatGPT account'/); assert.match(source, /'Your OpenAI key'/);
 });
@@ -333,7 +333,7 @@ test('agent and editor IPC wrappers reject untrusted requests before invoking ac
 
 test('legacy project, Spotify and window IPC reject foreign renderers', async () => {
   const source = fs.readFileSync(require.resolve('../main.js'), 'utf8');
-  const start = source.indexOf('// TWOCODE IPC'), end = source.indexOf('// Goodbye:', start);
+  const start = source.indexOf('// ORIX IPC'), end = source.indexOf('// Goodbye:', start);
   assert.ok(start >= 0 && end > start);
   const handlers = new Map(), events = new Map(), calls = [];
   const action = name => (...args) => { calls.push(name); return { ok: true }; };

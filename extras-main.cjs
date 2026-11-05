@@ -1,6 +1,6 @@
 'use strict';
 // Extras for the island (main process): file tray, calendar (ICS link), weather (Open-Meteo),
-// volume changes and Bluetooth battery levels. Only the TwoCode window may use these channels.
+// volume changes and Bluetooth battery levels. Only the ORIX window may use these channels.
 const { spawn } = require('node:child_process');
 const fs = require('node:fs');
 const path = require('node:path');
@@ -212,7 +212,7 @@ Get-PnpDevice -Class Bluetooth -Status OK -ErrorAction SilentlyContinue | ForEac
     // Only volume levels are measured in the island itself; nothing is recorded or sent anywhere.
     const { session, desktopCapturer } = electron;
     session.defaultSession.setDisplayMediaRequestHandler((request, callback) => {
-      if (!trusted({ sender: { getURL: () => request.frame?.url || '' } })) return callback({}); // only the TwoCode island
+      if (!trusted({ sender: { getURL: () => request.frame?.url || '' } })) return callback({}); // only the ORIX island
       desktopCapturer.getSources({ types: ['screen'] }).then(sources => callback({ video: sources[0], audio: 'loopback' })).catch(() => callback({}));
     });
     startVolume();

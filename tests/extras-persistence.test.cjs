@@ -77,13 +77,13 @@ test('an empty tray displays its load error', () => {
   const source = fs.readFileSync(require.resolve('../extras-ui.js'), 'utf8');
   const render = source.slice(source.indexOf('  function render() {'), source.indexOf('  // ---------- quick mirror'));
   const root = { innerHTML: '', querySelectorAll: () => [] };
-  vm.runInNewContext(render + '\nrender();', { root, currentView: 'tray', trayFiles: [], trayError: 'Could not load tray', window: { __twocodePrefs: () => ({ lang: 'en' }) }, esc: String });
+  vm.runInNewContext(render + '\nrender();', { root, currentView: 'tray', trayFiles: [], trayError: 'Could not load tray', window: { __orixPrefs: () => ({ lang: 'en' }) }, esc: String });
   assert.match(root.innerHTML, /Could not load tray/);
 });
 
 test('tray load failure is passed to the renderer and clears after a successful reload', async () => {
   const source = fs.readFileSync(require.resolve('../extras-ui.js'), 'utf8');
-  const loader = source.slice(source.indexOf('  async function loadTray()'), source.indexOf('  window.__twocodeTrayReload'));
+  const loader = source.slice(source.indexOf('  async function loadTray()'), source.indexOf('  window.__orixTrayReload'));
   let response = { ok: false, error: 'Could not load tray' }, renders = 0;
   const context = { api: { trayGet: async () => response }, trayFiles: [], trayError: '', render: () => renders++ };
   vm.runInNewContext(loader, context);
@@ -160,7 +160,7 @@ test('tray file controls expose keyboard-operable open and visible remove button
   const source = fs.readFileSync(require.resolve('../extras-ui.js'), 'utf8');
   const render = source.slice(source.indexOf('  function render() {'), source.indexOf('  // ---------- quick mirror'));
   const root = { innerHTML: '', querySelectorAll: () => [] };
-  const context = { root, currentView: 'tray', trayFiles: [{ name: 'fixture.txt', path: 'C:\\fixture.txt', size: 10 }], trayError: '', window: { __twocodePrefs: () => ({ lang: 'en' }) }, esc: String };
+  const context = { root, currentView: 'tray', trayFiles: [{ name: 'fixture.txt', path: 'C:\\fixture.txt', size: 10 }], trayError: '', window: { __orixPrefs: () => ({ lang: 'en' }) }, esc: String };
   vm.runInNewContext(render + '\nrender();', context);
   assert.match(root.innerHTML, /<button\b[^>]*class="ex-open"[^>]*>/);
   assert.match(root.innerHTML, /<button\b[^>]*class="ex-x"/);

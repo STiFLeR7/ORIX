@@ -6,7 +6,7 @@ Product-reference review date 2026-11-05. This reference summarizes public produ
 
 ## Identity and purpose
 
-ORIX's primary brand line is “Your desktop, within reach.” The application provides a compact desktop layer together with a configuration dashboard. Its source is published by the ORIX project at https://github.com/STiFLeR7/ORIX under the ISC license. The project describes its recovery provenance and subsequent development in its repository documentation.
+ORIX's primary brand line is “Your desktop, within reach.” The application provides a compact desktop layer together with a configuration dashboard. Its source is published by the ORIX project at https://github.com/STiFLeR7/ORIX under the ISC license.
 
 ORIX is the Windows desktop product described here. Its core local tools are free. Optional AI and music services apply their own accounts, subscriptions, usage conditions and privacy policies.
 
@@ -87,5 +87,5 @@ Use the published releases and the project's release and code signing records. I
 - [Code signing policy](https://raw.githubusercontent.com/STiFLeR7/ORIX/main/docs/CODE-SIGNING.md)
 - [Removal guidance](https://raw.githubusercontent.com/STiFLeR7/ORIX/main/docs/ORIX-REMOVAL.md)
 - [Contribution guidance](https://raw.githubusercontent.com/STiFLeR7/ORIX/main/CONTRIBUTING.md)
-- [Recovery provenance](https://raw.githubusercontent.com/STiFLeR7/ORIX/main/RECOVERY.md)
+- [Testing](https://raw.githubusercontent.com/STiFLeR7/ORIX/main/TESTING.md)
 - [Published releases](https://github.com/STiFLeR7/ORIX/releases)

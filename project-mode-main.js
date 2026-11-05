@@ -15,8 +15,8 @@ const chatgpt = require('./chatgpt-provider');
 // CONFIG
 // ============================================================
 
-const DEFAULT_TWOCODE_MODEL =
-  process.env.TWOCODE_AI_MODEL ||
+const DEFAULT_ORIX_MODEL =
+  process.env.ORIX_AI_MODEL ||
   'gpt-6-luna';
 
 const DEFAULT_OPENAI_MODEL =
@@ -46,19 +46,19 @@ const MAX_CHAT_MESSAGES =
 const PROJECT_FILE = () =>
   path.join(
     app.getPath('userData'),
-    'twocode-project.json'
+    'orix-project.json'
   );
 
 const AI_SETTINGS_FILE = () =>
   path.join(
     app.getPath('userData'),
-    'twocode-ai-settings.json'
+    'orix-ai-settings.json'
   );
 
 const CHAT_FILE = () =>
   path.join(
     app.getPath('userData'),
-    'twocode-project-chats.json'
+    'orix-project-chats.json'
   );
 
 
@@ -67,9 +67,11 @@ const CHAT_FILE = () =>
 // ============================================================
 
 const IGNORE_DIRECTORIES =
-  new Set(['.twocode-tools', '.twocode-backups', 
+  new Set(['.orix-tools', '.orix-backups',
+    '.' + require('./orix-compat.cjs').previous + '-tools',
+    '.' + require('./orix-compat.cjs').previous + '-backups',
     'node_modules',
-    '.twocode-backups',
+    '.orix-backups',
     '.codex',
     '.ssh',
     '.aws',
@@ -274,11 +276,11 @@ function loadAISettingsRaw() {
 
   return {
     provider:
-      saved.provider ||
-      'twocode',
+      (saved.provider === require('./orix-compat.cjs').previous ? 'orix' : saved.provider) ||
+      'orix',
 
-    twocodeDevKey:
-      saved.twocodeDevKey ||
+    orixDevKey:
+      saved.orixDevKey || saved[require('./orix-compat.cjs').previous + 'DevKey'] ||
       '',
 
     openaiKey:
@@ -342,31 +344,26 @@ async function resolveAIConfig({ peek = false } = {}) {
 
   const provider =
     settings.provider ||
-    'twocode';
+    'orix';
 
 
   // ----------------------------------------------------------
   // ORIX AI
   //
-  // PRODUCTIE LATER:
-  // hier wordt dit een request naar twocode.nl.
-  //
-  // ONTWIKKELVERSIE NU:
-  // tijdelijk OpenAI achter de schermen.
-  // ----------------------------------------------------------
+  // The built-in provider uses locally configured API access.
 
   if (
     provider ===
-    'twocode'
+    'orix'
   ) {
     const environmentKey =
-      process.env.TWOCODE_OPENAI_API_KEY ||
+      process.env.ORIX_OPENAI_API_KEY ||
       process.env.OPENAI_API_KEY ||
       '';
 
     const savedKey =
       decrypt(
-        settings.twocodeDevKey
+        settings.orixDevKey
       );
 
     const key =
@@ -375,7 +372,7 @@ async function resolveAIConfig({ peek = false } = {}) {
 
     return {
       provider:
-        'twocode',
+        'orix',
 
       name:
         'ORIX AI',
@@ -388,7 +385,7 @@ async function resolveAIConfig({ peek = false } = {}) {
       key,
 
       model:
-        DEFAULT_TWOCODE_MODEL,
+        DEFAULT_ORIX_MODEL,
 
       source:
         environmentKey
@@ -516,14 +513,14 @@ async function getPublicAISettings({ check = false } = {}) {
   const selected = await resolveAIConfig({ peek: !check });
   const chatgptStatus = check ? await chatgpt.status() : chatgpt.peek() || { installed: true, ready: false, unknown: true };
 
-  const twocodeEnvironmentKey =
-    process.env.TWOCODE_OPENAI_API_KEY ||
+  const orixEnvironmentKey =
+    process.env.ORIX_OPENAI_API_KEY ||
     process.env.OPENAI_API_KEY ||
     '';
 
-  const twocodeSavedKey =
+  const orixSavedKey =
     decrypt(
-      settings.twocodeDevKey
+      settings.orixDevKey
     );
 
   const openaiKey =
@@ -555,25 +552,25 @@ async function getPublicAISettings({ check = false } = {}) {
         selected.source
     },
 
-    twocode: {
+    orix: {
       ready:
         Boolean(
-          twocodeEnvironmentKey ||
-          twocodeSavedKey
+          orixEnvironmentKey ||
+          orixSavedKey
         ),
 
       environment:
         Boolean(
-          twocodeEnvironmentKey
+          orixEnvironmentKey
         ),
 
       hasDevelopmentKey:
         Boolean(
-          twocodeSavedKey
+          orixSavedKey
         ),
 
       model:
-        DEFAULT_TWOCODE_MODEL
+        DEFAULT_ORIX_MODEL
     },
 
     openai: {
@@ -621,7 +618,7 @@ function setAIProvider(
 ) {
   const allowed =
     new Set([
-      'twocode',
+      'orix',
       'openai',
       'chatgpt'
     ]);
@@ -686,9 +683,9 @@ function saveAIKey(
 
   if (
     type ===
-    'twocode'
+    'orix'
   ) {
-    settings.twocodeDevKey =
+    settings.orixDevKey =
       encrypt(
         clean
       );
@@ -732,9 +729,9 @@ function clearAIKey(
 
   if (
     type ===
-    'twocode'
+    'orix'
   ) {
-    settings.twocodeDevKey =
+    settings.orixDevKey =
       '';
 
   } else if (
@@ -997,8 +994,10 @@ function isSensitiveFile(
 
       'secret.json',
       'auth.json',
-      'twocode-ai-settings.json',
-      'twocode-connection.json',
+      'orix-ai-settings.json',
+      'orix-connection.json',
+      require('./orix-compat.cjs').previous + '-ai-settings.json',
+      require('./orix-compat.cjs').previous + '-connection.json',
 
       '.npmrc',
       '.pypirc',
@@ -1650,7 +1649,7 @@ async function createConversation(
       {
         metadata: {
           app:
-            'twocode-assistent',
+            'orix-assistent',
 
           provider:
             config.provider,

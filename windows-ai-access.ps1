@@ -11,7 +11,7 @@ $references = @(
 ) | Select-Object -Unique
 Add-Type -Path (Join-Path $PSScriptRoot 'windows-ai-access.cs') -ReferencedAssemblies $references
 function Target-From($value) {
-  $target = New-Object TwoCode.Native.Target
+  $target = New-Object ORIX.Native.Target
   $target.id = [string]$value.id
   $target.handle = [long]$value.handle
   $target.pid = [int]$value.pid
@@ -25,20 +25,20 @@ while ($null -ne ($line = [Console]::ReadLine())) {
   try {
     $request = ConvertFrom-Json -InputObject $line
     switch ($request.method) {
-      'windows' { $result = @{ ok = $true; windows = @([TwoCode.Native.Access]::Windows()) } }
-      'read' { $result = [TwoCode.Native.Access]::Read((Target-From $request.target)) }
-      'open' { [TwoCode.Native.Access]::Open((Target-From $request.target)); $result = @{ ok = $true } }
+      'windows' { $result = @{ ok = $true; windows = @([ORIX.Native.Access]::Windows()) } }
+      'read' { $result = [ORIX.Native.Access]::Read((Target-From $request.target)) }
+      'open' { [ORIX.Native.Access]::Open((Target-From $request.target)); $result = @{ ok = $true } }
       'reply' {
         $guards = @($request.guards | ForEach-Object {
-          $guard = New-Object TwoCode.Native.Guard
+          $guard = New-Object ORIX.Native.Guard
           $guard.id = [string]$_.id; $guard.name = [string]$_.name; $guard
         })
         $timeline = @($request.timeline | ForEach-Object {
-          $guard = New-Object TwoCode.Native.Guard
+          $guard = New-Object ORIX.Native.Guard
           $guard.id = [string]$_.id; $guard.name = [string]$_.name; $guard
         })
-        [TwoCode.Native.Access]::Reply((Target-From $request.target), [string]$request.contextKey,
-          [string]$request.composerId, [TwoCode.Native.Guard[]]$guards, [TwoCode.Native.Guard[]]$timeline, [string]$request.text)
+        [ORIX.Native.Access]::Reply((Target-From $request.target), [string]$request.contextKey,
+          [string]$request.composerId, [ORIX.Native.Guard[]]$guards, [ORIX.Native.Guard[]]$timeline, [string]$request.text)
         $result = @{ ok = $true }
       }
       default { throw 'Unknown command.' }

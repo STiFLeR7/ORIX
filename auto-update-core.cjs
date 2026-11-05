@@ -117,10 +117,10 @@ function extractZip(buf, dest) {
 }
 
 /**
- * Helper that runs after TwoCode has quit (TwoCode.exe started as plain Node, so no PowerShell or console is needed):
+ * Helper that runs after ORIX has quit (ORIX.exe started as plain Node, so no PowerShell or console is needed):
  * it waits for the app to end, swaps resourcespp for resourcespp.next, keeps the old version as
- * resourcespp.prev and starts TwoCode again when asked. If anything fails, the old version stays (or comes back).
- * Arguments: <pid> <resources folder> <TwoCode.exe> <relaunch 1|0> <log file>
+ * resourcespp.prev and starts ORIX again when asked. If anything fails, the old version stays (or comes back).
+ * Arguments: <pid> <resources folder> <ORIX.exe> <relaunch 1|0> <log file>
  */
 function swapHelperSource() {
   return `const fs = require('fs'), path = require('path'), { spawn } = require('child_process');

@@ -7,7 +7,7 @@ using System.Threading;
 using System.Windows;
 using System.Windows.Automation;
 
-namespace TwoCode.Native {
+namespace ORIX.Native {
   public class Target {
     public string id, title, process, started;
     public long handle;

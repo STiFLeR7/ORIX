@@ -40,7 +40,7 @@
     ctx.lineWidth = 1.7; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.strokeStyle = colour === LINE ? window.__orixCanvasColors?.text || colour : colour; ctx.fillStyle = fill === '#000' ? window.__orixCanvasColors?.surface || fill : fill;
     draw(ctx, arg); ctx.restore(); return true;
   }
-  window.__twocodeIcon = icon;
+  window.__orixIcon = icon;
 
   // ---- pills: same box, but a line icon instead of a text glyph ----
   pill = function (x, y, width, glyph, label, key) {
@@ -53,15 +53,15 @@
   };
 
   // ---- volume: 0 = silent, 1 = loud (replaces the on/off sound toggle) ----
-  const read = () => { try { const v = Number(localStorage.getItem('twocode:volume')); return Number.isFinite(v) && localStorage.getItem('twocode:volume') !== null ? v : soundEnabled ? 0.7 : 0; } catch { return 0.7; } };
+  const read = () => { try { const v = Number(localStorage.getItem('orix:volume')); return Number.isFinite(v) && localStorage.getItem('orix:volume') !== null ? v : soundEnabled ? 0.7 : 0; } catch { return 0.7; } };
   let volume = read();
   const setVolume = v => {
     volume = Math.max(0, Math.min(1, Math.round(v * 20) / 20));
     soundEnabled = volume > 0;
-    try { localStorage.setItem('twocode:volume', String(volume)); localStorage.setItem('twocode:sound', soundEnabled ? 'on' : 'off'); } catch {}
+    try { localStorage.setItem('orix:volume', String(volume)); localStorage.setItem('orix:sound', soundEnabled ? 'on' : 'off'); } catch {}
   };
   setVolume(volume);
-  window.__twocodeVolume = () => volume;
+  window.__orixVolume = () => volume;
   // Never two open/close sounds on top of each other (that sounded like a glitch).
   const baseSound = sound;
   let lastUiSound = 0;
@@ -80,19 +80,19 @@
   const TITLES = { chat: ['ORIX', 'ORIX'], spotify: ['Muziek', 'Music'], monitor: ['Claude', 'Claude'], assistant: ['Claude', 'Claude'], focus: ['Focus', 'Focus'],
     tray: ['Lade', 'Tray'], clips: ['Klembord', 'Clipboard'], note: ['Notitie', 'Note'], apps: ['Apps', 'Apps'], shortcuts: ['Snelknoppen', 'Quick buttons'],
     settings: ['Instellingen', 'Settings'], mirror: ['Spiegel', 'Mirror'] };
-  const en = () => window.__twocodePrefs?.().lang === 'en';
+  const en = () => window.__orixPrefs?.().lang === 'en';
   const round = (x, y, r, fill) => { ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fillStyle = fill; ctx.fill(); };
   const press = { key: null, at: 0 }; // what is pressed right now (it dims instantly, on pointer-down)
   const pressed = key => press.key === key && performance.now() - press.at < 600;
   let menuOpen = false, menuAt = 0, quitArmed = false, dragging = false;
   const MENU = [['apps', 'grid', ['Alle apps', 'All apps']], ['settings', 'gear', ['Instellingen', 'Settings']], ['collapse', 'collapse', ['Inklappen', 'Fold in']], ['quit', 'power', ['Afsluiten', 'Quit']]];
   const menuItems = () => MENU;
-  window.__twocodePageTint = () => '#ffffff';
+  window.__orixPageTint = () => '#ffffff';
   // the pages in a row (the tabs and ‹ ›); only the page you are on wears a colour
   const PAGES = [
     { view: 'home', icon: 'home', tint: '#ffffff', nl: 'Home', en: 'Home' },
     { view: 'monitor', icon: 'claude', tint: '#d97757', nl: 'Claude', en: 'Claude' },
-    { view: 'spotify', icon: 'music', tint: () => window.__twocodeAlbumColour || '#ff375f', nl: 'Muziek', en: 'Music' },
+    { view: 'spotify', icon: 'music', tint: () => window.__orixAlbumColour || '#ff375f', nl: 'Muziek', en: 'Music' },
     { view: 'chat', icon: 'chat', tint: '#30d158', nl: 'ORIX', en: 'ORIX' },
     { view: 'focus', icon: 'timer', tint: '#bf5af2', nl: 'Focus', en: 'Focus' },
     { view: 'tray', icon: 'tray', tint: '#ffd60a', nl: 'Lade', en: 'Tray' },
@@ -101,10 +101,10 @@
   ];
   const pageIndex = () => PAGES.findIndex(pg => pg.view === (currentView === 'assistant' ? 'monitor' : currentView));
   function go(view) {
-    if (window.__twocodeHomeEditing?.()) window.__twocodeHomeEdit?.(false);
+    if (window.__orixHomeEditing?.()) window.__orixHomeEdit?.(false);
     const from = pageIndex(), to = PAGES.findIndex(pg => pg.view === view);
-    window.__twocodeNavDir = from < 0 || to < 0 || from === to ? 0 : to > from ? 1 : -1; // the new page slides in from that side
-    if (view === 'monitor') { window.__twocodeMonitor?.open?.('claudecode'); return; }
+    window.__orixNavDir = from < 0 || to < 0 || from === to ? 0 : to > from ? 1 : -1; // the new page slides in from that side
+    if (view === 'monitor') { window.__orixMonitor?.open?.('claudecode'); return; }
     setView(view); setMode('expanded');
   }
   const ease = (from, to, k) => from + (to - from) * k;
@@ -112,10 +112,10 @@
     for (let i = 0; i < 4; i++) { const an = i * Math.PI / 4; ctx.beginPath(); ctx.moveTo(x - Math.cos(an) * r, y - Math.sin(an) * r); ctx.lineTo(x + Math.cos(an) * r, y + Math.sin(an) * r); ctx.stroke(); } ctx.restore(); };
   const pageIcon = (pg, x, y, size, colour) => pg.icon === 'claude' ? claudeGlyph(x, y, colour, size) : icon(pg.icon, x, y, size, colour, null, 'rgba(0,0,0,0)');
   const nav = { vol: 0, sliding: false, lastSet: 0, widths: null };
-  window.__twocodeNavGeometry = () => ({ top: 34, bottom: 38, side: 24 }); // contentRect (mascot.html) keeps out of this frame
+  window.__orixNavGeometry = () => ({ top: 34, bottom: 38, side: 24 }); // contentRect (mascot.html) keeps out of this frame
   // a small label above a tab you point at (HTML, so it lies above the pages)
-  const tip = document.createElement('div'); tip.id = 'twocode-tip'; document.body.appendChild(tip);
-  const tipStyle = document.createElement('style'); tipStyle.textContent = `#twocode-tip{position:absolute;z-index:95;pointer-events:none;padding:3px 8px;border-radius:7px;background:#2c2c2e;color:#fff;font:600 11px Inter,"Segoe UI",sans-serif;white-space:nowrap;transform:translate(-50%,-100%);opacity:0;transition:opacity .12s}#twocode-tip.on{opacity:1}`;
+  const tip = document.createElement('div'); tip.id = 'orix-tip'; document.body.appendChild(tip);
+  const tipStyle = document.createElement('style'); tipStyle.textContent = `#orix-tip{position:absolute;z-index:95;pointer-events:none;padding:3px 8px;border-radius:7px;background:#2c2c2e;color:#fff;font:600 11px Inter,"Segoe UI",sans-serif;white-space:nowrap;transform:translate(-50%,-100%);opacity:0;transition:opacity .12s}#orix-tip.on{opacity:1}`;
   document.head.appendChild(tipStyle);
   drawHeader = function (alpha) {
     const left = islandBounds.x, right = left + islandBounds.width, H = islandBounds.height, cy = 17, home = currentView === 'home';
@@ -123,7 +123,7 @@
     // left: the page name
     const t = TITLES[currentView];
     // two-tone names, like "Focustimer": the first part white, the second in the page's colour
-    const TWO = { monitor: [['Claude ', 'Code'], ['Claude ', 'Code'], '#d97757'], spotify: [['Muziek', 'speler'], ['Music ', 'Player'], () => window.__twocodeAlbumColour || '#ff375f'],
+    const TWO = { monitor: [['Claude ', 'Code'], ['Claude ', 'Code'], '#d97757'], spotify: [['Muziek', 'speler'], ['Music ', 'Player'], () => window.__orixAlbumColour || '#ff375f'],
       focus: [['Focus', 'timer'], ['Focus ', 'Timer'], '#bf5af2'], tray: [['Bestanden', 'lade'], ['File ', 'Tray'], '#ffd60a'], clips: [['Klem', 'bord'], ['Clip', 'board'], '#64d2ff'],
       note: [['Notitie', 'blok'], ['Note', 'pad'], '#ffd60a'], chat: [['ORIX ', 'Chat'], ['ORIX ', 'Chat'], '#30d158'], apps: [['Alle ', 'apps'], ['All ', 'apps'], '#8e8e93'],
       settings: [['Instel', 'lingen'], ['Set', 'tings'], '#8e8e93'], mirror: [['Spie', 'gel'], ['Mir', 'ror'], '#8e8e93'] };
@@ -141,9 +141,9 @@
     const time = d.toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' });
     ctx.save(); ctx.font = '500 12px Inter, "Segoe UI", sans-serif'; const dw = ctx.measureText(day + ' ').width; ctx.font = '700 12px Inter, "Segoe UI", sans-serif'; const tw = ctx.measureText(time).width; ctx.restore();
     // (no little eyes while ORIX stands big on the page himself; the little ones can be grabbed and dragged out too)
-    const eyesOn = !window.__twocodeRoboBig?.(), total = (eyesOn ? 22 : 0) + dw + tw, x0 = (left + right) / 2 - total / 2, tx = x0 + (eyesOn ? 22 : 0);
+    const eyesOn = !window.__orixRoboBig?.(), total = (eyesOn ? 22 : 0) + dw + tw, x0 = (left + right) / 2 - total / 2, tx = x0 + (eyesOn ? 22 : 0);
     hit.headEyes = null;
-    if (eyesOn) { window.__twocodeIslandEyes?.(x0 + 8, cy, 0.62); hit.headEyes = { x: x0 - 8, y: 2, width: 32, height: 30 }; }
+    if (eyesOn) { window.__orixIslandEyes?.(x0 + 8, cy, 0.62); hit.headEyes = { x: x0 - 8, y: 2, width: 32, height: 30 }; }
     text(day, tx, cy + 4.5, 12, '#8e8e93', 500); text(time, tx + dw, cy + 4.5, 12, '#ffffff', 700);
     // right: ⋯ (and, while music plays on another page, a small visualizer that takes you to it; on the tray: clear all)
     const mx = right - 24, overM = inside(pointer.x, pointer.y, { x: mx - 16, y: 2, width: 32, height: 30 });
@@ -151,18 +151,18 @@
     for (const dx of [-5, 0, 5]) round(mx + dx, cy, 1.8, '#ffffff');
     hit.more = { x: mx - 18, y: 0, width: 36, height: 34 };
     hit.navMusic = null; hit.navClear = null;
-    if (currentView === 'tray' && (window.__twocodeTrayCount?.() || 0) > 0) {
+    if (currentView === 'tray' && (window.__orixTrayCount?.() || 0) > 0) {
       const label = en() ? 'Clear all' : 'Wis alles'; ctx.save(); ctx.font = '600 11px Inter, "Segoe UI", sans-serif'; const w = ctx.measureText(label).width + 18; ctx.restore();
       const b = { x: mx - 22 - w, y: cy - 10, width: w, height: 20 }, over = inside(pointer.x, pointer.y, b);
       box(b.x, b.y, b.width, b.height, 10, over ? 'rgba(255,69,58,.3)' : 'rgba(255,69,58,.18)'); text(label, b.x + w / 2, cy + 4, 11, '#ff6961', 600, 'center'); hit.navClear = b;
     } else if (currentView !== 'spotify' && spotifyConnected && spotifyState?.track && spotifyState.is_playing) {
       const b = { x: mx - 42, y: cy - 10, width: 22, height: 20 };
-      window.__twocodeVisualizer?.('header', b.x + 2, cy, 16, 12, window.__twocodeAlbumColour || '#ffffff', 4); hit.navMusic = b;
+      window.__orixVisualizer?.('header', b.x + 2, cy, 16, 12, window.__orixAlbumColour || '#ffffff', 4); hit.navMusic = b;
     }
     hit.navPrev = null; hit.navNext = null; hit.navChat = null;
     const i = pageIndex(), by = H - 19;
     // bottom right: the speaker; point at it and it slides open into a volume slider
-    const sys = window.__twocodeSysVolume || { level: 50, muted: false }, level = sys.muted ? 0 : sys.level / 100;
+    const sys = window.__orixSysVolume || { level: 50, muted: false }, level = sys.muted ? 0 : sys.level / 100;
     const volZone = { x: right - 132, y: by - 15, width: 124, height: 30 };
     nav.vol += ((nav.sliding || inside(pointer.x, pointer.y, nav.vol > 0.5 ? volZone : { x: right - 40, y: by - 15, width: 32, height: 30 }) ? 1 : 0) - nav.vol) * 0.25;
     icon('speaker', right - 25, by, 16, nav.vol > 0.1 ? '#ffffff' : '#8e8e93', level, 'rgba(0,0,0,0)');
@@ -205,16 +205,16 @@
   const setSys = clientX => {
     const b = hit.navVol; if (!b) return;
     const level = Math.round(Math.max(0, Math.min(1, (clientX - b.track.x) / b.track.width)) * 100);
-    window.__twocodeVolumeQuietUntil = performance.now() + 1500;
-    window.__twocodeSysVolume = { level, muted: false };
-    const now = performance.now(); if (now - nav.lastSet > 50) { nav.lastSet = now; window.twocode?.volumeSet?.(level)?.catch?.(() => {}); }
+    window.__orixVolumeQuietUntil = performance.now() + 1500;
+    window.__orixSysVolume = { level, muted: false };
+    const now = performance.now(); if (now - nav.lastSet > 50) { nav.lastSet = now; window.orix?.volumeSet?.(level)?.catch?.(() => {}); }
   };
   canvas.addEventListener('pointerdown', e => {
     if (mode !== 'expanded' || !inside(e.clientX, e.clientY, hit.navVol)) return;
     e.preventDefault(); e.stopImmediatePropagation(); nav.sliding = true; canvas.setPointerCapture?.(e.pointerId); setSys(e.clientX);
   }, true);
   canvas.addEventListener('pointermove', e => { if (nav.sliding) setSys(e.clientX); });
-  const endSlide = e => { if (!nav.sliding) return; nav.sliding = false; setSys(e.clientX); const lv = window.__twocodeSysVolume?.level; if (lv != null) window.twocode?.volumeSet?.(lv)?.catch?.(() => {}); };
+  const endSlide = e => { if (!nav.sliding) return; nav.sliding = false; setSys(e.clientX); const lv = window.__orixSysVolume?.level; if (lv != null) window.orix?.volumeSet?.(lv)?.catch?.(() => {}); };
   canvas.addEventListener('pointerup', endSlide); canvas.addEventListener('pointercancel', endSlide);
   // the frame's buttons
   canvas.addEventListener('click', e => {
@@ -224,26 +224,26 @@
     if (at(hit.navVol)) { stop(); return; }
     for (let j = 0; j < n; j++) if (at(hit['navTab' + j])) { stop(); sound('click'); go(PAGES[j].view); return; }
     if (at(hit.navMusic)) { stop(); sound('click'); go('spotify'); return; }
-    if (at(hit.navClear)) { stop(); sound('click'); window.__twocodeTrayClear?.(); return; }
+    if (at(hit.navClear)) { stop(); sound('click'); window.__orixTrayClear?.(); return; }
   }, true);
   // The ⋯ menu (HTML, so it lies above every page): it grows out of its button (Apple: anchor to the source),
   // ORIX's sound on top, then four rows; Quit asks once more in the row itself.
-  const menu = document.createElement('div'); menu.id = 'twocode-menu'; document.body.appendChild(menu);
+  const menu = document.createElement('div'); menu.id = 'orix-menu'; document.body.appendChild(menu);
   const menuStyle = document.createElement('style'); menuStyle.textContent = `
-#twocode-menu{position:absolute;z-index:90;width:236px;padding:6px;box-sizing:border-box;border-radius:12px;background:#1c1c1e;box-shadow:0 18px 44px rgba(0,0,0,.6);
+#orix-menu{position:absolute;z-index:90;width:236px;padding:6px;box-sizing:border-box;border-radius:12px;background:#1c1c1e;box-shadow:0 18px 44px rgba(0,0,0,.6);
   font:500 15px Inter,"Segoe UI",sans-serif;color:#fff;transform-origin:calc(100% - 12px) -15px;opacity:0;transform:scale(.6);pointer-events:none;
   transition:opacity .16s ease-out,transform .22s cubic-bezier(.2,.9,.3,1)}
-#twocode-menu.open{opacity:1;transform:none;pointer-events:auto}
-#twocode-menu .mn-vol{display:flex;align-items:center;gap:12px;height:44px;padding:0 12px}
-#twocode-menu .mn-track{flex:1;height:6px;border-radius:3px;background:#3a3a3c;position:relative;cursor:pointer}
-#twocode-menu .mn-track i{position:absolute;left:0;top:0;bottom:0;border-radius:3px;background:#fff}
-#twocode-menu .mn-track::before{content:'';position:absolute;inset:-14px 0}
-#twocode-menu button{display:flex;align-items:center;gap:12px;width:100%;height:40px;padding:0 12px;border:0;border-top:1px solid #2c2c2e;border-radius:0;background:transparent;color:#fff;font:inherit;text-align:left;cursor:pointer}
-#twocode-menu button:hover{background:#2c2c2e;border-radius:8px;border-top-color:transparent}
-#twocode-menu button:active{transform:scale(.98);transition:transform .1s ease-out}
-#twocode-menu button.red{color:#ff4245}
-#twocode-menu button.green{color:#30d158}
-#twocode-menu svg{flex:none}`;
+#orix-menu.open{opacity:1;transform:none;pointer-events:auto}
+#orix-menu .mn-vol{display:flex;align-items:center;gap:12px;height:44px;padding:0 12px}
+#orix-menu .mn-track{flex:1;height:6px;border-radius:3px;background:#3a3a3c;position:relative;cursor:pointer}
+#orix-menu .mn-track i{position:absolute;left:0;top:0;bottom:0;border-radius:3px;background:#fff}
+#orix-menu .mn-track::before{content:'';position:absolute;inset:-14px 0}
+#orix-menu button{display:flex;align-items:center;gap:12px;width:100%;height:40px;padding:0 12px;border:0;border-top:1px solid #2c2c2e;border-radius:0;background:transparent;color:#fff;font:inherit;text-align:left;cursor:pointer}
+#orix-menu button:hover{background:#2c2c2e;border-radius:8px;border-top-color:transparent}
+#orix-menu button:active{transform:scale(.98);transition:transform .1s ease-out}
+#orix-menu button.red{color:#ff4245}
+#orix-menu button.green{color:#30d158}
+#orix-menu svg{flex:none}`;
   document.head.appendChild(menuStyle);
   const SVG = {
     speaker: '<path d="M4 9.5h4l4.5-4v13L8 14.5H4z" fill="currentColor"/><path d="M16 9a4 4 0 0 1 0 6M18.5 6.5a7.5 7.5 0 0 1 0 11"/>',
@@ -255,7 +255,7 @@
   const svg = (name, colour = 'currentColor') => `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="${colour}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${SVG[name]}</svg>`;
   function renderMenu() {
     const words = (nl, en2) => en() ? en2 : nl;
-    menu.innerHTML = `<div class="mn-vol">${svg('speaker')}<div class="mn-track" role="slider" aria-label="${words('Geluid van ORIX', 'ORIX sounds')}"><i style="width:${Math.round((window.__twocodeVolume?.() ?? 0) * 100)}%"></i></div></div>`
+    menu.innerHTML = `<div class="mn-vol">${svg('speaker')}<div class="mn-track" role="slider" aria-label="${words('Geluid van ORIX', 'ORIX sounds')}"><i style="width:${Math.round((window.__orixVolume?.() ?? 0) * 100)}%"></i></div></div>`
       + menuItems().map(([key, g, label]) => `<button type="button" data-menu="${key}" class="${key === 'quit' ? 'red' : key === 'update' ? 'green' : ''}">${svg(g)}${key === 'quit' && quitArmed ? words('Klik nog eens om af te sluiten', 'Click again to quit') : (en() ? label[1] : label[0])}</button>`).join('');
   }
   function openMenu(on) {
@@ -277,11 +277,11 @@
   menu.addEventListener('click', e => {
     const b = e.target.closest('[data-menu]'); if (!b) return;
     const choice = b.dataset.menu;
-    if (choice === 'quit') { if (quitArmed) { openMenu(false); sound('click'); window.twocode?.close?.(); } else { quitArmed = true; renderMenu(); sound('click'); } return; }
+    if (choice === 'quit') { if (quitArmed) { openMenu(false); sound('click'); window.orix?.close?.(); } else { quitArmed = true; renderMenu(); sound('click'); } return; }
     openMenu(false);
     if (choice === 'apps') { setView('apps'); sound('click'); }
     else if (choice === 'settings') { setView('settings'); sound('click'); }
-    else if (choice === 'collapse') { window.__twocodeMonitor?.small?.(); window.__twocodeHoldClosed?.(); setMode('rest'); }
+    else if (choice === 'collapse') { window.__orixMonitor?.small?.(); window.__orixHoldClosed?.(); setMode('rest'); }
   });
   // a press anywhere else closes it
   document.addEventListener('pointerdown', e => { if (menuOpen && !menu.contains(e.target) && !inside(e.clientX, e.clientY, hit.more)) openMenu(false); }, true);
@@ -295,11 +295,11 @@
     if (mode !== 'expanded') return;
     if (at(hit.more)) { stop(); openMenu(!menuOpen); sound('click'); return; }
     if (at(hit.back)) {
-      stop(); if (currentView === 'monitor') window.__twocodeMonitor?.small?.();
-      if (window.__twocodeHomeEditing?.()) window.__twocodeHomeEdit?.(false);
+      stop(); if (currentView === 'monitor') window.__orixMonitor?.small?.();
+      if (window.__orixHomeEditing?.()) window.__orixHomeEdit?.(false);
       setView('home'); setMode('expanded'); return;
     }
   }, true);
   window.addEventListener('keydown', e => { if (e.key === 'Escape' && menuOpen) { openMenu(false); e.stopImmediatePropagation(); } }, true);
-  window.__twocodeMenuOpen = () => menuOpen;
+  window.__orixMenuOpen = () => menuOpen;
 })();

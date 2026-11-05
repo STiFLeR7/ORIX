@@ -7,11 +7,11 @@ Inventory date: 2026-11-02. This is a preservation checklist. The redesign is im
 | Existing entry | New destination | Backing code/contract | Save behavior / verification |
 | --- | --- | --- | --- |
 | Home / `home` | Overview | `settings-app:home`, `settings-app:connections`; existing activity search | Read-only; history/search and connection links |
-| Desktop layer / `karakter` | Appearance | `__twocodeSettingsCharacter`, `settings-app:get` list/click | Draft; status colors/sleep preview, Save/Discard |
-| Apps / `apps` | Modules | `settings-app:get` apps/app; `twocode:apps-off` | Draft; exact nine IDs below |
+| Desktop layer / `karakter` | Appearance | `__orixSettingsCharacter`, `settings-app:get` list/click | Draft; status colors/sleep preview, Save/Discard |
+| Apps / `apps` | Modules | `settings-app:get` apps/app; `orix:apps-off` | Draft; exact nine IDs below |
 | Connections / `connect` | Settings / Connections | `settings-app:connections`, `settings-app:connect`; monitor provider setup | Existing connection actions remain explicit/immediate; do not pretend Save controls installed hooks |
 | AI & Chat / `ai` | Settings / AI & Chat | `ai-settings:*`; dashboard's `aiDirty` and provider selection flow | Preserve existing provider draft vs explicit login/logout/test actions |
-| General / `general` | Settings / General, with theme controls in General | `__twocodeSettingsExtra`, `settings-bridge-ui.js` | Preserve row delegation and draft/save/discard; action exceptions below |
+| General / `general` | Settings / General, with theme controls in General | `__orixSettingsExtra`, `settings-bridge-ui.js` | Preserve row delegation and draft/save/discard; action exceptions below |
 | News / `news` | Settings / Updates | local `settings-app:news`, disabled `update:*` | Manual only; repository link; no vendor checks/downloads |
 | Removed `wardrobe` link | Appearance | legacy route alias | Do not restore retired pet wardrobe or paid activation |
 | About (new destination for existing release facts) | Settings / About | app version, LICENSE, THIRD_PARTY_NOTICES | Read-only, accurate provenance and repository |
@@ -23,18 +23,18 @@ Inventory date: 2026-11-02. This is a preservation checklist. The redesign is im
 | `claude` | yes | AI status, monitor/history, questions/replies; home/footer, Ctrl+Alt+3 | `ai-monitor-*`, `claude-code-hooks.cjs`, reply/statusline helpers | [ ] Overview status → existing monitor, Settings connections/AI |
 | `buddy` | no | Desktop context drag/drop, ask about screen, spelling/Word fixes | `buddy:*`, `buddy-main.cjs`, `chat-ui.js` | [ ] Modules toggle, existing context/chat workflow |
 | `spotify` | no | Playback/devices/connect; home/footer, Ctrl+Alt+2 | `spotify:*`, `spotify-ui.js`; user-supplied public client ID | [ ] Modules, media view, configured/unconfigured states |
-| `focus` | no | Timer/duration presets/start/stop; home/footer, Ctrl+Alt+4 | `focus-ui.js`, `twocode-fun.js`; focus duration prefs | [ ] Modules, Focus view; running while layer OFF |
+| `focus` | no | Timer/duration presets/start/stop; home/footer, Ctrl+Alt+4 | `focus-ui.js`, `orix-fun.js`; focus duration prefs | [ ] Modules, Focus view; running while layer OFF |
 | `tray` | no | Dropped files, open/remove/drag-out; footer and drop target | `extras:tray-*`; `tray.json` | [ ] Modules and file tray with synthetic files |
 | `clips` | no | Clipboard history/copy/clear; footer, Ctrl+Alt+5 | `extras:clips-*`; existing collector | [ ] Modules and clipboard; synthetic inputs only |
 | `note` | no | Note/edit/check circles/autosave; footer, Ctrl+Alt+6 | `extras:note-get/set`; `note.json`, max 20000 chars | [ ] Modules, note persisted across restart |
 | `clock` | no | Home clock/date | existing home renderer and app-off list | [ ] Modules toggle hides/shows clock without affecting timer |
-| `settings` | yes | Gear/footer/tray/Start menu `--settings` | `settings-app:open`, `twocode-open-settings` | [ ] Always reachable, including while layer OFF |
+| `settings` | yes | Gear/footer/tray/Start menu `--settings` | `settings-app:open`, `orix-open-settings` | [ ] Always reachable, including while layer OFF |
 
 ## Existing controls outside the catalog
 
 | Control | State/handler | Destination and acceptance |
 | --- | --- | --- |
-| Interface language | Compatibility field `twocode:prefs.lang` | English only per latest user decision; old Dutch values migrate without altering user content. No language selector. |
+| Interface language | Compatibility field `orix:prefs.lang` | English only per latest user decision; old Dutch values migrate without altering user content. No language selector. |
 | Animation speed | `prefs.speed` (`snel`, `normaal`) | Appearance; preserve speed selection; reduced motion takes precedence over decorative motion |
 | Confetti | `prefs.confetti` | Appearance; preserve toggle, no decorative effects when reduced motion applies |
 | Status colors | `prefs.lightBusy/lightDone/lightError` | Appearance; preserve presets and demos, busy/question distinguishable beyond color |
@@ -58,7 +58,7 @@ Inventory date: 2026-11-02. This is a preservation checklist. The redesign is im
 
 - `main.js`: island creation, ready-to-show, interactive/click-through handling.
 - `tray-main.cjs`: tray click/open, `--settings`, second instance, restart and quit.
-- `island-window-main.js`: Ctrl+Alt+T, crashed-renderer recovery. Foundation now targets the island, not first BrowserWindow.
+- `island-window-main.js`: Ctrl+Alt+T, crashed-renderer restoration. Foundation now targets the island, not first BrowserWindow.
 - `extras-main.cjs`: Ctrl+Alt+1..6; renderer `tools-ui.js` and monitor listeners.
 - `buddy-main.cjs`: grab, regrab, drop/park, flyHome/arrived, delayed return, debug-only startup.
 - Renderer hover/blur/expand/collapse, project/chat navigation, file drag-enter, notification and monitor-driven reveals.
@@ -70,7 +70,7 @@ Original Robo styling/wardrobe/badges-as-shopping/paid activation are retired by
 
 ## Validation progress
 
-- Foundation source: note input persisted in isolated profile; Focus 5:00→4:49→Stop observed; recovery shortcut tested RED→GREEN.
+- Foundation source: note input persisted in isolated profile; Focus 5:00→4:49→Stop observed; restoration shortcut tested RED→GREEN.
 - Foundation packaged: island/Settings/buddy loaded; Home and local manual-update page observed; isolated installer 204-file hashes matched.
 - Redesigned navigation is implemented: canonical/legacy route tests preserve all nine module IDs and core flags. Source UI observed Overview, General settings and OFF→ON; Settings-only theme placement and Light preview verified; English-only supersedes the earlier language-selector direction. Other route/control checkboxes remain unverified until exercised.
 
@@ -81,4 +81,4 @@ Original Robo styling/wardrobe/badges-as-shopping/paid activation are retired by
 - Clipboard and tray: the installed Clipboard switch and synthetic polling/copy paths were exercised; actual Windows clipboard capture remains unverified. A disposable tray item reached mocked open and drag-start handlers, and keyboard removal preserved the source file; native external drag/drop remains unverified.
 - Spotify: disconnected state and synthetic device text were exercised in the installed app; real account connection, playback and device switching remain unverified.
 - Settings and project: trusted installed-app Settings/project requests and foreign-window rejection were exercised. An isolated VS Code extension-host round trip completed a synthetic edit; Windows URI routing and real provider work remain unverified.
-- Computer Use subsequently recovered. Native automated Tab navigation showed visible focus on sidebar buttons; Enter opened Appearance and Space opened Modules. This is a scoped keyboard-navigation check, not physical-input or screen-reader validation.
+- Computer Use subsequently reconnected. Native automated Tab navigation showed visible focus on sidebar buttons; Enter opened Appearance and Space opened Modules. This is a scoped keyboard-navigation check, not physical-input or screen-reader validation.

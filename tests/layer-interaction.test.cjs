@@ -30,7 +30,7 @@ test('the Claude shortcut opens the monitor and keeps it open without hover', ()
   const mascot = fs.readFileSync(require.resolve('../mascot.html'), 'utf8');
   const hover = mascot.slice(mascot.indexOf('function updateHover('), mascot.indexOf('function isTyping()'));
   let callback, opened, collapsed = 0;
-  const state = { window: { __twocodeMonitor: { open: provider => { opened = provider; } } },
+  const state = { window: { __orixMonitor: { open: provider => { opened = provider; } } },
     api: { onShortcut: fn => { callback = fn; } }, introFinished: true, currentView: 'monitor', mode: 'expanded',
     pointer: { known: false }, islandBounds: {}, inside: () => false, isTyping: () => false, leaveStartedAt: 0,
     UI: { HOME_LEAVE_DELAY: 100, VIEW_LEAVE_DELAY: 100 }, collapseIdle: () => collapsed++, setMode() {} };
@@ -75,7 +75,7 @@ test('AI settings shortcut opens the existing provider panel', () => {
   const source = fs.readFileSync(require.resolve('../tools-ui.js'), 'utf8');
   const start = source.indexOf('api.onShortcut?.('), end = source.indexOf("addEventListener('keydown'", start);
   let callback, dispatched, opened = 0;
-  const state = { window: { dispatchEvent: e => { dispatched = e.type; }, __twocodeOpenInlineSettings: () => opened++ }, CustomEvent: class { constructor(type) { this.type = type; } }, api: { onShortcut: fn => { callback = fn; } }, setView() {}, setMode() {} };
+  const state = { window: { dispatchEvent: e => { dispatched = e.type; }, __orixOpenInlineSettings: () => opened++ }, CustomEvent: class { constructor(type) { this.type = type; } }, api: { onShortcut: fn => { callback = fn; } }, setView() {}, setMode() {} };
   vm.runInNewContext(source.slice(start, end), state); callback('ai-settings');
-  assert.equal(dispatched, 'twocode:open-ai-settings'); assert.equal(opened, 1); assert.equal(state.window.__orixKeepOpen, true);
+  assert.equal(dispatched, 'orix:open-ai-settings'); assert.equal(opened, 1); assert.equal(state.window.__orixKeepOpen, true);
 });

@@ -1,9 +1,9 @@
-# Robo the buddy's eyes (buddy-main.cjs). Runs in the background while TwoCode runs and answers one line
+# Robo the buddy's eyes (buddy-main.cjs). Runs in the background while ORIX runs and answers one line
 # at a time, in a few milliseconds, so Robo can follow the window under the mouse while you drag him.
 #   <id> at <x> <y>                 -> the window under that point (physical pixels): title, process, visible rect
 #   <id> shot <x> <y> <w> <h> <file> -> saves that part of the screen as a PNG (only that part: light and fast)
 # Every answer starts with the same <id>, so answers never get mixed up.
-# TwoCode's own windows (the island, Robo's layer) are skipped: param -Skip is TwoCode's process id.
+# ORIX's own windows (the island, Robo's layer) are skipped: param -Skip is ORIX's process id.
 param([int]$Skip = 0)
 $ErrorActionPreference = 'Stop'
 [Console]::OutputEncoding = [Text.Encoding]::UTF8
@@ -25,7 +25,7 @@ public static class RoboEyes {
   [DllImport("dwmapi.dll")] static extern int DwmGetWindowAttribute(IntPtr h, int a, out int v, int size);
   public static void Init() { try { SetProcessDpiAwarenessContext(new IntPtr(-4)); } catch { SetProcessDPIAware(); } }
   static R Visible(IntPtr h) { R r; if (DwmGetWindowAttribute(h, 9, out r, 16) != 0) GetWindowRect(h, out r); return r; } // without the invisible borders
-  // The top-most real window under the point (in z-order), skipping TwoCode, hidden and see-through windows.
+  // The top-most real window under the point (in z-order), skipping ORIX, hidden and see-through windows.
   public static string At(int x, int y, uint skip) {
     string found = null;
     EnumWindows((h, p) => {

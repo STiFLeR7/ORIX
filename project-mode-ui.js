@@ -1,4 +1,4 @@
-// twocode-progress-v1
+// orix-progress-v1
 'use strict';
 (function projectUI() {
   let project = null;
@@ -25,13 +25,13 @@
   } catch {}
 
   const root = document.createElement('div');
-  root.id = 'twocode-project-v2';
+  root.id = 'orix-project-v2';
   document.body.appendChild(root);
 
   const style = document.createElement('style');
 
   style.textContent = `
-#twocode-project-v2 {
+#orix-project-v2 {
   position:absolute;
   z-index:50;
   display:none;
@@ -39,40 +39,40 @@
   font:10px/15px Inter, "Segoe UI", sans-serif;
   pointer-events:auto;
 }
-#twocode-project-v2 * {
+#orix-project-v2 * {
   box-sizing:border-box;
 }
-#twocode-project-v2 .tc-shell {
+#orix-project-v2 .tc-shell {
   height:100%;
   display:flex;
   flex-direction:column;
   min-height:0;
 }
-#twocode-project-v2 .tc-head {
+#orix-project-v2 .tc-head {
   display:flex;
   align-items:center;
   gap:7px;
   margin-bottom:8px;
   flex:none;
 }
-#twocode-project-v2 .tc-heading {
+#orix-project-v2 .tc-heading {
   flex:1;
   min-width:0;
 }
-#twocode-project-v2 .tc-label {
+#orix-project-v2 .tc-label {
   font-size:8px;
   color:#acc39c;
   letter-spacing:.1em;
   font-weight:bold;
 }
-#twocode-project-v2 .tc-title {
+#orix-project-v2 .tc-title {
   font-size:14px;
   font-weight:bold;
   overflow:hidden;
   text-overflow:ellipsis;
   white-space:nowrap;
 }
-#twocode-project-v2 button {
+#orix-project-v2 button {
   border:0;
   cursor:pointer;
   font:700 9px Inter, "Segoe UI", sans-serif;
@@ -81,43 +81,43 @@
   background:#20281e;
   color:#d4e0cc;
 }
-#twocode-project-v2 button:hover {
+#orix-project-v2 button:hover {
   background:#2d3829;
 }
-#twocode-project-v2 button:disabled {
+#orix-project-v2 button:disabled {
   opacity:.5;
   cursor:default;
 }
-#twocode-project-v2 .tc-messages {
+#orix-project-v2 .tc-messages {
   flex:1;
   min-height:0;
   overflow-y:auto;
   padding-right:4px;
 }
-#twocode-project-v2 .tc-messages::-webkit-scrollbar {
+#orix-project-v2 .tc-messages::-webkit-scrollbar {
   width:4px;
 }
-#twocode-project-v2 .tc-messages::-webkit-scrollbar-thumb {
+#orix-project-v2 .tc-messages::-webkit-scrollbar-thumb {
   background:#394333;
   border-radius:4px;
 }
-#twocode-project-v2 .tc-empty {
+#orix-project-v2 .tc-empty {
   height:100%;
   display:flex;
   flex-direction:column;
   justify-content:center;
   gap:5px;
 }
-#twocode-project-v2 .tc-empty strong {
+#orix-project-v2 .tc-empty strong {
   font-size:15px;
   color:#f4f7ef;
 }
-#twocode-project-v2 .tc-muted {
+#orix-project-v2 .tc-muted {
   color:#a3b09a;
   font-size:9px;
   line-height:14px;
 }
-#twocode-project-v2 .tc-message {
+#orix-project-v2 .tc-message {
   max-width:94%;
   border-radius:10px;
   padding:7px 10px;
@@ -127,21 +127,21 @@
   background:#161d14;
   color:#e3ebdc;
 }
-#twocode-project-v2 .tc-user {
+#orix-project-v2 .tc-user {
   margin-left:auto;
   background:#2b3823;
 }
-#twocode-project-v2 .tc-progress {
+#orix-project-v2 .tc-progress {
   flex:none;
   margin:4px 0 3px;
 }
-#twocode-project-v2 .tc-progress-row {
+#orix-project-v2 .tc-progress-row {
   display:flex;
   align-items:center;
   gap:8px;
   margin-bottom:5px;
 }
-#twocode-project-v2 .tc-status {
+#orix-project-v2 .tc-status {
   flex:1;
   min-width:0;
   min-height:14px;
@@ -151,26 +151,26 @@
   text-overflow:ellipsis;
   white-space:nowrap;
 }
-#twocode-project-v2 .tc-progress-meta {
+#orix-project-v2 .tc-progress-meta {
   color:#cbd4c4;
   font-size:9px;
   flex:none;
   font-variant-numeric:tabular-nums;
 }
-#twocode-project-v2 .tc-progress-track {
+#orix-project-v2 .tc-progress-track {
   height:6px;
   border-radius:8px;
   background:#35412b;
   position:relative;
   overflow:hidden;
 }
-#twocode-project-v2 .tc-progress-fill {
+#orix-project-v2 .tc-progress-fill {
   height:100%;
   border-radius:8px;
   background:#00c48a;
   transition:width .35s ease;
 }
-#twocode-project-v2 .tc-progress-waiting .tc-progress-track:after {
+#orix-project-v2 .tc-progress-waiting .tc-progress-track:after {
   content:'';
   position:absolute;
   inset:0;
@@ -178,10 +178,10 @@
   background:linear-gradient(90deg,transparent,#f0ffcd99,transparent);
   animation:tc-progress-pulse 1.5s linear infinite;
 }
-#twocode-project-v2 .tc-progress-error .tc-progress-fill {
+#orix-project-v2 .tc-progress-error .tc-progress-fill {
   background:#f2aa9b;
 }
-#twocode-project-v2 .tc-progress-error .tc-status {
+#orix-project-v2 .tc-progress-error .tc-status {
   color:#ffc1b7;
 }
 @keyframes tc-progress-pulse {
@@ -189,28 +189,28 @@
   to { transform:translateX(440%); }
 }
 @media(prefers-reduced-motion:reduce) {
-  #twocode-project-v2 .tc-progress-fill {
+  #orix-project-v2 .tc-progress-fill {
     transition:none;
   }
-  #twocode-project-v2 .tc-progress-track:after {
+  #orix-project-v2 .tc-progress-track:after {
     animation:none;
   }
 }
-#twocode-project-v2 .tc-error {
+#orix-project-v2 .tc-error {
   color:#ffc1b7;
   font-size:9px;
   margin-bottom:4px;
   max-height:43px;
   overflow:auto;
 }
-#twocode-project-v2 .tc-compose {
+#orix-project-v2 .tc-compose {
   display:flex;
   gap:7px;
   flex:none;
   margin-top:5px;
   align-items:flex-end;
 }
-#twocode-project-v2 textarea {
+#orix-project-v2 textarea {
   flex:1;
   min-width:0;
   resize:none;
@@ -224,15 +224,15 @@
   font:10px/15px Inter, "Segoe UI", sans-serif;
   outline:none;
 }
-#twocode-project-v2 textarea:focus {
+#orix-project-v2 textarea:focus {
   border-color:#00c48a;
 }
-#twocode-project-v2 .tc-primary {
+#orix-project-v2 .tc-primary {
   background:#00c48a;
   color:#11170c;
   min-height:36px;
 }
-#twocode-project-v2 .tc-primary:hover {
+#orix-project-v2 .tc-primary:hover {
   background:#ddf8b9;
 }
 `;
@@ -269,10 +269,10 @@
     });
   }
 
-  window.__twocodeProjectIndicator ||= { state: 'idle' };
+  window.__orixProjectIndicator ||= { state: 'idle' };
 
   function setIndicator(state) {
-    window.__twocodeProjectIndicator = {
+    window.__orixProjectIndicator = {
       state,
       at: Date.now()
     };
@@ -351,7 +351,7 @@
 
   async function load() {
     try {
-      const selected = await window.twocode.projectV2Get();
+      const selected = await window.orix.projectV2Get();
 
       if (!selected?.ok) {
         throw new Error(
@@ -359,7 +359,7 @@
         );
       }
 
-      ai = await window.twocode.projectV2AiStatus();
+      ai = await window.orix.projectV2AiStatus();
 
       if (!selected.selected) {
         project = null;
@@ -368,7 +368,7 @@
         return;
       }
 
-      const result = await window.twocode.projectAgentGet();
+      const result = await window.orix.projectAgentGet();
 
       if (!result?.ok) {
         throw new Error(
@@ -392,7 +392,7 @@
     error = '';
 
     try {
-      const result = await window.twocode.projectV2Choose();
+      const result = await window.orix.projectV2Choose();
 
       if (result?.cancelled) return;
 
@@ -419,7 +419,7 @@
     if (busy || !project) return;
 
     try {
-      const result = await window.twocode.projectAgentOpen();
+      const result = await window.orix.projectAgentOpen();
 
       if (!result?.ok) {
         throw new Error(
@@ -460,7 +460,7 @@
     let recorded = false;
 
     try {
-      const result = await window.twocode.projectAgentSend(
+      const result = await window.orix.projectAgentSend(
         request
       );
 
@@ -509,7 +509,7 @@
     let ok = false;
 
     try {
-      const result = await window.twocode.projectAgentUndo();
+      const result = await window.orix.projectAgentUndo();
 
       if (!result?.ok) {
         throw new Error(
@@ -530,14 +530,14 @@
   }
 
   function settings() {
-    localStorage.setItem('twocode:settings-tab', 'ai');
+    localStorage.setItem('orix:settings-tab', 'ai');
 
     window.dispatchEvent(
-      new CustomEvent('twocode:open-ai-settings')
+      new CustomEvent('orix:open-ai-settings')
     );
 
     try {
-      if (window.__twocodeOpenInlineSettings) window.__twocodeOpenInlineSettings();
+      if (window.__orixOpenInlineSettings) window.__orixOpenInlineSettings();
       else setView('settings');
     } catch {}
   }
@@ -696,7 +696,7 @@
     }
   }
 
-  window.twocode.onProjectAgentProgress(data => {
+  window.orix.onProjectAgentProgress(data => {
     if (data.root !== project?.path || !busy) return;
 
     status = data.text;
@@ -713,10 +713,10 @@
   });
 
   window.addEventListener(
-    'twocode:ai-settings-changed',
+    'orix:ai-settings-changed',
     async () => {
       try {
-        ai = await window.twocode.projectV2AiStatus();
+        ai = await window.orix.projectV2AiStatus();
       } catch (failure) {
         error = failure.message;
       }

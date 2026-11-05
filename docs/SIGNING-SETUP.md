@@ -17,7 +17,7 @@ Default workflow dispatch builds and tests on Windows. Installer uploads are par
 
 ## Before applying
 
-- [x] Complete source publication review and publish the ISC-licensed source, excluding recovered binaries, credentials, profiles and generated media.
+- [x] Complete source publication review and publish the ISC-licensed source, excluding private binaries, credentials, profiles and generated media.
 - [x] Run hosted Windows CI with signing off. All 228 tests and ZIP/setup builds passed.
 - [x] Publish a source preview describing functionality and linking to the Code signing policy. Add privacy/provider disclosures and record the owner's GitHub MFA confirmation.
 - [x] Start the application route with an owner-approved inquiry after the [official form](https://signpath.org/apply.html) failed to render. Request guidance on the first-binary-release prerequisite.

@@ -257,7 +257,7 @@
 
     if (job.kind === 'restore') {
       const temp =
-        job.file + '.' + crypto.randomUUID() + '.twocode-tmp';
+        job.file + '.' + crypto.randomUUID() + '.orix-tmp';
 
       try {
         fs.writeFileSync(
@@ -371,7 +371,7 @@
       vscode.window.registerUriHandler({
         handleUri(uri) {
           if (
-            uri.authority !== 'twocode.project-editor' ||
+            uri.authority !== 'orix.project-editor' ||
             uri.path !== '/connect'
           ) {
             return;

@@ -1,4 +1,6 @@
 require('electron').app.setName('ORIX');
+require('./orix-compat.cjs').migrateEnvironment(process.env);
+require('./orix-compat.cjs').migrateProfile(require('electron').app.getPath('userData'));
 if (require('./self-install.cjs').handedOver) return; // started from elsewhere: the installed ORIX (AppData\Local\Programs\ORIX) takes over
 require('./tray-main.cjs'); // first: tray icon + only one ORIX at a time
 require('./island-window-main');
@@ -24,8 +26,8 @@ require('./project-mode-main');
 require('./ai-monitor-main.cjs');
 require('./extras-main.cjs');
 const settingsApp = require('./settings-app-main.cjs'); // ORIX Instellingen: settings as their own app
-require('./license-main.cjs'); // packs bought on twocode.nl: which extra apps are open
-require('./auto-update.cjs'); // updates from twocode.nl, installed at the next restart
+require('./license-main.cjs'); // all bundled tools are free
+require('./auto-update.cjs'); // local manual-update status
 
 app.setAppUserModelId(
   'app.orix.desktop'
@@ -46,13 +48,13 @@ let mascotInteractive = false;
 
 
 // ============================================================
-// TWOCODE
+// ORIX
 // ============================================================
 
 const PROJECT_FILE = () =>
   path.join(
     app.getPath('userData'),
-    'twocode-project.json'
+    'orix-project.json'
   );
 
 
@@ -2520,7 +2522,7 @@ function decryptString(
 
 
 // ============================================================
-// TWOCODE CONNECTION
+// ORIX CONNECTION
 // ============================================================
 
 async function readResponse(
@@ -3903,13 +3905,13 @@ function createMascot() {
 
 
 // ============================================================
-// TWOCODE IPC
+// ORIX IPC
 const handleLayer = (channel, handler) => ipcMain.handle(channel, (event, ...args) =>
   desktopLayer.trusted(event, ['mascot.html']) ? handler(event, ...args) : { ok: false, error: 'Not allowed.' });
 // ============================================================
 
 handleLayer(
-  'twocode:connect',
+  'orix:connect',
 
   async () =>
     connectToORIX()
@@ -3917,7 +3919,7 @@ handleLayer(
 
 
 handleLayer(
-  'twocode:get-connection',
+  'orix:get-connection',
 
   async () => {
     const connection =
@@ -3936,7 +3938,7 @@ handleLayer(
 
 
 handleLayer(
-  'twocode:get-state',
+  'orix:get-state',
 
   async () =>
     getORIXState()
@@ -4131,13 +4133,13 @@ app.on('before-quit', event => {
   if (goodbyeShown || !mascotWindow || mascotWindow.isDestroyed() || !mascotWindow.isVisible()) return;
   goodbyeShown = true;
   event.preventDefault();
-  mascotWindow.webContents.send('twocode:goodbye');
+  mascotWindow.webContents.send('orix:goodbye');
   setTimeout(() => app.quit(), 1000);
 });
 
 
 ipcMain.on(
-  'twocode:notify',
+  'orix:notify',
   () => {}
 );
 

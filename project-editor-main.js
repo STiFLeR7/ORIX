@@ -352,7 +352,7 @@ module.exports = function projectEditorMain(deps) {
 
     try {
       await shell.openExternal(
-        `vscode://twocode.project-editor/connect?port=${port}&token=${token}&job=${id}`
+        `vscode://orix.project-editor/connect?port=${port}&token=${token}&job=${id}`
       );
     } catch {
       finish(jobs.get(id), {
@@ -540,7 +540,7 @@ Do not wrap the JSON in Markdown or code blocks.`;
           text: {
             format: {
               type: 'json_schema',
-              name: 'twocode_file_edits',
+              name: 'orix_file_edits',
               strict: true,
               schema
             }

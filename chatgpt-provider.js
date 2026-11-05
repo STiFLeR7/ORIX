@@ -351,14 +351,15 @@ async function start(retry = false) {
   const task = (async () => {
     const env = { ...process.env };
 
-    // Eigen login en configuratie voor TwoCode.
+    // Eigen login en configuratie voor ORIX.
     env.CODEX_HOME = path.join(folder(), 'codex');
 
     fs.mkdirSync(env.CODEX_HOME, { recursive: true });
 
     for (const name of [
       'OPENAI_API_KEY',
-      'TWOCODE_OPENAI_API_KEY',
+      'ORIX_OPENAI_API_KEY',
+      require('./orix-compat.cjs').previous.toUpperCase() + '_OPENAI_API_KEY',
       'CODEX_API_KEY',
       'CODEX_ACCESS_TOKEN',
       'ELECTRON_RUN_AS_NODE'
@@ -402,9 +403,9 @@ async function start(retry = false) {
       'features.code_mode.enabled=false',
       'web_search="disabled"',
       'shell_environment_policy.inherit="none"',
-      'default_permissions="twocode-chat"',
-      'permissions.twocode-chat.filesystem={":minimal"="read",":workspace_roots"={"."="read"}}',
-      'permissions.twocode-chat.network.enabled=false'
+      'default_permissions="orix-chat"',
+      'permissions.orix-chat.filesystem={":minimal"="read",":workspace_roots"={"."="read"}}',
+      'permissions.orix-chat.network.enabled=false'
     ];
 
     const args = [
@@ -470,7 +471,7 @@ async function start(retry = false) {
 
     await request('initialize', {
       clientInfo: {
-        name: 'twocode_assistent',
+        name: 'orix_assistent',
         title: 'ORIX',
         version: '1.0.0'
       },
@@ -563,7 +564,7 @@ async function status(refresh = false) {
 }
 
 // What we last knew about the account, without starting Codex. Starting codex.exe can freeze all of
-// TwoCode for seconds on Windows (the virus scanner checks it first), so the settings use this.
+// ORIX for seconds on Windows (the virus scanner checks it first), so the settings use this.
 // A login or logout changes the revision, which makes the old snapshot invalid.
 const snapshotFile = () =>
   path.join(folder(), 'account.json');
@@ -821,7 +822,7 @@ async function answer(prompt, instructions, images = []) {
     model: chosen.model,
     cwd: workspace(),
     approvalPolicy: 'never',
-    permissions: 'twocode-chat',
+    permissions: 'orix-chat',
     ephemeral: true,
     baseInstructions:
       'Beantwoord de aangeleverde tekst. Gebruik geen tools en lees of wijzig geen bestanden.',
@@ -874,7 +875,7 @@ async function answer(prompt, instructions, images = []) {
         ...images.map(file => ({ type: 'localImage', path: file }))
       ],
       approvalPolicy: 'never',
-      permissions: 'twocode-chat'
+      permissions: 'orix-chat'
     });
 
     turnId = result?.turn?.id;
@@ -922,13 +923,13 @@ app.on('will-quit', () => {
   stop();
 });
 
-// "Fix it" for Robo Buddy: Codex changes files in one project folder, with TwoCode's ChatGPT login.
+// "Fix it" for Robo Buddy: Codex changes files in one project folder, with ORIX's ChatGPT login.
 // Only that folder may change (workspace-write sandbox), no web search, no hooks.
 function fixInFolder(dir, prompt, images = [], sandbox = 'workspace-write') {
   const runtime = nativeRuntime();
   const env = { ...process.env };
   env.CODEX_HOME = path.join(folder(), 'codex');
-  for (const name of ['OPENAI_API_KEY', 'TWOCODE_OPENAI_API_KEY', 'CODEX_API_KEY', 'CODEX_ACCESS_TOKEN', 'ELECTRON_RUN_AS_NODE']) delete env[name];
+  for (const name of ['OPENAI_API_KEY', 'ORIX_OPENAI_API_KEY', 'CODEX_API_KEY', 'CODEX_ACCESS_TOKEN', 'ELECTRON_RUN_AS_NODE']) delete env[name];
   if (fs.existsSync(runtime.helpers)) {
     const key = Object.keys(env).find(name => name.toLowerCase() === 'path') || 'PATH';
     env[key] = [runtime.helpers, env[key] || ''].filter(Boolean).join(path.delimiter);

@@ -14,7 +14,7 @@ test('reduced-motion island transition snaps to its target without unstable spri
 });
 test('shared layer branding caches local images and keyboard activation works without hover', () => {
   const events = {}, actions = [], sources = [], buttons = [];
-  const context = { currentView: 'focus', window: { ORIXIcons: require('../orix-icons-ui.js'), __twocodePrefs: () => ({ lang: 'nl' }) },
+  const context = { currentView: 'focus', window: { ORIXIcons: require('../orix-icons-ui.js'), __orixPrefs: () => ({ lang: 'nl' }) },
     document: { documentElement: { dataset: { theme: 'light' } }, body: { appendChild: b => buttons.push(b) },
       createElement: () => ({ addEventListener: (type, fn) => { events['button:' + type] = fn; } }) },
     addEventListener: (type, fn) => { events[type] = fn; }, setView: view => actions.push(view), sendInteractive: value => actions.push(value),

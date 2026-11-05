@@ -31,7 +31,7 @@ function buildMenu() {
     { label: text(lang, desktopLayer.isVisible() ? 'hideLayer' : 'showLayer'), click: () => {
       if (desktopLayer.isVisible()) desktopLayer.setVisible(false); else openIsland();
     } },
-    { label: text(lang, 'settings'), click: () => app.emit('twocode-open-settings') },
+    { label: text(lang, 'settings'), click: () => app.emit('orix-open-settings') },
     { label: text(lang, 'startup'), type: 'checkbox', checked: startsWithWindows(), click: item => setStartsWithWindows(item.checked) },
     { type: 'separator' },
     { label: text(lang, 'restart'), click: restart },
@@ -44,7 +44,7 @@ if (!app.requestSingleInstanceLock()) {
   app.exit(0);
 } else {
   // "ORIX Settings" in the Start menu starts ORIX with --settings: then only that app opens.
-  app.on('second-instance', (event, argv) => { if ((argv || []).includes('--settings') || !desktopLayer.isVisible()) app.emit('twocode-open-settings'); else openIsland(); });
+  app.on('second-instance', (event, argv) => { if ((argv || []).includes('--settings') || !desktopLayer.isVisible()) app.emit('orix-open-settings'); else openIsland(); });
   app.on('orix:layer-changed', buildMenu);
   app.on('orix:appearance-committed', buildMenu);
   app.setName('ORIX');

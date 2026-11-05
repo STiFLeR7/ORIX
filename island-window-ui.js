@@ -36,12 +36,12 @@
 
       projectDisplay:
         document.getElementById(
-          'twocode-project-v2'
+          'orix-project-v2'
         )?.style.display,
 
       settingsDisplay:
         document.getElementById(
-          'twocode-settings-v2'
+          'orix-settings-v2'
         )?.style.display
     };
   }
@@ -113,7 +113,7 @@
     true
   );
 
-  window.__twocodeWindowDebug = Object.freeze({
+  window.__orixWindowDebug = Object.freeze({
     state,
     restore
   });

@@ -20,7 +20,7 @@ The AI monitor reads supported local window/accessibility and agent-status infor
 | Weather | A configured city is sent to Open-Meteo geocoding. Its returned coordinates are used for forecast requests. Providers also receive ordinary connection information such as IP address. | Leave the city blank or clear it and save to stop configured-city requests. [Open-Meteo terms and privacy](https://open-meteo.com/en/terms). |
 | Calendar | ORIX fetches the HTTPS calendar URL the user supplies. That service receives the request and connection information. A private calendar URL may itself grant access to the calendar. | Clear the URL and save to stop requests. The selected calendar service's privacy policy applies. |
 
-Source dependency installation contacts npm and Electron's download infrastructure. Manual project/download links open GitHub in the browser. ORIX's former TwoCode account, news and automatic-update service defaults are disabled.
+Source dependency installation contacts npm and Electron's download infrastructure. Manual project/download links open GitHub in the browser. Automatic-update and remote account/news defaults are disabled.
 
 ## Removal and retention
 

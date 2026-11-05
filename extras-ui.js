@@ -2,54 +2,54 @@
 // Island extras (renderer): file tray, quick mirror, volume bar, battery warnings, weather + calendar
 // on the home screen, and the album colour used by the Spotify screen and sound wave.
 (function islandExtras() {
-  const api = window.twocode;
+  const api = window.orix;
   if (!api?.trayGet) return;
-  const prefs = () => window.__twocodePrefs?.() || {};
-  const say = (title, body) => window.__twocodeSay?.(title, body);
-  const badge = id => window.dispatchEvent(new CustomEvent('twocode:badge', { detail: id }));
+  const prefs = () => window.__orixPrefs?.() || {};
+  const say = (title, body) => window.__orixSay?.(title, body);
+  const badge = id => window.dispatchEvent(new CustomEvent('orix:badge', { detail: id }));
   const esc = s => String(s ?? '').replace(/[&<>"']/g, x => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[x]));
   const VIEWS = ['tray', 'mirror'];
   // (page height and layout come from pages-ui.js)
 
   // ---------- DOM panel for the tray and mirror views (same place as the Claude Code screen) ----------
-  const root = document.createElement('section'); root.id = 'twocode-extras'; document.body.appendChild(root);
+  const root = document.createElement('section'); root.id = 'orix-extras'; document.body.appendChild(root);
   const style = document.createElement('style'); style.textContent = `
-#twocode-extras{position:absolute;z-index:60;display:none;color:#f4f7ef;font:12px/1.4 Inter, "Segoe UI", sans-serif;pointer-events:auto}
-#twocode-extras *{box-sizing:border-box}
-#twocode-extras{font-family:Inter,"Segoe UI",sans-serif;color:#fff}
-#twocode-extras button{border:0;cursor:pointer;font-family:inherit;color:#fff;background:transparent;padding:0}
-#twocode-extras .ex-hint{color:#8e8e93;font-size:13px}
-#twocode-extras .ex-row{display:flex;align-items:center;gap:2px;height:100%;overflow-x:auto;scrollbar-width:none}
-#twocode-extras .ex-file{position:relative;flex:none;width:78px;display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 2px;border-radius:10px;cursor:grab;text-align:center;animation:ex-in .3s cubic-bezier(.2,.9,.3,1) both;animation-delay:calc(var(--k) * 30ms)}
-#twocode-extras .ex-file:hover{background:#1c1c1e}
-#twocode-extras .ex-file:active{transform:scale(.97);transition:transform .1s ease-out}
-#twocode-extras .ex-file svg{flex:none;filter:drop-shadow(0 3px 8px rgba(0,0,0,.4))}
-#twocode-extras .ex-name{font-size:11px;line-height:14px;font-weight:600;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#twocode-extras .ex-size{margin-top:-3px;font-size:10px;color:#8e8e93}
-#twocode-extras .ex-x{position:absolute;top:2px;right:6px;width:18px;height:18px;border-radius:50%;background:#3a3a3c;color:#fff;font-size:9px;line-height:18px;opacity:0;transition:opacity .15s}
-#twocode-extras .ex-file:hover .ex-x,#twocode-extras .ex-x:focus-visible{opacity:1}
-#twocode-extras .ex-open{display:flex;flex-direction:column;align-items:center;gap:4px;width:100%;border-radius:8px}
-#twocode-extras .ex-open:focus-visible,#twocode-extras .ex-x:focus-visible{outline:2px solid #82b4ff;outline-offset:2px}
+#orix-extras{position:absolute;z-index:60;display:none;color:#f4f7ef;font:12px/1.4 Inter, "Segoe UI", sans-serif;pointer-events:auto}
+#orix-extras *{box-sizing:border-box}
+#orix-extras{font-family:Inter,"Segoe UI",sans-serif;color:#fff}
+#orix-extras button{border:0;cursor:pointer;font-family:inherit;color:#fff;background:transparent;padding:0}
+#orix-extras .ex-hint{color:#8e8e93;font-size:13px}
+#orix-extras .ex-row{display:flex;align-items:center;gap:2px;height:100%;overflow-x:auto;scrollbar-width:none}
+#orix-extras .ex-file{position:relative;flex:none;width:78px;display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 2px;border-radius:10px;cursor:grab;text-align:center;animation:ex-in .3s cubic-bezier(.2,.9,.3,1) both;animation-delay:calc(var(--k) * 30ms)}
+#orix-extras .ex-file:hover{background:#1c1c1e}
+#orix-extras .ex-file:active{transform:scale(.97);transition:transform .1s ease-out}
+#orix-extras .ex-file svg{flex:none;filter:drop-shadow(0 3px 8px rgba(0,0,0,.4))}
+#orix-extras .ex-name{font-size:11px;line-height:14px;font-weight:600;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#orix-extras .ex-size{margin-top:-3px;font-size:10px;color:#8e8e93}
+#orix-extras .ex-x{position:absolute;top:2px;right:6px;width:18px;height:18px;border-radius:50%;background:#3a3a3c;color:#fff;font-size:9px;line-height:18px;opacity:0;transition:opacity .15s}
+#orix-extras .ex-file:hover .ex-x,#orix-extras .ex-x:focus-visible{opacity:1}
+#orix-extras .ex-open{display:flex;flex-direction:column;align-items:center;gap:4px;width:100%;border-radius:8px}
+#orix-extras .ex-open:focus-visible,#orix-extras .ex-x:focus-visible{outline:2px solid #82b4ff;outline-offset:2px}
 /* the drop zone: a dashed box, like a shelf you drop things on */
-#twocode-extras .ex-zone{height:100%;border:1.5px dashed #3a3a3c;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;text-align:center;transition:border-color .2s,background .2s}
-#twocode-extras .ex-zone svg{margin-bottom:4px}
-#twocode-extras .ex-zone b{font-size:13px;font-weight:600}
-#twocode-extras .ex-zone small{font-size:11px;color:#8e8e93}
-#twocode-extras.dragging .ex-zone{border-color:#fff;background:#1c1c1e}
-#twocode-extras .ex-slot{flex:none;width:58px;height:78px;margin-left:4px;border:1.5px dashed #3a3a3c;border-radius:10px;display:grid;place-items:center;transition:border-color .2s,background .2s}
-#twocode-extras.dragging .ex-slot{border-color:#fff;background:#1c1c1e}
-#twocode-extras .ex-catch{display:none}
-#twocode-extras.dragging .ex-catch{display:block}
-#twocode-extras.dragging .ex-zone .off{display:none}
+#orix-extras .ex-zone{height:100%;border:1.5px dashed #3a3a3c;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;text-align:center;transition:border-color .2s,background .2s}
+#orix-extras .ex-zone svg{margin-bottom:4px}
+#orix-extras .ex-zone b{font-size:13px;font-weight:600}
+#orix-extras .ex-zone small{font-size:11px;color:#8e8e93}
+#orix-extras.dragging .ex-zone{border-color:#fff;background:#1c1c1e}
+#orix-extras .ex-slot{flex:none;width:58px;height:78px;margin-left:4px;border:1.5px dashed #3a3a3c;border-radius:10px;display:grid;place-items:center;transition:border-color .2s,background .2s}
+#orix-extras.dragging .ex-slot{border-color:#fff;background:#1c1c1e}
+#orix-extras .ex-catch{display:none}
+#orix-extras.dragging .ex-catch{display:block}
+#orix-extras.dragging .ex-zone .off{display:none}
 @keyframes ex-in{0%{opacity:0;transform:translateY(8px) scale(.96)}}
-@keyframes ex-pop{0%{transform:scale(.6);opacity:0}100%{transform:scale(1);opacity:1}}#twocode-extras video{width:100%;height:176px;object-fit:cover;border-radius:22px;transform:scaleX(-1);background:#0d0d10}`;
+@keyframes ex-pop{0%{transform:scale(.6);opacity:0}100%{transform:scale(1);opacity:1}}#orix-extras video{width:100%;height:176px;object-fit:cover;border-radius:22px;transform:scaleX(-1);background:#0d0d10}`;
   document.head.appendChild(style);
 
   let trayFiles = [], trayError = '';
   async function loadTray() { try { const r = await api.trayGet(); if (r.ok) { trayFiles = r.files; trayError = ''; } else trayError = r.error; } catch { trayError = 'Could not load tray data. Try restarting ORIX.'; } render(); }
-  window.__twocodeTrayReload = loadTray;
-  window.__twocodeTrayClear = async () => { for (const f of [...trayFiles]) { const r = await api.trayRemove(f.path).catch(() => null); if (r?.ok) trayFiles = r.files; } render(); };
-  window.__twocodeTrayCount = () => trayFiles.length;
+  window.__orixTrayReload = loadTray;
+  window.__orixTrayClear = async () => { for (const f of [...trayFiles]) { const r = await api.trayRemove(f.path).catch(() => null); if (r?.ok) trayFiles = r.files; } render(); };
+  window.__orixTrayCount = () => trayFiles.length;
   function render() {
     if (currentView === 'tray') {
       const n = trayFiles.length;
@@ -58,7 +58,7 @@
       // a sheet of paper with a folded corner and its kind on a grey label (like a document icon in Finder)
       const paper = e => { const w = Math.max(22, e.length * 5.4 + 8);
         return `<svg width="38" height="48" viewBox="0 0 38 48" aria-hidden="true"><path d="M4 1h22l11 11v31a4 4 0 0 1-4 4H4a4 4 0 0 1-4-4V5a4 4 0 0 1 4-4z" fill="#fff"/><path d="M26 1v7a4 4 0 0 0 4 4h7z" fill="#d1d1d6"/><path d="M7 19h18M7 24h22M7 29h14" stroke="#e5e5ea" stroke-width="2" stroke-linecap="round"/>${e ? `<rect x="5" y="34" width="${w}" height="10" rx="3" fill="#3a3a3c"/><text x="${5 + w / 2}" y="41.5" text-anchor="middle" font-family="Inter, sans-serif" font-size="6.5" font-weight="700" fill="#fff">${esc(e)}</text>` : ''}</svg>`; };
-      const T = (nl, en) => window.__twocodePrefs?.().lang === 'en' ? en : nl;
+      const T = (nl, en) => window.__orixPrefs?.().lang === 'en' ? en : nl;
       const plus = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8e8e93" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>`;
       const trayGlyph = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v9m-3.5-3.5L12 12l3.5-3.5"/><path d="M4 14l2-5h2M20 14l-2-5h-2M4 14v5h16v-5h-5l-1 2h-4l-1-2z"/></svg>`;
       root.innerHTML = n
@@ -97,7 +97,7 @@
   // ---------- views in the canvas island ----------
   // ---------- the basket: while you drag a file over the island, ORIX walks under it with a basket ----------
   const basket = { on: false, seen: 0, x: null, y: null, vx: 0, caughtAt: -1e9, mouseX: null };
-  window.__twocodeBasket = () => {
+  window.__orixBasket = () => {
     const t = performance.now(), catching = t - basket.caughtAt < 700;
     if (basket.on && t - basket.seen > 180) basket.on = false; // the drag left the island or ended
     return { show: basket.on || catching, wobble: catching ? Math.sin((t - basket.caughtAt) / 45) * (1 - (t - basket.caughtAt) / 700) : 0, vx: basket.vx };
@@ -118,7 +118,7 @@
     ctx.beginPath(); ctx.roundRect(x, y, w, h, 26); ctx.fillStyle = 'rgba(198,233,148,.07)'; ctx.fill();
     ctx.setLineDash([10, 8]); ctx.lineDashOffset = -t / 30; ctx.lineWidth = 2; ctx.strokeStyle = '#00c48a'; ctx.shadowColor = '#00c48a'; ctx.shadowBlur = 12; ctx.stroke();
     ctx.setLineDash([]); ctx.shadowBlur = 0;
-    window.__twocodeIcon?.('tray', b.x + b.width / 2, y + 48, 30, '#00c48a');
+    window.__orixIcon?.('tray', b.x + b.width / 2, y + 48, 30, '#00c48a');
     text('Laat los, ik vang hem!', b.x + b.width / 2, y + 92, 18, '#ffffff', 700, 'center');
     text('Het bestand komt in je lade', b.x + b.width / 2, y + 112, 11, '#9aa596', 400, 'center');
     ctx.restore();
@@ -126,7 +126,7 @@
   }
   drawExpanded = function (alpha) {
     if (!VIEWS.includes(currentView)) return baseExpanded(alpha);
-    const PAGE = window.__twocodePage, area = contentRect(), t = performance.now();
+    const PAGE = window.__orixPage, area = contentRect(), t = performance.now();
     if (basket.on && t - basket.seen > 180) basket.on = false; // no more dragover: the drag left or ended
     const zone = currentView === 'tray' && dropZone(t);
     if (!zone || !basket.on) drawHeader(alpha * (basket.on ? 0 : 1));
@@ -146,8 +146,8 @@
   // After a drop: a card in the middle. The file drops in with a bounce, a bar fills up, then a check pops.
   const INCOMING_MS = 1500;
   let incoming = null;
-  window.__twocodeDragging = () => basket.on;
-  window.__twocodeTestDrop = names => { incoming = { names, chimed: false }; basket.caughtAt = performance.now(); }; // for test mode / videos
+  window.__orixDragging = () => basket.on;
+  window.__orixTestDrop = names => { incoming = { names, chimed: false }; basket.caughtAt = performance.now(); }; // for test mode / videos
   function drawIncoming(area, k) {
     const ease = t => 1 - Math.pow(1 - Math.max(0, Math.min(1, t)), 3), back = t => { t = Math.max(0, Math.min(1, t)); return 1 + 2.4 * Math.pow(t - 1, 3) + 1.4 * Math.pow(t - 1, 2); };
     const out = Math.max(0, Math.min(1, (INCOMING_MS - k) / 220)), appear = back(k / 260), W = 300, H = 92;
@@ -186,7 +186,7 @@
     // While a file is dragged over the island, the whole island is the drop zone (canvas), so the page hides.
     const display = show && !(currentView === 'tray' && (basket.on || (incoming && performance.now() - basket.caughtAt < INCOMING_MS - 120))) ? 'block' : 'none';
     if (root.style.display !== display) root.style.display = display; // only write when it changes (runs every frame)
-    if (show) window.__twocodePage.place(root, contentRect());
+    if (show) window.__orixPage.place(root, contentRect());
     const now = show ? currentView : null;
     if (now !== shownView) { shownView = now; if (now !== 'mirror') stopCamera(); if (now === 'tray') loadTray(); else render(); }
     requestAnimationFrame(position);
@@ -203,7 +203,7 @@
   window.addEventListener('dragover', e => {
     if (!hasFiles(e)) return;
     e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; root.classList.add('dragging');
-    if (!basket.on) window.__twocodeFeel?.('surprised', 500);
+    if (!basket.on) window.__orixFeel?.('surprised', 500);
     basket.on = true; basket.seen = performance.now(); basket.mouseX = e.clientX;
     if (currentView !== 'tray' || mode !== 'expanded') setView('tray');
   });
@@ -217,30 +217,30 @@
     if (!paths.length) return;
     incoming = { names: paths.map(p => p.split(/[\\/]/).pop()), chimed: false };
     const r = await api.trayAdd(paths); if (r.ok) { trayFiles = r.files; trayError = ''; } else trayError = r.error;
-    render(); window.__twocodeCheer?.(); badge('tray:' + trayFiles.length);
+    render(); window.__orixCheer?.(); badge('tray:' + trayFiles.length);
   });
 
   // ---------- messages in the medium island (volume, battery) ----------
   let hud = null;
-  window.__twocodeFlash = (text, ms, raw = false) => flash(text, ms, raw); // short message in the small island (also used by swipe)
+  window.__orixFlash = (text, ms, raw = false) => flash(text, ms, raw); // short message in the small island (also used by swipe)
   function flash(text, ms = 1600, raw = false) {
     // Right after start ORIX is still saying hi in the middle of the island: a message then ran
     // straight through him (the battery check fires at start). Wait until the hello is over.
-    if (!introFinished || window.__twocodeHelloBusy?.()) { clearTimeout(flash.later); flash.later = setTimeout(() => flash(text, ms, raw), 400); return; }
+    if (!introFinished || window.__orixHelloBusy?.()) { clearTimeout(flash.later); flash.later = setTimeout(() => flash(text, ms, raw), 400); return; }
     hud = { text, raw, until: performance.now() + ms };
     if (mode === 'rest' && introFinished) setMode('compact', false);
-    clearTimeout(flash.timer); flash.timer = setTimeout(() => { hud = null; window.__twocodeSettleSize?.(); }, ms + 50);
+    clearTimeout(flash.timer); flash.timer = setTimeout(() => { hud = null; window.__orixSettleSize?.(); }, ms + 50);
   }
-  const baseMessage = window.__twocodeCompactMessage;
-  window.__twocodeCompactMessage = () => (hud && performance.now() < hud.until ? hud.text : '') || baseMessage?.() || '';
-  window.__twocodeCompactMessageIsRaw = () => !!(hud && performance.now() < hud.until && hud.raw);
+  const baseMessage = window.__orixCompactMessage;
+  window.__orixCompactMessage = () => (hud && performance.now() < hud.until ? hud.text : '') || baseMessage?.() || '';
+  window.__orixCompactMessageIsRaw = () => !!(hud && performance.now() < hud.until && hud.raw);
 
   // Volume bar: "🔊 ▮▮▮▮▮▮▯▯▯▯ 62%"
   let firstVolume = true;
   api.onVolume(({ level, muted }) => {
-    window.__twocodeSysVolume = { level, muted }; // the volume block on the home screen
+    window.__orixSysVolume = { level, muted }; // the volume block on the home screen
     if (firstVolume) { firstVolume = false; return; } // the first report is just the starting value
-    if (prefs().volumeHud === false || performance.now() < (window.__twocodeVolumeQuietUntil || 0)) return; // not while you slide it in the island
+    if (prefs().volumeHud === false || performance.now() < (window.__orixVolumeQuietUntil || 0)) return; // not while you slide it in the island
     const blocks = Math.round(level / 10);
     flash(muted ? '🔇 Sound off' : `${level > 60 ? '🔊' : level > 20 ? '🔉' : '🔈'} ${'▮'.repeat(blocks)}${'▯'.repeat(10 - blocks)} ${level}%`, 1400);
   });
@@ -254,7 +254,7 @@
       for (const at of [20, 10]) {
         if (pct <= at && !warned.has(at)) {
           warned.add(at); flash(`🪫 ${pct}% battery remaining. Plug in your charger!`, 4000);
-          say(`Battery low: ${pct}%`, 'Plug in your charger.'); window.__twocodeFeel?.('surprised', 1500);
+          say(`Battery low: ${pct}%`, 'Plug in your charger.'); window.__orixFeel?.('surprised', 1500);
         }
       }
     };
@@ -263,10 +263,10 @@
 
   // Bluetooth devices (headphones, mouse): warn once a day when one is low
   api.onBluetooth(({ devices }) => {
-    window.__twocodeBluetooth = devices;
+    window.__orixBluetooth = devices;
     if (prefs().batteryWarn === false) return;
     for (const d of devices) {
-      const key = 'twocode:bt-warned:' + d.name + ':' + new Date().toDateString();
+      const key = 'orix:bt-warned:' + d.name + ':' + new Date().toDateString();
       if (d.battery <= 20 && !localStorage.getItem(key)) {
         localStorage.setItem(key, '1'); flash(`🎧 ${d.name}: ${d.battery}% remaining`, 4000, true); say(`${d.name} is low on battery`, `${d.battery}% battery remaining.`);
       }
@@ -281,8 +281,8 @@
     try { const c = await api.calendarNext(); nextEvent = c.ok ? c.next : null; } catch {}
   }
   refreshInfo(); setInterval(refreshInfo, 10 * 60000);
-  window.__twocodeRefreshInfo = refreshInfo;
-  window.__twocodeHomeInfo = () => {
+  window.__orixRefreshInfo = refreshInfo;
+  window.__orixHomeInfo = () => {
     const parts = [];
     if (weather) parts.push(`${weather.code === 0 && !weather.day ? '🌙' : ICONS(weather.code)} ${weather.temp}° ${weather.place}`);
     if (nextEvent) {
@@ -304,7 +304,7 @@
       const stream = await navigator.mediaDevices.getDisplayMedia({ audio: true, video: { width: 16, height: 16, frameRate: 1 } });
       stream.getVideoTracks().forEach(t => t.stop()); // only the sound is used
       if (!stream.getAudioTracks().length) throw new Error('no audio');
-      const ctx = new (window.__twocodeRealAudio || AudioContext)();
+      const ctx = new (window.__orixRealAudio || AudioContext)();
       const analyser = ctx.createAnalyser(); analyser.fftSize = 2048; analyser.smoothingTimeConstant = 0.6; analyser.minDecibels = -80; // very soft hiss counts as silence
       ctx.createMediaStreamSource(stream).connect(analyser); // not connected to the speakers: no echo
       Object.assign(audio, { stream, ctx, analyser, data: new Uint8Array(analyser.frequencyBinCount) });
@@ -313,20 +313,20 @@
   }
   function stopListening() {
     audio.stream?.getTracks().forEach(t => t.stop()); audio.ctx?.close().catch(() => {});
-    Object.assign(audio, { stream: null, ctx: null, analyser: null }); audio.levels.fill(0); window.__twocodeHearing = false;
+    Object.assign(audio, { stream: null, ctx: null, analyser: null }); audio.levels.fill(0); window.__orixHearing = false;
   }
   setInterval(() => {
     const playing = Boolean(spotifyConnected && spotifyState.is_playing);
     if (playing) { audio.offSince = 0; if (!audio.failed) startListening(); }
     else if (audio.stream) { audio.offSince ||= performance.now(); if (performance.now() - audio.offSince > 4000) stopListening(); }
-    window.__twocodeAudioLevels?.(); // keeps __twocodeHearing fresh when no wave is on screen
+    window.__orixAudioLevels?.(); // keeps __orixHearing fresh when no wave is on screen
   }, 1000);
   // Levels 0..1 per bar, or null when not listening.
   // Bars cover 60 Hz – 12 kHz on a log scale (like a real equalizer), and every bar has its own
   // auto-range: bass is much louder than treble, so without this only the first bars would move.
   const peaks = new Array(BARS).fill(0.08);
   let loudPeak = 0.1;
-  window.__twocodeAudioLevels = () => {
+  window.__orixAudioLevels = () => {
     if (!audio.analyser) return null;
     audio.analyser.getByteFrequencyData(audio.data);
     const n = audio.data.length, hzPerBin = audio.ctx.sampleRate / 2 / n;
@@ -340,8 +340,8 @@
     const loud = raw.reduce((a, b) => a + b, 0) / BARS;
     // Real silence on this PC (e.g. the music plays on your phone): the bars settle flat. Without this the
     // auto-range below would blow up tiny background hiss into a dancing wave.
-    window.__twocodeHearing = loud > 0.05;
-    if (!window.__twocodeHearing) { for (let i = 0; i < BARS; i++) audio.levels[i] *= 0.8; return audio.levels; }
+    window.__orixHearing = loud > 0.05;
+    if (!window.__orixHearing) { for (let i = 0; i < BARS; i++) audio.levels[i] *= 0.8; return audio.levels; }
     loudPeak = Math.max(loud, loudPeak * 0.997, 0.12);
     const overall = Math.min(1, loud / loudPeak * 1.15); // quiet parts → lower wave
     for (let i = 0; i < BARS; i++) {
@@ -357,7 +357,7 @@
   setInterval(() => {
     const url = spotifyState.track?.image_url || '';
     if (url === colourFor) return; colourFor = url;
-    if (!url) { window.__twocodeAlbumColour = null; return; }
+    if (!url) { window.__orixAlbumColour = null; return; }
     const img = new Image(); img.crossOrigin = 'anonymous';
     img.onload = () => {
       try {
@@ -366,8 +366,8 @@
         for (let i = 0; i < d.length; i += 4) { const sat = Math.max(d[i], d[i + 1], d[i + 2]) - Math.min(d[i], d[i + 1], d[i + 2]); const w = 1 + sat / 16; r += d[i] * w; g += d[i + 1] * w; b += d[i + 2] * w; n += w; }
         [r, g, b] = [r / n, g / n, b / n];
         const boost = 200 / Math.max(60, Math.max(r, g, b)); // bright enough on black
-        window.__twocodeAlbumColour = `rgb(${[r, g, b].map(v => Math.min(255, Math.round(v * boost))).join(',')})`;
-      } catch { window.__twocodeAlbumColour = null; }
+        window.__orixAlbumColour = `rgb(${[r, g, b].map(v => Math.min(255, Math.round(v * boost))).join(',')})`;
+      } catch { window.__orixAlbumColour = null; }
     };
     img.src = url;
   }, 1000);

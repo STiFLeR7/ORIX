@@ -1,29 +1,29 @@
 /* Floating surfaces use the same tokens as the dashboard; the desktop itself stays transparent. */
-:root :is(#twocode-tools,#twocode-focus,#twocode-ai-monitor,#twocode-settings-v2,#twocode-project-v2,#twocode-chat){color:var(--orix-text);font-family:var(--orix-font)}
-:root :is(#twocode-tools,#twocode-focus,#twocode-ai-monitor,#twocode-settings-v2,#twocode-project-v2,#twocode-chat) :is(input,textarea){background:var(--orix-surface);color:var(--orix-text);border-color:var(--orix-border)}
-:root #twocode-tools button{color:var(--orix-text)}:root #twocode-tools .tl-row:hover{background:var(--orix-hover,var(--orix-surface))}:root #twocode-tools .tl-txt{border-color:var(--orix-border)}:root #twocode-tools :is(.tl-empty span,.tl-date,.tl-hint,.tl-txt small){color:var(--orix-muted)}:root #twocode-tools .tl-check{border-color:var(--orix-border)}
-:root #twocode-focus{color:var(--orix-text)}:root #twocode-focus .grey{--b:var(--orix-surface);--f:var(--orix-text)}:root #twocode-focus .white{--b:var(--orix-text);--f:var(--orix-bg)}:root #twocode-focus :is(.fo-end,.fo-hint){color:var(--orix-muted)}:root #twocode-focus .fo-unit{color:#b4bdc6}:root[data-high-contrast=true] #twocode-focus .fo-unit{color:CanvasText}:root[data-high-contrast=true] #twocode-focus .fo-band{background:Canvas;outline:1px solid CanvasText}:root[data-high-contrast=true] #twocode-focus .fo-num.on{color:CanvasText}
-:root[data-theme=light] #twocode-focus .fo-wheel{background:var(--orix-surface);color:var(--orix-text)}:root[data-theme=light] #twocode-focus .fo-round.white:hover{background:#303b46;color:#fff}
-:root :is(#twocode-settings-v2,#twocode-project-v2) :is(.tc-setting-row,.tc-card,.tc-input,.tc-message,.tc-compose){background:var(--orix-surface);color:var(--orix-text);border-color:var(--orix-border)}
-:root :is(#twocode-ai-monitor,#twocode-chat) :is(.am-row,.am-card,.ch-msg,.cr-msg,.cr-compose){color:var(--orix-text);border-color:var(--orix-border)}
-:root:is([data-theme=light],[data-high-contrast=true]) #twocode-ai-monitor.cl-new :is(.gl-tile,.gl-big,.gl-title,.gl-md,.gl-row b,.gl-row .ic,.gl-think p,.gl-cmd,.gl-card .lv-file,.gl-steps .n span,.gl-steps.done div:last-child span,.gl-limit b){color:var(--orix-text)}
-:root:is([data-theme=light],[data-high-contrast=true]) #twocode-ai-monitor.cl-new .cx-timer{color:var(--orix-text)}
-:root:is([data-theme=light],[data-high-contrast=true]) #twocode-ai-monitor.cl-new :is(.am-plan,.am-plan code,.am-said){color:var(--orix-text)}
-:root:is([data-theme=light],[data-high-contrast=true]) #twocode-ai-monitor.cl-new :is(.am-option,.am-note){background:var(--orix-surface);color:var(--orix-text);box-shadow:inset 0 0 0 1px var(--orix-border)}
-:root:is([data-theme=light],[data-high-contrast=true]) #twocode-ai-monitor.cl-new .am-option small{color:var(--orix-muted)}
-:root:is([data-theme=light],[data-high-contrast=true]) #twocode-ai-monitor.cl-new :is(.am-option.on,.am-primary){background:var(--orix-text);color:var(--orix-surface)}
-:root:is([data-theme=light],[data-high-contrast=true]) #twocode-ai-monitor.cl-new .am-option.on small{color:var(--orix-surface)}
-:root:is([data-theme=light],[data-high-contrast=true]) #twocode-ai-monitor.cl-new :is(.gl-sub,.gl-cap,.gl-empty,.gl-row code,.gl-row.d b,.gl-row.h em,.gl-card .lv-file em,.gl-card .lv-ln i,.gl-card .lv-out,.gl-card .lv-out.dim,.gl-steps span,.gl-steps .d span,.gl-chip em,.gl-chip span,.gl-limit){color:var(--orix-muted)}
-:root:is([data-theme=light],[data-high-contrast=true]) #twocode-ai-monitor.cl-new .gl-card{background:var(--orix-bg);box-shadow:inset 0 0 0 1px var(--orix-border)}
-:root:is([data-theme=light],[data-high-contrast=true]) #twocode-ai-monitor.cl-new :is(.gl-md code,.gl-md pre,.gl-row .ic,.gl-card .lv-file span,.gl-chip,.gl-compose,.gl-note,.gl-two .gl-no){background:var(--orix-surface);color:var(--orix-text);box-shadow:inset 0 0 0 1px var(--orix-border)}
-:root:is([data-theme=light],[data-high-contrast=true]) #twocode-ai-monitor.cl-new .gl-compose textarea{color:var(--orix-text)}
-:root:is([data-theme=light],[data-high-contrast=true]) #twocode-ai-monitor.cl-new .gl-compose textarea::placeholder{color:var(--orix-muted)}
-:root:is([data-theme=light],[data-high-contrast=true]) #twocode-ai-monitor.cl-new :is(.gl-compose #am-send,.gl-two .gl-yes){background:var(--orix-text);color:var(--orix-surface)}
-:root:is([data-theme=light],[data-high-contrast=true]) #twocode-ai-monitor.cl-new .gl-think span{background:none;color:var(--orix-text);animation:none}
-:root:is([data-theme=light],[data-high-contrast=true]) #twocode-ai-monitor.cl-new :is(.gl-steps i,.gl-limit i){background:var(--orix-border)}
-:root:is([data-theme=light],[data-high-contrast=true]) #twocode-ai-monitor.cl-new :is(.gl-steps .d i,.gl-steps.bad .n i,.gl-steps .n i::after,.gl-limit s){background:var(--orix-text)}
+:root :is(#orix-tools,#orix-focus,#orix-ai-monitor,#orix-settings-v2,#orix-project-v2,#orix-chat){color:var(--orix-text);font-family:var(--orix-font)}
+:root :is(#orix-tools,#orix-focus,#orix-ai-monitor,#orix-settings-v2,#orix-project-v2,#orix-chat) :is(input,textarea){background:var(--orix-surface);color:var(--orix-text);border-color:var(--orix-border)}
+:root #orix-tools button{color:var(--orix-text)}:root #orix-tools .tl-row:hover{background:var(--orix-hover,var(--orix-surface))}:root #orix-tools .tl-txt{border-color:var(--orix-border)}:root #orix-tools :is(.tl-empty span,.tl-date,.tl-hint,.tl-txt small){color:var(--orix-muted)}:root #orix-tools .tl-check{border-color:var(--orix-border)}
+:root #orix-focus{color:var(--orix-text)}:root #orix-focus .grey{--b:var(--orix-surface);--f:var(--orix-text)}:root #orix-focus .white{--b:var(--orix-text);--f:var(--orix-bg)}:root #orix-focus :is(.fo-end,.fo-hint){color:var(--orix-muted)}:root #orix-focus .fo-unit{color:#b4bdc6}:root[data-high-contrast=true] #orix-focus .fo-unit{color:CanvasText}:root[data-high-contrast=true] #orix-focus .fo-band{background:Canvas;outline:1px solid CanvasText}:root[data-high-contrast=true] #orix-focus .fo-num.on{color:CanvasText}
+:root[data-theme=light] #orix-focus .fo-wheel{background:var(--orix-surface);color:var(--orix-text)}:root[data-theme=light] #orix-focus .fo-round.white:hover{background:#303b46;color:#fff}
+:root :is(#orix-settings-v2,#orix-project-v2) :is(.tc-setting-row,.tc-card,.tc-input,.tc-message,.tc-compose){background:var(--orix-surface);color:var(--orix-text);border-color:var(--orix-border)}
+:root :is(#orix-ai-monitor,#orix-chat) :is(.am-row,.am-card,.ch-msg,.cr-msg,.cr-compose){color:var(--orix-text);border-color:var(--orix-border)}
+:root:is([data-theme=light],[data-high-contrast=true]) #orix-ai-monitor.cl-new :is(.gl-tile,.gl-big,.gl-title,.gl-md,.gl-row b,.gl-row .ic,.gl-think p,.gl-cmd,.gl-card .lv-file,.gl-steps .n span,.gl-steps.done div:last-child span,.gl-limit b){color:var(--orix-text)}
+:root:is([data-theme=light],[data-high-contrast=true]) #orix-ai-monitor.cl-new .cx-timer{color:var(--orix-text)}
+:root:is([data-theme=light],[data-high-contrast=true]) #orix-ai-monitor.cl-new :is(.am-plan,.am-plan code,.am-said){color:var(--orix-text)}
+:root:is([data-theme=light],[data-high-contrast=true]) #orix-ai-monitor.cl-new :is(.am-option,.am-note){background:var(--orix-surface);color:var(--orix-text);box-shadow:inset 0 0 0 1px var(--orix-border)}
+:root:is([data-theme=light],[data-high-contrast=true]) #orix-ai-monitor.cl-new .am-option small{color:var(--orix-muted)}
+:root:is([data-theme=light],[data-high-contrast=true]) #orix-ai-monitor.cl-new :is(.am-option.on,.am-primary){background:var(--orix-text);color:var(--orix-surface)}
+:root:is([data-theme=light],[data-high-contrast=true]) #orix-ai-monitor.cl-new .am-option.on small{color:var(--orix-surface)}
+:root:is([data-theme=light],[data-high-contrast=true]) #orix-ai-monitor.cl-new :is(.gl-sub,.gl-cap,.gl-empty,.gl-row code,.gl-row.d b,.gl-row.h em,.gl-card .lv-file em,.gl-card .lv-ln i,.gl-card .lv-out,.gl-card .lv-out.dim,.gl-steps span,.gl-steps .d span,.gl-chip em,.gl-chip span,.gl-limit){color:var(--orix-muted)}
+:root:is([data-theme=light],[data-high-contrast=true]) #orix-ai-monitor.cl-new .gl-card{background:var(--orix-bg);box-shadow:inset 0 0 0 1px var(--orix-border)}
+:root:is([data-theme=light],[data-high-contrast=true]) #orix-ai-monitor.cl-new :is(.gl-md code,.gl-md pre,.gl-row .ic,.gl-card .lv-file span,.gl-chip,.gl-compose,.gl-note,.gl-two .gl-no){background:var(--orix-surface);color:var(--orix-text);box-shadow:inset 0 0 0 1px var(--orix-border)}
+:root:is([data-theme=light],[data-high-contrast=true]) #orix-ai-monitor.cl-new .gl-compose textarea{color:var(--orix-text)}
+:root:is([data-theme=light],[data-high-contrast=true]) #orix-ai-monitor.cl-new .gl-compose textarea::placeholder{color:var(--orix-muted)}
+:root:is([data-theme=light],[data-high-contrast=true]) #orix-ai-monitor.cl-new :is(.gl-compose #am-send,.gl-two .gl-yes){background:var(--orix-text);color:var(--orix-surface)}
+:root:is([data-theme=light],[data-high-contrast=true]) #orix-ai-monitor.cl-new .gl-think span{background:none;color:var(--orix-text);animation:none}
+:root:is([data-theme=light],[data-high-contrast=true]) #orix-ai-monitor.cl-new :is(.gl-steps i,.gl-limit i){background:var(--orix-border)}
+:root:is([data-theme=light],[data-high-contrast=true]) #orix-ai-monitor.cl-new :is(.gl-steps .d i,.gl-steps.bad .n i,.gl-steps .n i::after,.gl-limit s){background:var(--orix-text)}
 :root #card{background:var(--orix-surface);color:var(--orix-text);box-shadow:0 0 0 1px var(--orix-border),0 18px 50px #0004}:root #card .head b{color:var(--orix-text)}:root #card :is(.head,.sub){color:var(--orix-muted)}:root #card .x{background:var(--orix-bg);color:var(--orix-text)}
-:root[data-high-contrast=true] :is(#card,#twocode-tools,#twocode-focus,#twocode-project-v2){forced-color-adjust:auto;background:Canvas;color:CanvasText;border:1px solid CanvasText;box-shadow:none}
+:root[data-high-contrast=true] :is(#card,#orix-tools,#orix-focus,#orix-project-v2){forced-color-adjust:auto;background:Canvas;color:CanvasText;border:1px solid CanvasText;box-shadow:none}
 :root[data-reduced-motion=true] .scan{display:none!important}
 #orix-layer-access{position:absolute;left:50%;top:0;transform:translateX(-50%);width:180px;min-height:40px;border:2px solid var(--orix-action);border-radius:0 0 12px 12px;background:var(--orix-surface);color:var(--orix-text);font:600 12px var(--orix-font);opacity:0;pointer-events:none}
 #orix-layer-access:focus-visible{opacity:1;pointer-events:auto;outline:2px solid var(--orix-text);outline-offset:2px;z-index:10000}

@@ -32,7 +32,7 @@ contextBridge.exposeInMainWorld('settingsApp', {
   theme: (theme, lang) => ipcRenderer.send('settings-app:theme', { theme, lang }),
   news: () => ipcRenderer.invoke('settings-app:news'),
   about: () => ipcRenderer.invoke('settings-app:about'),
-  // updates from twocode.nl (auto-update.cjs)
+  // Manual release status (auto-update.cjs)
   update: () => ipcRenderer.invoke('update:state'),
   installUpdate: () => ipcRenderer.send('update:install'),
   onUpdate: callback => { const fn = (_e, v) => callback(v); ipcRenderer.on('update:state', fn); return () => ipcRenderer.removeListener('update:state', fn); },
@@ -40,7 +40,7 @@ contextBridge.exposeInMainWorld('settingsApp', {
   connections: () => ipcRenderer.invoke('settings-app:connections'),
   connect: (id, on) => ipcRenderer.invoke('settings-app:connect', { id, on }),
   openUrl: url => ipcRenderer.send('settings-app:open-url', url),
-  // packs bought on twocode.nl (license-main.cjs)
+  // Bundled free tools (license-main.cjs)
   license: {
     get: () => ipcRenderer.invoke('license:get'),
     activate: code => ipcRenderer.invoke('license:activate', String(code || '')),

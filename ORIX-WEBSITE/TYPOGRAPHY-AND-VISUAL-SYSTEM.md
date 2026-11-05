@@ -65,6 +65,6 @@ Apply perspective to illustrative compositions with an equivalent flat view at n
 | Pressed | Immediate feedback while preserving label readability |
 | Selected | Persistent state indicator and a programmatic state |
 | Loading | Named progress/status without blocking unrelated navigation |
-| Error | Specific readable explanation and a relevant recovery action |
+| Error | Specific readable explanation and a relevant restoration action |
 
 Use a proposed 44 by 44 CSS-pixel minimum touch target for interactive controls. Verify keyboard navigation, browser zoom, long labels and forced-color presentation. The [app design system](../dashboard-rewamp/orix-system/DESIGN-SYSTEM.md) and [token reference](../dashboard-rewamp/orix-system/tokens.css) provide the existing foundations.

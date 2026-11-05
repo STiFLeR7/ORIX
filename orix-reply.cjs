@@ -2,7 +2,7 @@
 // Claude Code Stop hook (asyncRewake): lets you answer Claude from the ORIX island.
 // Runs in the background after Claude stops and waits until you type an answer in the island.
 // Exit code 2 wakes Claude with your answer; exit 0 means "nothing to send" (you answered in the
-// terminal, ORIX is closed, or the wait ended). Usage: node twocode-reply.cjs <token>
+// terminal, ORIX is closed, or the wait ended). Usage: node orix-reply.cjs <token>
 const http = require('node:http');
 
 let input = '';
@@ -14,8 +14,8 @@ process.stdin.on('end', () => {
   if (!sessionId) process.exit(0);
   // ppid = the process that started this hook (part of Claude Code), used for "jump to terminal".
   const body = JSON.stringify({ session_id: sessionId, pid: process.ppid });
-  const req = http.request({ host: '127.0.0.1', port: 47824, path: '/twocode-wait', method: 'POST',
-    headers: { 'content-type': 'application/json', 'content-length': Buffer.byteLength(body), 'x-twocode-token': process.argv[2] || '' } }, res => {
+  const req = http.request({ host: '127.0.0.1', port: 47824, path: '/orix-wait', method: 'POST',
+    headers: { 'content-type': 'application/json', 'content-length': Buffer.byteLength(body), 'x-orix-token': process.argv[2] || '' } }, res => {
     let answer = '';
     res.setEncoding('utf8');
     res.on('data', chunk => { answer += chunk; });

@@ -1,5 +1,5 @@
 'use strict';
-// ORIX releases are installed manually; never trust or install the recovered updater's packages.
+// ORIX releases are installed manually; never trust or install the baseline updater's packages.
 const { app, ipcMain } = require('electron');
 const state = () => ({ current: app.getVersion(), ready: null, full: null, page: '', enabled: false });
 const ours = event => String(event.senderFrame?.url || '').startsWith('file:');

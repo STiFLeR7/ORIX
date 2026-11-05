@@ -4,7 +4,7 @@
 // are translated in one place. Unknown texts (your own notes, Claude's messages, file names) stay as they are.
 (function i18n() {
   const lang = () => 'en';
-  window.__twocodeLang = lang;
+  window.__orixLang = lang;
 
   const EXACT = {
     'Nieuwe key; bestaande key wordt niet getoond': 'New key; the saved key is not shown',
@@ -165,11 +165,11 @@
     const out = translate(t);
     return out == null ? s : s.replace(t, out);
   }
-  window.__twocodeTr = tr;
+  window.__orixTr = tr;
 
   // ---- canvas: everything drawn with text() ----
   const baseText = text;
-  window.__twocodeRawText = baseText;
+  window.__orixRawText = baseText;
   text = function (value, ...rest) { return baseText(typeof value === 'string' ? tr(value) : value, ...rest); };
 
   // ---- DOM pages: translate text and labels, remember the Dutch to switch back ----
@@ -202,7 +202,7 @@
     const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT); let n;
     while ((n = w.nextNode())) fixNode(n, language);
   }
-  window.__twocodeTranslateTree = root => fixTree(root, 'en');
+  window.__orixTranslateTree = root => fixTree(root, 'en');
   const observer = new MutationObserver(list => {
     if (applying) return; applying = true;
     try { for (const m of list) { if (m.type === 'childList') m.addedNodes.forEach(node => fixTree(node)); else fixNode(m.target); } }

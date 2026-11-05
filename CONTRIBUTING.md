@@ -9,7 +9,7 @@ Before proposing a change:
 - Run `npm test`. Add a focused regression for behavioral fixes; preserve notes, settings drafts, active timers and custom integration hooks.
 - Run `npm audit` and inspect the affected screens in English and light/dark. Record unavailable provider or hardware checks rather than claiming them passed.
 - Check OFF semantics: hide the desktop layer while enabled tools continue. Settings must remain reachable. Theme belongs in Settings → General and follows Save/Cancel. English is the only interface language; there is no language selector.
-- Retain ISC and all third-party notices. Attribute imported assets and establish redistribution permission. Do not include local profiles, recovered binaries, dependency folders or unlicensed reference images.
+- Retain ISC and all third-party notices. Attribute imported assets and establish redistribution permission. Do not include local profiles, private binaries, dependency folders or unlicensed reference images.
 
 Never submit keys, tokens, conversation data or local user settings. This workspace uses the vault MCP for commands needing secrets; contributors should use their own secret-management tools without committing credentials. Public Spotify client IDs are launch configuration; account access remains the user's responsibility.
 

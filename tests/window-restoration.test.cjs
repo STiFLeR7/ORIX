@@ -28,10 +28,10 @@ async function recover(visible) {
   await callback();
   return shown;
 }
-test('recovery selects the island instead of an earlier context or dashboard window', async () => {
+test('restoration selects the island instead of an earlier context or dashboard window', async () => {
   const shown = await recover(true);
   assert.deepEqual(shown, ['mascot.html']);
 });
-test('recovery cannot override an explicitly hidden layer', async () => {
+test('restoration cannot override an explicitly hidden layer', async () => {
   assert.deepEqual(await recover(false), []);
 });

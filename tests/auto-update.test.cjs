@@ -9,7 +9,7 @@ const { execFileSync, spawn } = require('child_process');
 const core = require('../auto-update-core.cjs');
 
 const win = process.platform === 'win32';
-const tmp = () => fs.mkdtempSync(path.join(os.tmpdir(), 'twocode-update-test-'));
+const tmp = () => fs.mkdtempSync(path.join(os.tmpdir(), 'orix-update-test-'));
 const ps = (args, opts = {}) => execFileSync('powershell.exe', ['-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', ...args], { encoding: 'utf8', windowsHide: true, ...opts });
 
 test('versions compare like semver, prereleases before the release', () => {
@@ -56,7 +56,7 @@ test('the zip unpacks to the same files, with our own unzip and with Windows (Ex
   fs.rmSync(dir, { recursive: true, force: true });
 });
 
-test('the helper waits for TwoCode to quit, then swaps app and app.next (and keeps the old one)', async () => {
+test('the helper waits for ORIX to quit, then swaps app and app.next (and keeps the old one)', async () => {
   const dir = tmp(), res = path.join(dir, 'resources');
   for (const [sub, v] of [['app', '1.0.0'], ['app.next', '1.1.0']]) {
     fs.mkdirSync(path.join(res, sub), { recursive: true });
@@ -66,7 +66,7 @@ test('the helper waits for TwoCode to quit, then swaps app and app.next (and kee
   fs.writeFileSync(helper, core.swapHelperSource());
   const log = path.join(dir, 'log.txt');
   const run = pid => new Promise(resolve => spawn(process.execPath, [helper, String(pid), res, 'unused.exe', '0', log], { stdio: 'ignore' }).on('exit', resolve));
-  // stand-in for TwoCode.exe: a process that runs for 1.5 seconds
+  // stand-in for ORIX.exe: a process that runs for 1.5 seconds
   const fake = spawn(process.execPath, ['-e', 'setTimeout(() => {}, 1500)'], { stdio: 'ignore' });
   const t0 = Date.now();
   await run(fake.pid);

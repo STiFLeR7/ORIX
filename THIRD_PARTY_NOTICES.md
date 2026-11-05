@@ -1,10 +1,8 @@
 # Attribution and third-party notices
 
-## Recovered TwoCode application
+## Application license
 
-ORIX is based on TwoCode Assistent 1.2.0-beta.6, recovered from the user's `TwoCode-Setup.exe` on 2026-11-02. The original application was branded TwoCode / twocode.nl and used the Robo mascot. Its history is recorded in RECOVERY.md.
-
-The recovered application manifest declares `ISC`; an application-level license text was absent from the recovered app directory. ORIX retains that declared license and supplies the standard text in [LICENSE](LICENSE), with attribution for ORIX contributions. This does not transfer ownership of third-party code, artwork, trademarks, or fonts. Historical originals remain in `recovered/TwoCode/resources/app/`; the source project's RECOVERY.md records the extraction.
+ORIX application code is distributed under the [ISC license](LICENSE). Third-party code, artwork, trademarks and fonts retain their respective licenses and notices.
 
 ## Runtime, fonts, and packages
 

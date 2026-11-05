@@ -1,11 +1,11 @@
-# Prints "<volume 0-100> <muted 0/1>" whenever the Windows master volume changes (TwoCode volume bar).
+# Prints "<volume 0-100> <muted 0/1>" whenever the Windows master volume changes (ORIX volume bar).
 # Also listens on stdin: "set <0-100>" sets the master volume (the volume block on the home screen), "mute <0/1>" mutes.
 param([int]$Parent = 0) # must come first in a script
 $ErrorActionPreference = 'Stop'
 Add-Type -TypeDefinition @'
 using System;
 using System.Runtime.InteropServices;
-namespace TwoCode {
+namespace ORIX {
   [Guid("5CDF2C82-841E-4546-9722-0CF74078229A"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
   interface IAudioEndpointVolume {
     int f(); int g(); int h(); int i();
@@ -40,7 +40,7 @@ namespace TwoCode {
       Marshal.ThrowExceptionForHR(v.SetMasterVolumeLevelScalar(percent / 100f, Guid.Empty));
       if (percent > 0) v.SetMute(false, Guid.Empty);
     }
-    // Commands from TwoCode come in on stdin, on their own thread (the main loop keeps reporting changes).
+    // Commands from ORIX come in on stdin, on their own thread (the main loop keeps reporting changes).
     public static void Listen() {
       var thread = new System.Threading.Thread(() => {
         string line;
@@ -59,11 +59,11 @@ namespace TwoCode {
 '@
 $last = ''
 $tick = 0
-[TwoCode.Audio]::Listen()
+[ORIX.Audio]::Listen()
 while ($true) {
-  # Stop together with TwoCode, also when it was closed abruptly.
+  # Stop together with ORIX, also when it was closed abruptly.
   if ($Parent -and (++$tick % 15 -eq 0) -and -not (Get-Process -Id $Parent -ErrorAction SilentlyContinue)) { exit 0 }
-  try { $now = [TwoCode.Audio]::Read() } catch { $now = $last }
+  try { $now = [ORIX.Audio]::Read() } catch { $now = $last }
   if ($now -ne $last) { [Console]::Out.WriteLine($now); [Console]::Out.Flush(); $last = $now }
   Start-Sleep -Milliseconds 150
 }

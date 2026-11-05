@@ -15,7 +15,7 @@ const same = (a, b) => path.resolve(a).toLowerCase() === path.resolve(b).toLower
 const versionIn = dir => { try { return JSON.parse(fs.readFileSync(path.join(dir, 'resources', 'app', 'package.json'), 'utf8')).version; } catch (e) { return null; } };
 
 function installHome() {
-  if (process.env.TWOCODE_INSTALL_DIR) return process.env.TWOCODE_INSTALL_DIR; // tests
+  if (process.env.ORIX_INSTALL_DIR) return process.env.ORIX_INSTALL_DIR; // tests
   return path.join(process.env.LOCALAPPDATA || path.join(os.homedir(), 'AppData', 'Local'), 'Programs', 'ORIX');
 }
 
@@ -29,7 +29,7 @@ function moveHome() {
   const mine = app.getVersion(), there = versionIn(home);
   try {
     if (!fs.existsSync(home) && fs.existsSync(home + '.old')) {
-      log('installation backup requires recovery: ' + home + '.old');
+      log('installation backup requires restoration: ' + home + '.old');
       return false;
     }
     if (!there || compareVersions(mine, there) > 0) {
@@ -58,7 +58,7 @@ function moveHome() {
       app.setLoginItemSettings({ openAtLogin: true, path: exe });
     }
   } catch (e) {}
-  if (process.env.TWOCODE_INSTALL_DRYRUN) { log('dry run: would start ' + exe); return true; }
+  if (process.env.ORIX_INSTALL_DRYRUN) { log('dry run: would start ' + exe); return true; }
   spawn(exe, process.argv.slice(1), { detached: true, stdio: 'ignore', cwd: home }).unref();
   return true;
 }

@@ -63,7 +63,7 @@ test('only the island can publish committed appearance, and late context windows
   assert.equal(publish(island.event(), { ...value, lang: 'nl' }).ok, false);
   assert.equal(f.handlers.get('orix:layer-set')(island.event(), 'off').error, 'Choose ON or OFF.');
   assert.equal(dashboard.messages.at(-1)[0], 'orix:appearance-committed');
-  assert.equal(fs.existsSync(path.join(f.folder, 'twocode-prefs.json')), false);
+  assert.equal(fs.existsSync(path.join(f.folder, 'orix-prefs.json')), false);
 });
 
 test('visibility persists independently and hides without destroying registered renderers', t => {
@@ -151,7 +151,7 @@ test('tray explicit Show restores OFF, while a second launch opens Settings and 
   let menu, tray;
   Object.assign(f.app, { orixLanguage: 'en', isPackaged: true, requestSingleInstanceLock: () => true, setName() {},
     whenReady: () => Promise.resolve(), getLoginItemSettings: () => ({ openAtLogin: false }) });
-  let openedSettings = 0; f.app.on('twocode-open-settings', () => openedSettings++);
+  let openedSettings = 0; f.app.on('orix-open-settings', () => openedSettings++);
   const electron = { app: f.app, BrowserWindow: { getAllWindows: () => f.windows },
     ipcMain: { handle() {}, on() {} }, nativeImage: { createFromPath() {} },
     Menu: { buildFromTemplate: template => { menu = template; return template; } },
@@ -216,7 +216,7 @@ test('island-only controls reject spoofed frame URLs and subframes', t => {
   }
 });
 
-test('window selection ignores foreign mascot-named URLs for Settings, buddy and recovery', t => {
+test('window selection ignores foreign mascot-named URLs for Settings, buddy and restoration', t => {
   const f = fixture(t), foreign = f.window('foreign.html'), island = f.window('mascot.html'), c = f.load();
   foreign.webContents.getURL = () => 'data:text/html,<title>mascot.html</title>';
   assert.equal(c.findIsland(), island);

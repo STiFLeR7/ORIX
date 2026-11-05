@@ -6,8 +6,7 @@ node_modules/
 .claude/
 dist/
 
-# Original extracted runtime; keep it out of source control.
-/recovered/
+# Private verification artifacts.
 /.verification/
 
 # User-supplied visual references have no established redistribution license.

@@ -1,5 +1,6 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8">
+<html lang="en"><head>
+<script src="./orix-compat.cjs"></script><meta charset="utf-8">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'">
 <link rel="stylesheet" href="./orix-theme.css">
 <title>ORIX Settings</title>
@@ -716,7 +717,7 @@ async function toggleConnect(id, on) {
 async function drawAbout() {
   const about = await S.about(); if (tab !== 'about') return;
   if (!about?.ok) { paint(`<p role="alert">${esc(about?.error || t().wait)}</p>`, false); return; }
-  paint(`<div class="card version"><img src="assets/settings-icon-64.png" alt="" width="36" height="36"><div><b>ORIX ${esc(about.version)}</b><small>${t().licenseText}</small></div></div><p class="muted" style="margin-top:20px">${'Based on recovered TwoCode source.'}</p><button class="btn ghost" style="margin:20px 0" data-repo>${t().repository}</button><details><summary>ISC ${'license'}</summary><pre class="license-copy">${esc(about.license)}</pre></details><details><summary>${'Third-party notices'}</summary><pre class="license-copy">${esc(about.notices)}</pre></details>`, false);
+  paint(`<div class="card version"><img src="assets/settings-icon-64.png" alt="" width="36" height="36"><div><b>ORIX ${esc(about.version)}</b><small>${t().licenseText}</small></div></div><p class="muted" style="margin-top:20px">${'Based on baseline ORIX source.'}</p><button class="btn ghost" style="margin:20px 0" data-repo>${t().repository}</button><details><summary>ISC ${'license'}</summary><pre class="license-copy">${esc(about.license)}</pre></details><details><summary>${'Third-party notices'}</summary><pre class="license-copy">${esc(about.notices)}</pre></details>`, false);
 }
 // ---------- clicks ----------
 function go(where) { const next = internalTab(where); if (next === tab) return; tab = next; localStorage.setItem('tab', tab); $('#search').value = ''; lastHtml = ''; labels(); render(true); }

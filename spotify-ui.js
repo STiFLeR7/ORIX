@@ -2,9 +2,9 @@
 // Spotify screen: album cover, song, progress bar (click to jump) and previous / play-pause / next.
 // Replaces the old drawSpotify in mascot.html, which only showed the song title.
 (function spotifyScreen() {
-  const api = window.twocode;
+  const api = window.orix;
   // Colour of the album cover (extras-ui.js), Spotify green as fallback.
-  const accent = () => window.__twocodeAlbumColour || '#1ed760';
+  const accent = () => window.__orixAlbumColour || '#1ed760';
   const time = ms => { const s = Math.max(0, Math.floor(ms / 1000)); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; };
   const position = () => Math.min(spotifyState.duration_ms || 0,
     (spotifyState.progress_ms || 0) + (spotifyState.is_playing ? performance.now() - spotifySyncAt : 0));
@@ -18,12 +18,12 @@
     else { const d = kind === 'next' ? 1 : -1; tri(x - d * s * 0.6, d); tri(x - d * s * 0.05, d); ctx.roundRect(x + d * s * 0.7 - (d > 0 ? 0 : s * 0.16), y - s / 2, s * 0.16, s, 1); }
     ctx.fill(); ctx.restore();
   }
-  window.__twocodeMediaIcon = mediaIcon;
+  window.__orixMediaIcon = mediaIcon;
   // The music visualizer in the cover's colour: bars that follow the sound when ORIX can hear it, otherwise a made-up
   // dance. Every bar rises fast and falls slowly (like a real level meter), with a soft glow in the same colour.
   const vizState = {};
-  window.__twocodeVisualizer = (key, x, cy, w, h, colour, n = 6) => {
-    const levels = window.__twocodeAudioLevels?.(), t = performance.now() / 1000, playing = spotifyState.is_playing;
+  window.__orixVisualizer = (key, x, cy, w, h, colour, n = 6) => {
+    const levels = window.__orixAudioLevels?.(), t = performance.now() / 1000, playing = spotifyState.is_playing;
     const bars = vizState[key] && vizState[key].length === n ? vizState[key] : (vizState[key] = new Array(n).fill(0.15));
     const gap = Math.max(2, (w / n) * 0.4), bw = (w - gap * (n - 1)) / n;
     ctx.save(); ctx.shadowColor = colour; ctx.shadowBlur = h * 0.35;
@@ -40,10 +40,10 @@
   // While music plays, the album's colour rises from the bottom of the island (black at the top, like a notch).
   let tintK = 0, tintColour = null;
   const rgba = (c, a) => { const m = /rgba?\((\d+),\s*(\d+),\s*(\d+)/.exec(c); if (m) return `rgba(${m[1]},${m[2]},${m[3]},${a})`; const n = parseInt(String(c).replace('#', '').slice(0, 6), 16); return `rgba(${n >> 16},${(n >> 8) & 255},${n & 255},${a})`; };
-  window.__twocodeIslandBackdrop = (x, w, h, r) => {
-    const want = mode === 'expanded' && window.__twocodeTintIsland && performance.now() - (window.__twocodeTintAt || 0) < 120;
-    if (want) tintColour = window.__twocodeTintIsland;
-    const strength = want ? (window.__twocodeTintStrength ?? 1) : 0; window.__twocodeTintStrength = undefined; // a page may dim it (it says so every frame)
+  window.__orixIslandBackdrop = (x, w, h, r) => {
+    const want = mode === 'expanded' && window.__orixTintIsland && performance.now() - (window.__orixTintAt || 0) < 120;
+    if (want) tintColour = window.__orixTintIsland;
+    const strength = want ? (window.__orixTintStrength ?? 1) : 0; window.__orixTintStrength = undefined; // a page may dim it (it says so every frame)
     tintK += (strength - tintK) * (want ? 0.12 : 0.12);
     if (tintK < 0.01 || !tintColour) return;
     ctx.save(); islandPath(x, 0, w, h, r); ctx.clip();
@@ -71,7 +71,7 @@
   async function moveTo(device) {
     devicesNote = 'Switching to ' + device.name + '…';
     const r = await api.spotifyTransfer?.(device.id).catch(e => ({ ok: false, error: e.message }));
-    if (r?.ok) { devicesOpen = false; devicesNote = ''; window.__twocodeFlash?.('🔊  ' + device.name, 1200, true); window.__twocodeChime?.('pop'); setTimeout(() => refreshSpotify(), 700); }
+    if (r?.ok) { devicesOpen = false; devicesNote = ''; window.__orixFlash?.('🔊  ' + device.name, 1200, true); window.__orixChime?.('pop'); setTimeout(() => refreshSpotify(), 700); }
     else devicesNote = r?.error || "That didn't work.";
   }
 
@@ -82,7 +82,7 @@
     hit.ghost = null;
     if (!spotifyConnected) { // not linked yet: a small tile, two lines and one button
       const x0 = content.x, y0 = content.y + 6;
-      box(x0, y0, 52, 52, 10, '#1c1c1e'); window.__twocodeIcon?.('music', x0 + 26, y0 + 26, 22, '#8e8e93', null, 'rgba(0,0,0,0)');
+      box(x0, y0, 52, 52, 10, '#1c1c1e'); window.__orixIcon?.('music', x0 + 26, y0 + 26, 22, '#8e8e93', null, 'rgba(0,0,0,0)');
       text('Connect Spotify', x0 + 64, y0 + 22, 15, '#fff', 600);
       text('See and control your music here.', x0 + 64, y0 + 40, 12, '#8e8e93', 400);
       const b = { x: x0 + 64, y: y0 + 54, width: 128, height: 28 }, over = inside(pointer.x, pointer.y, b);
@@ -93,15 +93,15 @@
     }
     // the player, compact like a notch app: the cover colours the island, small sharp white type
     const art = albumImage?.complete && albumImage.naturalWidth, colour = accent(), soft = 'rgba(255,255,255,.55)';
-    window.__twocodeTintIsland = window.__twocodeAlbumColour; window.__twocodeTintAt = performance.now();
+    window.__orixTintIsland = window.__orixAlbumColour; window.__orixTintAt = performance.now();
     const x0 = content.x, right = content.x + content.width, top0 = content.y + 2, cs = 60;
     const display = (str, tx, ty, sz, col, weight = 600, max) => { ctx.save(); ctx.font = `${weight} ${sz}px Inter, "Segoe UI", sans-serif`; ctx.fillStyle = col; ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
       let t = String(str || ''); if (max) while (t.length > 1 && ctx.measureText(t).width > max) t = t.slice(0, -2) + '…'; ctx.fillText(t, tx, ty); ctx.restore(); };
     if (art) { ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.45)'; ctx.shadowBlur = 12; ctx.shadowOffsetY = 4; box(x0, top0, cs, cs, 10, '#1c1c1e'); ctx.restore();
       ctx.save(); ctx.beginPath(); ctx.roundRect(x0, top0, cs, cs, 10); ctx.clip(); ctx.drawImage(albumImage, x0, top0, cs, cs); ctx.restore(); }
-    else { box(x0, top0, cs, cs, 10, '#1c1c1e'); window.__twocodeIcon?.('music', x0 + cs / 2, top0 + cs / 2, 22, '#8e8e93', null, 'rgba(0,0,0,0)'); }
+    else { box(x0, top0, cs, cs, 10, '#1c1c1e'); window.__orixIcon?.('music', x0 + cs / 2, top0 + cs / 2, 22, '#8e8e93', null, 'rgba(0,0,0,0)'); }
     // the visualizer in the cover's colour (it moves with the music when ORIX can hear it)
-    window.__twocodeVisualizer('page', right - 44, top0 + 24, 44, 28, colour, 6);
+    window.__orixVisualizer('page', right - 44, top0 + 24, 44, 28, colour, 6);
     const tx = x0 + cs + 12, titleW = right - 56 - tx;
     if (!track) {
       display('Nothing is playing', tx, top0 + 26, 15, '#fff', 600, titleW);
@@ -109,7 +109,7 @@
     } else {
       const over = inside(pointer.x, pointer.y, { x: tx, y: top0 + 10, width: titleW, height: 20 });
       display(track.name, tx, top0 + 26, 15, over ? soft : '#fff', 600, titleW);
-      (window.__twocodeRawText || text)(track.artist, tx, top0 + 44, 12, soft, 400, 'left', titleW);
+      (window.__orixRawText || text)(track.artist, tx, top0 + 44, 12, soft, 400, 'left', titleW);
     }
     hit.spTitle = { x: tx, y: top0 + 10, width: titleW, height: 20 };
     // the timeline: elapsed, a thin bar (grows when you point at it), remaining
@@ -132,7 +132,7 @@
     const dbx = right - dw, dby = cy - 11, overDev = inside(pointer.x, pointer.y, { x: dbx, y: dby, width: dw, height: 22 });
     box(dbx, dby, dw, 22, 7, devicesOpen || overDev ? 'rgba(255,255,255,.2)' : 'rgba(255,255,255,.1)');
     devIcon(dev?.type || 'Computer', dbx + 13, dby + 11, 12, '#ffffff');
-    (window.__twocodeRawText || text)(devLabel, dbx + 25, dby + 15, 11, '#ffffff', 600, 'left', dw - 30);
+    (window.__orixRawText || text)(devLabel, dbx + 25, dby + 15, 11, '#ffffff', 600, 'left', dw - 30);
     hit.spDevices = { x: dbx, y: dby, width: dw, height: 22 };
     hit.spOpen = null;
     for (let i = 0; i < 5; i++) hit['spDev' + i] = null;
@@ -146,16 +146,16 @@
         box(px + 16, ry, pw - 32, 1, 0, '#2c2c2e');
         if (over) box(b.x, b.y + 2, b.width, b.height - 4, 8, '#2c2c2e');
         devIcon(d.type, px + 26, ry + 20, 15, '#ffffff');
-        (window.__twocodeRawText || text)(d.name, px + 46, ry + 25, 15, '#ffffff', d.active ? 600 : 500, 'left', pw - 110);
+        (window.__orixRawText || text)(d.name, px + 46, ry + 25, 15, '#ffffff', d.active ? 600 : 500, 'left', pw - 110);
         if (d.active) { ctx.save(); ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2.4; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.beginPath(); ctx.moveTo(px + pw - 30, ry + 20); ctx.lineTo(px + pw - 26, ry + 24); ctx.lineTo(px + pw - 19, ry + 16); ctx.stroke(); ctx.restore(); }
         hit['spDev' + i] = { ...b, device: d };
       });
-      if (devicesNote) (window.__twocodeRawText || text)(devicesNote, px + 16, py + ph - 12, 12, '#8e8e93', 500, 'left', pw - 32);
+      if (devicesNote) (window.__orixRawText || text)(devicesNote, px + 16, py + ph - 12, 12, '#8e8e93', 500, 'left', pw - 32);
     }
   };
 
   async function control(action) {
-    window.dispatchEvent(new CustomEvent('twocode:badge', { detail: 'dj' }));
+    window.dispatchEvent(new CustomEvent('orix:badge', { detail: 'dj' }));
     const wasPlaying = spotifyState.is_playing, syncedAt = spotifySyncAt;
     if (action === 'play' || action === 'pause') { spotifyState.is_playing = action === 'play'; spotifySyncAt = performance.now(); }
     try {
@@ -163,19 +163,19 @@
       if (!result?.ok) throw new Error(result?.error || "Couldn't control Spotify.");
     } catch (error) {
       spotifyState.is_playing = wasPlaying; spotifySyncAt = syncedAt;
-      window.__twocodeFlash?.(error.message || "Couldn't control Spotify.", 4000, true);
+      window.__orixFlash?.(error.message || "Couldn't control Spotify.", 4000, true);
     }
     setTimeout(() => refreshSpotify(), 350);
   }
-  window.__twocodeSpotifyControl = control;
+  window.__orixSpotifyControl = control;
   // ---- swipe for music: drag left/right over the island (or swipe with two fingers on the touchpad) ----
   // left = next song, right = previous song. Works on the small island and on the Spotify page.
   let drag = null, swallowClick = false, wheelX = 0, wheelAt = 0, lastSwipe = 0;
   const canSwipe = (x, y) => spotifyConnected && spotifyState.track && inside(x, y, islandBounds) && (mode === 'compact' || currentView === 'spotify');
   function swipe(dir) {
     if (performance.now() - lastSwipe < 700) return; lastSwipe = performance.now();
-    window.__twocodeFlash?.(dir > 0 ? '⏭  Next song' : '⏮  Previous song', 900);
-    window.__twocodeKick?.(dir > 0 ? -0.05 : 0.05);
+    window.__orixFlash?.(dir > 0 ? '⏭  Next song' : '⏮  Previous song', 900);
+    window.__orixKick?.(dir > 0 ? -0.05 : 0.05);
     control(dir > 0 ? 'next' : 'previous');
   }
   canvas.addEventListener('pointerdown', e => { drag = canSwipe(e.clientX, e.clientY) ? { x: e.clientX, y: e.clientY } : null; });

@@ -79,8 +79,8 @@
     try {
       const state = await inspectUI(
         win,
-        'window.__twocodeWindowDebug ' +
-        '? window.__twocodeWindowDebug.state() ' +
+        'window.__orixWindowDebug ' +
+        '? window.__orixWindowDebug.state() ' +
         ': ({ uiLoaded: false })'
       );
 
@@ -221,12 +221,12 @@
               }
             }, 50);
           } else {
-            const recovered = await inspectUI(
+            const baseline = await inspectUI(
               win,
-              'window.__twocodeWindowDebug && ' +
-              '({ before: window.__twocodeWindowDebug.state(), after: window.__twocodeWindowDebug.restore() })'
+              'window.__orixWindowDebug && ' +
+              '({ before: window.__orixWindowDebug.state(), after: window.__orixWindowDebug.restore() })'
             );
-            log('renderer-herstel', recovered);
+            log('renderer-herstel', baseline);
 
             await snapshot(win);
           }

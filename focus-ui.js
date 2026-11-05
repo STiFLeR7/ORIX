@@ -1,62 +1,62 @@
 'use strict';
 // Focus page: choose hours, minutes and seconds, start, and watch the countdown.
-// Timer logic lives in twocode-fun.js (window.__twocodeFocus); layout comes from pages-ui.js.
+// Timer logic lives in orix-fun.js (window.__orixFocus); layout comes from pages-ui.js.
 (function focusPage() {
-  const root = document.createElement('section'); root.id = 'twocode-focus'; document.body.appendChild(root);
+  const root = document.createElement('section'); root.id = 'orix-focus'; document.body.appendChild(root);
   const style = document.createElement('style'); style.textContent = `
-#twocode-focus{position:absolute;z-index:60;display:none;color:#fff;font:15px/1.4 Inter,"Segoe UI",sans-serif;pointer-events:auto;user-select:none}
-#twocode-focus *{box-sizing:border-box}
-#twocode-focus button{border:0;cursor:pointer;font-family:inherit;color:#fff;background:transparent;padding:0}
-#twocode-focus .fo-body{height:100%;display:flex;flex-direction:column}
-#twocode-focus .fo-row{flex:1;min-height:0;display:flex;align-items:center;justify-content:space-between;gap:16px}
+#orix-focus{position:absolute;z-index:60;display:none;color:#fff;font:15px/1.4 Inter,"Segoe UI",sans-serif;pointer-events:auto;user-select:none}
+#orix-focus *{box-sizing:border-box}
+#orix-focus button{border:0;cursor:pointer;font-family:inherit;color:#fff;background:transparent;padding:0}
+#orix-focus .fo-body{height:100%;display:flex;flex-direction:column}
+#orix-focus .fo-row{flex:1;min-height:0;display:flex;align-items:center;justify-content:space-between;gap:16px}
 /* round buttons like the Clock app and the timer in the Dynamic Island: a tinted circle, the label in the colour */
-#twocode-focus .fo-round{flex:none;min-width:92px;height:44px;padding:0 16px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;gap:6px;background:var(--b);color:var(--f);font-size:15px;font-weight:600}
-#twocode-focus .fo-round.sm{min-width:0;height:40px;padding:0 14px}
-#twocode-focus .fo-round:hover{filter:brightness(1.2)}
-#twocode-focus .fo-round.white:hover{filter:none;background:#e5e5ea}
-#twocode-focus .fo-round:active{transform:scale(.97);transition:transform .1s ease-out}
-#twocode-focus .fo-round:disabled{opacity:.4;cursor:default}
-#twocode-focus .grey{--b:#1c1c1e;--f:#ffffff}
-#twocode-focus .white{--b:#ffffff;--f:#000000}
+#orix-focus .fo-round{flex:none;min-width:92px;height:44px;padding:0 16px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;gap:6px;background:var(--b);color:var(--f);font-size:15px;font-weight:600}
+#orix-focus .fo-round.sm{min-width:0;height:40px;padding:0 14px}
+#orix-focus .fo-round:hover{filter:brightness(1.2)}
+#orix-focus .fo-round.white:hover{filter:none;background:#e5e5ea}
+#orix-focus .fo-round:active{transform:scale(.97);transition:transform .1s ease-out}
+#orix-focus .fo-round:disabled{opacity:.4;cursor:default}
+#orix-focus .grey{--b:#1c1c1e;--f:#ffffff}
+#orix-focus .white{--b:#ffffff;--f:#000000}
 /* the picker wheel */
-#twocode-focus .fo-wheel{position:relative;flex:1;height:132px;display:flex;justify-content:center;overflow:hidden}
-#twocode-focus .fo-band{position:absolute;left:0;right:0;top:50%;height:40px;margin-top:-20px;border-radius:12px;background:#1c1c1e}
-#twocode-focus .fo-col{position:relative;width:50%;height:100%;cursor:ns-resize}
-#twocode-focus .fo-list{position:absolute;left:0;right:0;top:50%;transition:transform .3s cubic-bezier(.2,.9,.3,1)}
-#twocode-focus .fo-num{height:40px;display:flex;align-items:center;justify-content:flex-end;padding-right:54px;font-size:24px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--orix-muted,#b4bdc6);cursor:pointer}
-#twocode-focus .fo-num.on{color:#fff}
-#twocode-focus .fo-unit{position:absolute;left:calc(100% - 48px);top:50%;margin-top:-11px;font-size:17px;font-weight:600;pointer-events:none}
-#twocode-focus .fo-foot{flex:none;height:34px;display:flex;align-items:center;gap:6px}
-#twocode-focus .fo-chip{height:30px;padding:0 13px;border-radius:8px;background:#1c1c1e;font-size:13px;font-weight:600;color:#fff}
-#twocode-focus .fo-chip:hover{background:#2c2c2e}
-#twocode-focus .fo-chip.on{background:#3a3a3c;color:#fff}
-#twocode-focus .fo-end{margin-left:auto;font-size:13px;font-weight:600;color:#8e8e93;font-variant-numeric:tabular-nums}
+#orix-focus .fo-wheel{position:relative;flex:1;height:132px;display:flex;justify-content:center;overflow:hidden}
+#orix-focus .fo-band{position:absolute;left:0;right:0;top:50%;height:40px;margin-top:-20px;border-radius:12px;background:#1c1c1e}
+#orix-focus .fo-col{position:relative;width:50%;height:100%;cursor:ns-resize}
+#orix-focus .fo-list{position:absolute;left:0;right:0;top:50%;transition:transform .3s cubic-bezier(.2,.9,.3,1)}
+#orix-focus .fo-num{height:40px;display:flex;align-items:center;justify-content:flex-end;padding-right:54px;font-size:24px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--orix-muted,#b4bdc6);cursor:pointer}
+#orix-focus .fo-num.on{color:#fff}
+#orix-focus .fo-unit{position:absolute;left:calc(100% - 48px);top:50%;margin-top:-11px;font-size:17px;font-weight:600;pointer-events:none}
+#orix-focus .fo-foot{flex:none;height:34px;display:flex;align-items:center;gap:6px}
+#orix-focus .fo-chip{height:30px;padding:0 13px;border-radius:8px;background:#1c1c1e;font-size:13px;font-weight:600;color:#fff}
+#orix-focus .fo-chip:hover{background:#2c2c2e}
+#orix-focus .fo-chip.on{background:#3a3a3c;color:#fff}
+#orix-focus .fo-end{margin-left:auto;font-size:13px;font-weight:600;color:#8e8e93;font-variant-numeric:tabular-nums}
 /* running: like the timer in the iPhone's Dynamic Island, two round buttons left, big white digits right */
-#twocode-focus .fo-run{flex:1;display:flex;align-items:center;gap:12px}
-#twocode-focus .fo-big{margin-left:auto;text-align:right}
-#twocode-focus .fo-big small{display:block;font-size:15px;font-weight:600;color:#8e8e93;margin-bottom:-4px}
-#twocode-focus .fo-big b{display:block;font-size:76px;line-height:84px;font-weight:500;letter-spacing:-2px;color:var(--orix-text,#fff);font-variant-numeric:tabular-nums}
-#twocode-focus .fo-bar{flex:none;height:4px;border-radius:2px;background:#3a3a3c;overflow:hidden;margin:6px 0 10px}
-#twocode-focus .fo-bar i{display:block;height:100%;border-radius:2px;background:var(--orix-text,#fff);transition:width .6s linear}
+#orix-focus .fo-run{flex:1;display:flex;align-items:center;gap:12px}
+#orix-focus .fo-big{margin-left:auto;text-align:right}
+#orix-focus .fo-big small{display:block;font-size:15px;font-weight:600;color:#8e8e93;margin-bottom:-4px}
+#orix-focus .fo-big b{display:block;font-size:76px;line-height:84px;font-weight:500;letter-spacing:-2px;color:var(--orix-text,#fff);font-variant-numeric:tabular-nums}
+#orix-focus .fo-bar{flex:none;height:4px;border-radius:2px;background:#3a3a3c;overflow:hidden;margin:6px 0 10px}
+#orix-focus .fo-bar i{display:block;height:100%;border-radius:2px;background:var(--orix-text,#fff);transition:width .6s linear}
 /* compact (notch-app size) */
-#twocode-focus .fo-row{gap:12px}
-#twocode-focus .fo-round{min-width:76px;height:34px;padding:0 12px;border-radius:9px;font-size:13px}
-#twocode-focus .fo-round.sm{height:30px;padding:0 12px;font-size:12px}
-#twocode-focus .fo-wheel{height:104px}
-#twocode-focus .fo-band{height:32px;margin-top:-16px;border-radius:9px}
-#twocode-focus .fo-num{height:32px;font-size:19px;padding-right:46px}
-#twocode-focus .fo-unit{left:calc(100% - 42px);margin-top:-9px;font-size:13px}
-#twocode-focus .fo-foot{height:28px;gap:5px}
-#twocode-focus .fo-chip{height:24px;padding:0 10px;border-radius:7px;font-size:11px}
-#twocode-focus .fo-end{font-size:11px}
-#twocode-focus .fo-big small{font-size:12px;margin-bottom:-2px}
-#twocode-focus .fo-big b{font-size:52px;line-height:58px;letter-spacing:-1.5px}
-#twocode-focus .fo-bar{height:3px;margin:4px 0 6px}
-#twocode-focus .fo-foot span{font-size:11px !important}`;
+#orix-focus .fo-row{gap:12px}
+#orix-focus .fo-round{min-width:76px;height:34px;padding:0 12px;border-radius:9px;font-size:13px}
+#orix-focus .fo-round.sm{height:30px;padding:0 12px;font-size:12px}
+#orix-focus .fo-wheel{height:104px}
+#orix-focus .fo-band{height:32px;margin-top:-16px;border-radius:9px}
+#orix-focus .fo-num{height:32px;font-size:19px;padding-right:46px}
+#orix-focus .fo-unit{left:calc(100% - 42px);margin-top:-9px;font-size:13px}
+#orix-focus .fo-foot{height:28px;gap:5px}
+#orix-focus .fo-chip{height:24px;padding:0 10px;border-radius:7px;font-size:11px}
+#orix-focus .fo-end{font-size:11px}
+#orix-focus .fo-big small{font-size:12px;margin-bottom:-2px}
+#orix-focus .fo-big b{font-size:52px;line-height:58px;letter-spacing:-1.5px}
+#orix-focus .fo-bar{height:3px;margin:4px 0 6px}
+#orix-focus .fo-foot span{font-size:11px !important}`;
   document.head.appendChild(style);
 
-  const F = () => window.__twocodeFocus;
-  const EN = () => window.__twocodePrefs?.().lang === 'en', T = (nl, en) => EN() ? en : nl;
+  const F = () => window.__orixFocus;
+  const EN = () => window.__orixPrefs?.().lang === 'en', T = (nl, en) => EN() ? en : nl;
   const ROW = 32, HOURS = 6, MINUTES = 60;
   let lastKey = '';
   const at = ms => new Date(ms).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' });
@@ -123,7 +123,7 @@
   (function position() {
     const show = currentView === 'focus' && mode === 'expanded' && visual.width > 500 && visual.height > Math.min(targetHeight() - 30, 150);
     const display = show ? 'block' : 'none'; if (root.style.display !== display) root.style.display = display;
-    if (show) { window.__twocodePage.place(root, contentRect()); if (!shown) lastKey = ''; render(); }
+    if (show) { window.__orixPage.place(root, contentRect()); if (!shown) lastKey = ''; render(); }
     shown = show;
     requestAnimationFrame(position);
   })();

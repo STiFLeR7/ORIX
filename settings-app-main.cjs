@@ -13,7 +13,7 @@ const THEMES = { dark: { bg: '#111315', symbol: '#f3f5f7' }, light: { bg: '#f2f4
 const island = () => require('./orix-layer-main.cjs').findIsland();
 const fromApp = e => win && !win.isDestroyed() && e.sender === win.webContents && require('./orix-layer-main.cjs').trusted(e, ['settings-app.html']);
 const fromIsland = e => require('./orix-layer-main.cjs').trusted(e, ['mascot.html']);
-const faceWanted = on => island()?.webContents.executeJavaScript(`window.__twocodeFaceForSettings = ${on ? 'true' : 'false'}`).catch(() => {});
+const faceWanted = on => island()?.webContents.executeJavaScript(`window.__orixFaceForSettings = ${on ? 'true' : 'false'}`).catch(() => {});
 
 let theme = 'dark', appLang = 'en';
 const lang = () => 'en';
@@ -69,7 +69,7 @@ function open(tab) {
   });
   win.on('closed', () => {
     win = null; dirty = false; closing = false; faceWanted(false);
-    island()?.webContents.executeJavaScript('window.__twocodeSettingsClosed?.()').catch(() => {}); // an unsaved draft is gone
+    island()?.webContents.executeJavaScript('window.__orixSettingsClosed?.()').catch(() => {}); // an unsaved draft is gone
   });
   // links in settings (for example "how to get your calendar link") open in the browser
   win.webContents.setWindowOpenHandler(({ url }) => { if (/^https:\/\//.test(url)) require('electron').shell.openExternal(url); return { action: 'deny' }; });
@@ -79,7 +79,7 @@ function open(tab) {
 async function relay(req) {
   const isl = island();
   if (!isl) return { ok: false, error: text(lang(), 'starting') };
-  try { return { ok: true, ...(await isl.webContents.executeJavaScript(`window.__twocodeRemoteSettings(${JSON.stringify(req)})`)) }; }
+  try { return { ok: true, ...(await isl.webContents.executeJavaScript(`window.__orixRemoteSettings(${JSON.stringify(req)})`)) }; }
   catch (error) { return { ok: false, error: req.kind === 'save' ? text(lang(), 'savePreferences') : String(error?.message || error).slice(0, 200) }; }
 }
 async function prepareQuit() {
@@ -145,14 +145,14 @@ ipcMain.on('settings-app:theme', (e, value) => {
 ipcMain.on('settings-app:frame', (e, url) => { // the app's own Robo, drawn by the island from your draft (buddy-ui.js)
   if (fromIsland(e) && win && !win.isDestroyed() && typeof url === 'string' && url.startsWith('data:image/')) win.webContents.send('settings-app:face', url);
 });
-app.on('twocode-open-settings', () => open()); // tray menu, or the Start menu shortcut while ORIX runs
+app.on('orix-open-settings', () => open()); // tray menu, or the Start menu shortcut while ORIX runs
 if (process.argv.includes('--settings')) app.whenReady().then(() => setTimeout(() => open(), 1200)); // started from the Start menu shortcut
 
 // Home and Verbindingen: your name, what your AI did, and which AIs ORIX follows (ai-monitor-main.cjs).
 const os = require('node:os'), fs = require('node:fs');
 const userName = () => { const n = String(os.userInfo().username || '').replace(/[._-]+/g, ' ').trim(); return n ? n[0].toUpperCase() + n.slice(1) : ''; };
 async function connections() {
-  const m = app.twocodeMonitor; if (!m) return { ok: false };
+  const m = app.orixMonitor; if (!m) return { ok: false };
   const view = m.view(), auto = (await m.handlers['ai-monitor:auto-get']()).auto;
   const by = id => view.providers.find(p => p.provider === id) || {};
   const item = (id, on, available, p) => ({ id, on: !!on, available, soon: !!p.soon, state: p.connected ? (p.permission ? 'question' : p.state) : 'off', detail: p.detail || '', project: p.source?.title || '' });
@@ -164,12 +164,12 @@ async function connections() {
   ] };
 }
 async function connect(id, on) {
-  const h = app.twocodeMonitor?.handlers; if (!h) throw new Error(text(lang(), 'starting'));
+  const h = app.orixMonitor?.handlers; if (!h) throw new Error(text(lang(), 'starting'));
   if (id === 'claudecode' || id === 'codex') await h[on ? 'ai-monitor:hooks-install' : 'ai-monitor:hooks-uninstall']({ agent: id === 'codex' ? 'codex' : 'claude' });
   else if (id === 'claude' || id === 'chatgpt') { const r = await h['ai-monitor:auto-set']({ provider: id, on }); if (on && !r.found) return { ...(await connections()), waiting: id }; }
   return connections();
 }
-ipcMain.handle('settings-app:home', e => fromApp(e) ? { ok: true, user: userName(), history: app.twocodeMonitor?.history() || [] } : null);
+ipcMain.handle('settings-app:home', e => fromApp(e) ? { ok: true, user: userName(), history: app.orixMonitor?.history() || [] } : null);
 ipcMain.handle('settings-app:connections', e => fromApp(e) ? connections() : null);
 ipcMain.handle('settings-app:connect', async (e, req) => {
   if (!fromApp(e) || !['claudecode', 'codex', 'claude', 'chatgpt'].includes(req?.id)) return null;

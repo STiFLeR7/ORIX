@@ -133,7 +133,7 @@ test('VS Code extension presents ORIX branding on connection failures', async ()
   const context = { exports: {}, require: name => name === 'vscode' ? vscode : name === 'http' ? http : require(name), URLSearchParams, Buffer, process, console };
   vm.runInNewContext(fs.readFileSync(require.resolve('../vscode-editor/extension.js'), 'utf8'), context);
   context.exports.activate({ subscriptions: [] });
-  uriHandler.handleUri({ authority: 'twocode.project-editor', path: '/connect', query: `port=12345&token=${'a'.repeat(64)}&job=${'b'.repeat(36)}` });
+  uriHandler.handleUri({ authority: 'orix.project-editor', path: '/connect', query: `port=12345&token=${'a'.repeat(64)}&job=${'b'.repeat(36)}` });
   assert.equal(await warning, 'ORIX: Synthetic failure');
   assert.equal(require('../vscode-editor/package.json').displayName, 'ORIX Project Editor');
 });
@@ -153,7 +153,7 @@ test('ChatGPT integration uses English app errors and keeps redaction', async ()
 
 test('old Dutch preferences and Dutch Windows locale resolve to English without losing other choices', () => {
   assert.equal(normalize({ lang: 'nl', themeMode: 'light' }, null, 'nl-NL').lang, 'en');
-  const source = fs.readFileSync(require.resolve('../twocode-fun.js'), 'utf8');
+  const source = fs.readFileSync(require.resolve('../orix-fun.js'), 'utf8');
   const script = source.slice(source.indexOf('const DEFAULTS'), source.indexOf('// Old saves only')) + '\nglobalThis.snapshot = prefs;';
   const context = { window: { ORIXAppearance: { normalize } }, navigator: { language: 'nl-NL' },
     store: { get: () => ({ lang: 'nl', warnAt: 90, themeMode: 'light' }), set() {} } };
@@ -162,12 +162,12 @@ test('old Dutch preferences and Dutch Windows locale resolve to English without 
 });
 
 test('General settings no longer render a language selector', () => {
-  const source = fs.readFileSync(require.resolve('../twocode-fun.js'), 'utf8'), seen = [];
-  const start = source.indexOf('window.__twocodeSettingsExtra =');
+  const source = fs.readFileSync(require.resolve('../orix-fun.js'), 'utf8'), seen = [];
+  const start = source.indexOf('window.__orixSettingsExtra =');
   const script = source.slice(start, source.indexOf('// Settings: click a block', start));
   const context = { window: {}, row: () => '', toggle: () => '', chips: key => { seen.push(key); return ''; },
     prefs: {}, PACKS: {}, extrasCfg: {}, extrasError: '', loginOn: false, esc: String };
-  vm.runInNewContext(script, context); context.window.__twocodeSettingsExtra();
+  vm.runInNewContext(script, context); context.window.__orixSettingsExtra();
   assert.equal(seen.includes('lang'), false);
 });
 
@@ -209,7 +209,7 @@ test('AI notifications use English and identify the originating agent', () => {
 });
 
 test('focus completion and usage notifications use English', () => {
-  const source = fs.readFileSync(require.resolve('../twocode-fun.js'), 'utf8');
+  const source = fs.readFileSync(require.resolve('../orix-fun.js'), 'utf8');
   const start = source.indexOf('    if (wasFocus && !focus.active())');
   const end = source.indexOf('    wasFocus = focus.active();', start); assert.ok(start >= 0 && end > start);
   const messages = [], noop = () => {};
@@ -217,18 +217,18 @@ test('focus completion and usage notifications use English', () => {
   vm.runInNewContext(source.slice(start, end), context);
   assert.equal(messages[0][0], 'Focus complete!'); assert.match(messages[0][1], /focused/);
   const warnStart = source.indexOf('  function warnLimit()'), warnEnd = source.indexOf('  // ---------- random life:', warnStart); assert.ok(warnStart >= 0 && warnEnd > warnStart);
-  const warn = { window: { __twocodeMonitor: { state: () => ({ providers: [{ provider: 'claudecode', usage: { fiveHour: { used: 90 } } }] }) } }, prefs: { warnAt: 80 }, store: { get: () => '', set: noop }, say: (...args) => messages.push(args), chime: noop, feel: noop };
+  const warn = { window: { __orixMonitor: { state: () => ({ providers: [{ provider: 'claudecode', usage: { fiveHour: { used: 90 } } }] }) } }, prefs: { warnAt: 80 }, store: { get: () => '', set: noop }, say: (...args) => messages.push(args), chime: noop, feel: noop };
   vm.runInNewContext(source.slice(warnStart, warnEnd), warn); warn.warnLimit();
   assert.equal(messages[1][0], 'You have used 90% of your Claude limit'); assert.match(messages[1][1], /break/);
 });
 
 test('achievement notification labels are English without changing saved badge IDs', () => {
-  const source = fs.readFileSync(require.resolve('../twocode-fun.js'), 'utf8'), start = source.indexOf('  const BADGES = ['), end = source.indexOf('  function bump(', start);
+  const source = fs.readFileSync(require.resolve('../orix-fun.js'), 'utf8'), start = source.indexOf('  const BADGES = ['), end = source.indexOf('  function bump(', start);
   assert.ok(start >= 0 && end > start); const messages = [], saved = [], noop = () => {};
   const context = { store: { get: (_key, fallback) => fallback, set: (key, value) => saved.push([key, value]) }, say: (...args) => messages.push(args), chime: noop, confetti: noop, jump: noop, feel: noop };
   vm.runInNewContext(source.slice(start, end), context); context.earn('first');
   assert.match(messages[0][0], /Achievement: First task/); assert.equal(messages[0][1], 'Claude Code completes a task');
-  assert.equal(saved[0][0], 'twocode:badges'); assert.equal(saved[0][1][0], 'first');
+  assert.equal(saved[0][0], 'orix:badges'); assert.equal(saved[0][1][0], 'first');
 });
 
 test('Spotify playback failures are visible and restore the confirmed play state', async () => {
@@ -237,7 +237,7 @@ test('Spotify playback failures are visible and restore the confirmed play state
   for (const response of [{ ok: false, error: 'No active device found' }, new Error('offline'), { ok: true }]) {
     const flashes = [], refreshes = [], state = { is_playing: false };
     const context = { spotifyState: state, spotifySyncAt: 0, performance: { now: () => 100 }, CustomEvent: class {}, console,
-      window: { dispatchEvent() {}, __twocodeFlash: message => flashes.push(message) },
+      window: { dispatchEvent() {}, __orixFlash: message => flashes.push(message) },
       api: { spotifyControl: async () => { if (response instanceof Error) throw response; return response; } },
       setTimeout: fn => refreshes.push(fn), refreshSpotify() {} };
     vm.runInNewContext(source.slice(start, end), context);
@@ -256,7 +256,7 @@ test('home music buttons use the shared Spotify control error handling', () => {
   const state = { is_playing: false };
   vm.runInNewContext(source.slice(start, end), { canvas: { addEventListener: (_event, fn) => { click = fn; } },
     currentView: 'home', mode: 'expanded', spotifyState: state, hit: { homePlay: 'play', hmNext: 'next', hmPrev: 'previous' },
-    inside: (_x, _y, bounds) => bounds === target, sound() {}, window: { __twocodeSpotifyControl: action => actions.push(action) } });
+    inside: (_x, _y, bounds) => bounds === target, sound() {}, window: { __orixSpotifyControl: action => actions.push(action) } });
   const event = { clientX: 0, clientY: 0, preventDefault() {}, stopImmediatePropagation() {} };
   target = 'play'; click(event); state.is_playing = true; click(event);
   target = 'next'; click(event); target = 'previous'; click(event);
@@ -274,9 +274,9 @@ test('Spotify device messages are English and preserve provider errors', async (
   reject = true; await context.loadDevices(); assert.equal(context.note(), "Couldn't load your devices."); reject = false;
   response = { ok: false }; await context.moveTo({ id: 'id', name: 'Klaar' }); assert.equal(context.note(), "That didn't work.");
   const noteText = source.match(/if \(devicesNote\) (.*);/)[1];
-  assert.match(noteText, /__twocodeRawText/, 'device status and provider errors bypass translation');
-  assert.match(source, /__twocodeRawText \|\| text\)\(d\.name/, 'device names bypass translation');
-  assert.match(source, /__twocodeRawText \|\| text\)\(devLabel/, 'active device name bypasses translation');
+  assert.match(noteText, /__orixRawText/, 'device status and provider errors bypass translation');
+  assert.match(source, /__orixRawText \|\| text\)\(d\.name/, 'device names bypass translation');
+  assert.match(source, /__orixRawText \|\| text\)\(devLabel/, 'active device name bypasses translation');
 });
 
 test('battery and calendar alerts use English while preserving device names and event titles', async () => {
@@ -291,29 +291,29 @@ test('battery and calendar alerts use English while preserving device names and 
   assert.deepEqual(notifications[0], ['Battery low: 19%', 'Plug in your charger.']);
   bluetooth({ devices: [{ name: 'Klaar', battery: 15 }] }); assert.deepEqual(notifications[1], ['Klaar is low on battery', '15% battery remaining.']);
   assert.ok(flashes.some(([text, , raw]) => text === '🎧 Klaar: 15% remaining' && raw === true));
-  assert.match(context.window.__twocodeHomeInfo(), /in 10 min: Klaar/);
+  assert.match(context.window.__orixHomeInfo(), /in 10 min: Klaar/);
   assert.ok(flashes.some(([text, , raw]) => text === '📅 In 10 min: Klaar' && raw === true));
   assert.deepEqual(notifications[2], ['In 10 minutes', 'Klaar']);
 });
 
 test('compact alerts preserve dynamic text without disabling translation for ordinary messages', () => {
-  const source = fs.readFileSync(require.resolve('../ai-monitor-ui.js'), 'utf8'), start = source.indexOf('    if (message) {', source.indexOf('const message = window.__twocodeCompactMessage')), end = source.indexOf('    if (p && (needsYou', start);
+  const source = fs.readFileSync(require.resolve('../ai-monitor-ui.js'), 'utf8'), start = source.indexOf('    if (message) {', source.indexOf('const message = window.__orixCompactMessage')), end = source.indexOf('    if (p && (needsYou', start);
   assert.ok(start >= 0 && end > start); const calls = [], raw = [];
-  const context = { message: '🎧 Klaar: 15% remaining', left: 0, cy: 0, right: 300, text: value => calls.push(value), window: { __twocodeCompactMessageIsRaw: () => true, __twocodeRawText: value => raw.push(value) } };
+  const context = { message: '🎧 Klaar: 15% remaining', left: 0, cy: 0, right: 300, text: value => calls.push(value), window: { __orixCompactMessageIsRaw: () => true, __orixRawText: value => raw.push(value) } };
   vm.runInNewContext('(function(){' + source.slice(start, end) + '})()', context);
   assert.deepEqual(raw, [context.message]); assert.deepEqual(calls, []);
-  context.window.__twocodeCompactMessageIsRaw = () => false;
+  context.window.__orixCompactMessageIsRaw = () => false;
   vm.runInNewContext('(function(){' + source.slice(start, end) + '})()', context); assert.deepEqual(calls, [context.message]);
 });
 
 test('compact alert raw-text flag follows the current alert and expires', () => {
   const source = fs.readFileSync(require.resolve('../extras-ui.js'), 'utf8'), start = source.indexOf('  let hud = null;'), end = source.indexOf('  // Volume bar:', start); assert.ok(start >= 0 && end > start);
-  let now = 0; const window = { __twocodeCompactMessage: () => 'fallback' };
+  let now = 0; const window = { __orixCompactMessage: () => 'fallback' };
   const context = { window, introFinished: true, performance: { now: () => now }, mode: 'compact', setMode() {}, setTimeout: () => 1, clearTimeout() {} };
   vm.runInNewContext(source.slice(start, end), context);
-  window.__twocodeFlash('Klaar', 100, true); assert.equal(window.__twocodeCompactMessage(), 'Klaar'); assert.equal(window.__twocodeCompactMessageIsRaw(), true);
-  window.__twocodeFlash('Ordinary', 100); assert.equal(window.__twocodeCompactMessageIsRaw(), false);
-  window.__twocodeFlash('Klaar', 100, true); now = 101; assert.equal(window.__twocodeCompactMessage(), 'fallback'); assert.equal(window.__twocodeCompactMessageIsRaw(), false);
+  window.__orixFlash('Klaar', 100, true); assert.equal(window.__orixCompactMessage(), 'Klaar'); assert.equal(window.__orixCompactMessageIsRaw(), true);
+  window.__orixFlash('Ordinary', 100); assert.equal(window.__orixCompactMessageIsRaw(), false);
+  window.__orixFlash('Klaar', 100, true); now = 101; assert.equal(window.__orixCompactMessage(), 'fallback'); assert.equal(window.__orixCompactMessageIsRaw(), false);
 });
 
 test('project file chat requests English while passing file and user text unchanged', async () => {
@@ -368,7 +368,7 @@ test('project chat reports a safe error when the selected file becomes unreadabl
 
 test('project UI load failures are English and preserve external error text', async () => {
   const source = fs.readFileSync(require.resolve('../project-mode-ui.js'), 'utf8'), start = source.indexOf('  async function load()'), end = source.indexOf('  async function choose()', start); assert.ok(start >= 0 && end > start);
-  let result = { ok: false }; const context = { window: { twocode: { projectV2Get: async () => result } }, error: '', loaded: false, render() {} };
+  let result = { ok: false }; const context = { window: { orix: { projectV2Get: async () => result } }, error: '', loaded: false, render() {} };
   vm.runInNewContext(source.slice(start, end), context); await context.load(); assert.equal(context.error, 'Could not load the project.');
   result = { ok: false, error: 'Klaar' }; await context.load(); assert.equal(context.error, 'Klaar');
   assert.match(source, /class="tc-error" data-user-content/);
@@ -384,7 +384,7 @@ test('project panel keeps progress and project names outside translation and avo
 test('project request failures keep unrecorded drafts without duplicating chat history', async () => {
   const source = fs.readFileSync(require.resolve('../project-mode-ui.js'), 'utf8'), start = source.indexOf('  async function send()'), end = source.indexOf('  async function undo()', start); assert.ok(start >= 0 && end > start);
   const old = { role: 'assistant', text: 'Earlier' }; let send;
-  const c = { busy: false, project: {}, ai: { ready: true }, draft: '  Keep this request  ', messages: [old], canUndo: false, error: '', begin() {}, render() {}, scroll() {}, finish() {}, window: { twocode: { projectAgentSend: text => send(text) } } };
+  const c = { busy: false, project: {}, ai: { ready: true }, draft: '  Keep this request  ', messages: [old], canUndo: false, error: '', begin() {}, render() {}, scroll() {}, finish() {}, window: { orix: { projectAgentSend: text => send(text) } } };
   vm.runInNewContext(source.slice(start, end), c); send = async () => { throw Error('Connection lost'); }; await c.send();
   assert.equal(c.draft, '  Keep this request  '); assert.equal(c.messages.length, 1); assert.equal(c.messages[0], old); assert.match(c.error, /Connection lost/); assert.match(c.error, /check.*files/i);
   const recorded = [{ role: 'user', text: 'Keep this request' }, { role: 'assistant', text: 'Partially saved' }]; send = async () => ({ ok: false, error: 'Stopped', partial: true, undo: true, messages: recorded }); await c.send();
@@ -393,6 +393,6 @@ test('project request failures keep unrecorded drafts without duplicating chat h
 
 test('successful project requests clear the draft and show recorded messages', async () => {
   const source = fs.readFileSync(require.resolve('../project-mode-ui.js'), 'utf8'), start = source.indexOf('  async function send()'), end = source.indexOf('  async function undo()', start); const recorded = [{ role: 'user', text: 'Change it' }, { role: 'assistant', text: 'Done' }]; let sent;
-  const c = { busy: false, project: {}, ai: { ready: true }, draft: 'Change it', messages: [], canUndo: false, error: '', begin() {}, render() {}, scroll() {}, finish() {}, window: { twocode: { projectAgentSend: async text => { sent = text; return { ok: true, applied: true, undo: true, messages: recorded, answer: 'Done' }; } } } };
+  const c = { busy: false, project: {}, ai: { ready: true }, draft: 'Change it', messages: [], canUndo: false, error: '', begin() {}, render() {}, scroll() {}, finish() {}, window: { orix: { projectAgentSend: async text => { sent = text; return { ok: true, applied: true, undo: true, messages: recorded, answer: 'Done' }; } } } };
   vm.runInNewContext(source.slice(start, end), c); await c.send(); assert.equal(sent, 'Change it'); assert.equal(c.draft, ''); assert.equal(c.messages, recorded); assert.equal(c.canUndo, true);
 });

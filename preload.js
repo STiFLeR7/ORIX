@@ -15,7 +15,7 @@
     return () => ipcRenderer.removeListener(channel, listener);
   }
 
-  contextBridge.exposeInMainWorld('twocode', {
+  contextBridge.exposeInMainWorld('orix', {
     appearance: {
       commit: value => ipcRenderer.invoke('orix:appearance-commit', value),
       onChange: callback => subscribe('orix:appearance-committed', callback)
@@ -29,9 +29,9 @@
       set: visible => ipcRenderer.invoke('orix:layer-set', visible),
       onChange: callback => subscribe('orix:layer-changed', callback)
     },
-    connect: () => ipcRenderer.invoke('twocode:connect'),
-    getConnection: () => ipcRenderer.invoke('twocode:get-connection'),
-    getState: () => ipcRenderer.invoke('twocode:get-state'),
+    connect: () => ipcRenderer.invoke('orix:connect'),
+    getConnection: () => ipcRenderer.invoke('orix:get-connection'),
+    getState: () => ipcRenderer.invoke('orix:get-state'),
 
     spotifyConnect: () => ipcRenderer.invoke('spotify:connect'),
     spotifyGetState: () => ipcRenderer.invoke('spotify:get-state'),
@@ -141,18 +141,18 @@
     setMode: mode =>
       ipcRenderer.send('window:set-mode', mode),
     openUrl: url =>
-      ipcRenderer.send('twocode:open-url', url),
+      ipcRenderer.send('orix:open-url', url),
     close: () =>
       ipcRenderer.send('window:close'),
     notify: (title, body, url) =>
-      ipcRenderer.send('twocode:notify', { title, body, url }),
+      ipcRenderer.send('orix:notify', { title, body, url }),
     onPointer: callback =>
       subscribe('companion:pointer', callback),
     onGoodbye: callback =>
-      subscribe('twocode:goodbye', callback),
+      subscribe('orix:goodbye', callback),
     // Robo the buddy (buddy-main.cjs): grab him out of the island and drop him on the screen
-    settingsOpen: tab => ipcRenderer.send('settings-app:open', typeof tab === 'string' ? tab : ''), // the TwoCode app, its own window
-    // updates from twocode.nl (auto-update.cjs): what is ready, and "install now" (TwoCode restarts)
+    settingsOpen: tab => ipcRenderer.send('settings-app:open', typeof tab === 'string' ? tab : ''), // the ORIX app, its own window
+    // Manual release status (auto-update.cjs)
     updateState: () => ipcRenderer.invoke('update:state'),
     updateInstall: () => ipcRenderer.send('update:install'),
     onUpdateState: callback => subscribe('update:state', callback),

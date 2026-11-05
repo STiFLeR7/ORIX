@@ -11,7 +11,7 @@ async function fixture(text = 'My note\n[ ] Ship it', loaded = true) {
     querySelector: selector => selector === 'textarea' ? root.innerHTML.includes('<textarea') ? area : null
       : selector === '[data-note-status]' ? status : selector === '[data-note-retry]' ? retry : null };
   const context = { root, currentView: 'note', clips: [], copied: -1, lastRender: '', projectInputFocused: false,
-    window: { __twocodePrefs: () => ({ lang: 'en' }) }, document: { activeElement: area }, sendInteractive() {}, sound() {},
+    window: { __orixPrefs: () => ({ lang: 'en' }) }, document: { activeElement: area }, sendInteractive() {}, sound() {},
     esc: value => String(value).replaceAll('&', '&amp;').replaceAll('"', '&quot;').replaceAll('<', '&lt;'),
     api: { noteGet: async () => loaded ? { ok: true, text } : { ok: false }, noteSet: async () => result },
     setTimeout: fn => { timers.set(++serial, fn); return serial; }, clearTimeout: id => timers.delete(id) };
@@ -60,7 +60,7 @@ test('quit flushes a pending note and reports a failed write', async () => {
 
 test('hidden-layer quit waits for note flush and stays open on failure', async () => {
   const source = fs.readFileSync(require.resolve('../main.js'), 'utf8');
-  const start = source.indexOf('// Goodbye'), end = source.indexOf("  'twocode:notify'", start);
+  const start = source.indexOf('// Goodbye'), end = source.indexOf("  'orix:notify'", start);
   const boundary = source.lastIndexOf('ipcMain.on(', end); assert.ok(start >= 0 && boundary > start);
   let handler, resolveFlush, quits = 0, errors = 0;
   const pending = new Promise(resolve => { resolveFlush = resolve; });
@@ -86,7 +86,7 @@ test('a note edited while flushing is saved again before quit proceeds', async (
 
 test('successful note flush allows a hidden-layer quit', async () => {
   const source = fs.readFileSync(require.resolve('../main.js'), 'utf8');
-  const start = source.indexOf('// Goodbye'), end = source.indexOf("  'twocode:notify'", start), boundary = source.lastIndexOf('ipcMain.on(', end);
+  const start = source.indexOf('// Goodbye'), end = source.indexOf("  'orix:notify'", start), boundary = source.lastIndexOf('ipcMain.on(', end);
   assert.ok(start >= 0 && boundary > start); let handler, quits = 0;
   const app = { on: (_name, fn) => { handler = fn; }, quit: () => { quits++; } };
   const context = { app, settingsApp: { prepareQuit: async () => true }, mascotWindow: { isDestroyed: () => false, isVisible: () => false, webContents: { executeJavaScript: async () => true } },
@@ -100,7 +100,7 @@ test('successful note flush allows a hidden-layer quit', async () => {
 
 test('visible-layer quit flushes again after the goodbye animation', async () => {
   const source = fs.readFileSync(require.resolve('../main.js'), 'utf8');
-  const start = source.indexOf('// Goodbye'), end = source.indexOf("  'twocode:notify'", start), boundary = source.lastIndexOf('ipcMain.on(', end);
+  const start = source.indexOf('// Goodbye'), end = source.indexOf("  'orix:notify'", start), boundary = source.lastIndexOf('ipcMain.on(', end);
   assert.ok(start >= 0 && boundary > start); let handler, flushes = 0, goodbye = 0, goodbyeTimer;
   const app = { on: (_name, fn) => { handler = fn; }, quit() { handler(event()); } };
   function event() { return { preventDefault() {} }; }
@@ -127,7 +127,7 @@ test('restart is scheduled only when shutdown reaches will-quit', () => {
 
 test('a stalled note flush blocks duplicate quits, reports failure, and permits a later retry', async () => {
   const source = fs.readFileSync(require.resolve('../main.js'), 'utf8');
-  const start = source.indexOf('// Goodbye'), end = source.indexOf("  'twocode:notify'", start), boundary = source.lastIndexOf('ipcMain.on(', end);
+  const start = source.indexOf('// Goodbye'), end = source.indexOf("  'orix:notify'", start), boundary = source.lastIndexOf('ipcMain.on(', end);
   assert.ok(start >= 0 && boundary > start);
   let handler, timeout, attempts = 0, quits = 0, errors = 0, shouldStall = true;
   const app = { orixRestartRequested: true, on: (_event, fn) => { handler = fn; }, quit: () => { quits++; } };
@@ -147,7 +147,7 @@ test('a stalled note flush blocks duplicate quits, reports failure, and permits 
 
 test('quit leaves all windows open when Settings preflight is cancelled', async () => {
   const source = fs.readFileSync(require.resolve('../main.js'), 'utf8');
-  const start = source.indexOf('// Goodbye'), end = source.indexOf("  'twocode:notify'", start), boundary = source.lastIndexOf('ipcMain.on(', end);
+  const start = source.indexOf('// Goodbye'), end = source.indexOf("  'orix:notify'", start), boundary = source.lastIndexOf('ipcMain.on(', end);
   let handler, quits = 0, checked = 0;
   const app = { orixRestartRequested: true, on: (_event, fn) => { handler = fn; }, quit: () => { quits++; } };
   const settingsApp = { prepareQuit: async () => { checked++; return false; } };
