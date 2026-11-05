@@ -1,0 +1,29 @@
+/* ORIX interface token reference. Verify product overrides in orix-theme.css. */
+:root {
+  color-scheme: dark;
+  --orix-bg: #111318;
+  --orix-surface: #1c2024;
+  --orix-text: #f4f5f7;
+  --orix-text-muted: #b4bdc6;
+  --orix-border: #414950;
+  --orix-action: #82b4ff;
+  --orix-action-text: #82b4ff;
+  --orix-space-1: 4px; --orix-space-2: 8px; --orix-space-3: 12px;
+  --orix-space-4: 16px; --orix-space-6: 24px; --orix-space-8: 32px;
+  --orix-radius-control: 10px; --orix-radius-panel: 20px; --orix-radius-pill: 999px;
+  --orix-duration-normal: 160ms; --orix-duration-expand: 220ms;
+  --orix-font: Inter, 'Segoe UI', system-ui, sans-serif;
+}
+[data-orix-theme='light'] {
+  color-scheme: light;
+  --orix-bg: #f4f5f7;
+  --orix-surface: #ffffff;
+  --orix-text: #171b20;
+  --orix-text-muted: #505b66;
+  --orix-border: #b8c2cc;
+  --orix-action: #3974d4;
+  --orix-action-text: #315c97;
+}
+@media (prefers-reduced-motion: reduce) {
+  :root { --orix-duration-normal: 0ms; --orix-duration-expand: 0ms; }
+}

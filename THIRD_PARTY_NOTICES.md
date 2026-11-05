@@ -1,0 +1,24 @@
+# Attribution and third-party notices
+
+## Recovered TwoCode application
+
+ORIX 0.1.0-beta.1 is based on TwoCode Assistent 1.2.0-beta.6, recovered from the user's `TwoCode-Setup.exe` on 2026-11-02. The original application was branded TwoCode / twocode.nl and used the Robo mascot. This attribution records the source's provenance; it does not designate those original services as ORIX update or support channels.
+
+The recovered application manifest declares `ISC`; an application-level license text was absent from the recovered app directory. ORIX retains that declared license and supplies the standard text in [LICENSE](LICENSE), with attribution for ORIX contributions. This does not transfer ownership of third-party code, artwork, trademarks, or fonts. Historical originals remain in `recovered/TwoCode/resources/app/`; the source project's RECOVERY.md records the extraction.
+
+## Runtime, fonts, and packages
+
+| Component | License and notices to preserve |
+| --- | --- |
+| Inter fonts | Copyright 2016 The Inter Project Authors. SIL Open Font License 1.1, including its notices, in [assets/fonts/Inter-LICENSE.txt](assets/fonts/Inter-LICENSE.txt). |
+| Integration SVG assets | Claude Code artwork from [Devicon](https://github.com/devicons/devicon); Claude, Codex, OpenAI/ChatGPT and Spotify artwork from [SVGL](https://github.com/pheralb/svgl). MIT license texts and pinned source revisions are retained in [assets/icons/brands](assets/icons/brands/SOURCES.md). Vendor trademarks remain their respective owners' property. |
+| Optional weather data | Weather data is provided by [Open-Meteo](https://open-meteo.com/) under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). ORIX displays the returned current temperature and weather condition. The service's [usage terms](https://open-meteo.com/en/terms) apply separately. |
+| Electron 44.10.1 | MIT, as declared by the installed Electron package. Preserve Electron's `LICENSE` and Chromium/third-party notices in `LICENSES.chromium.html` beside the executable in the distributable. Chromium and bundled components have their own terms. |
+| `@openai/codex` 0.160.0 and its platform package | Apache-2.0, as declared by the installed package metadata. The upstream [license](assets/licenses/CODEX-APACHE-2.0.txt) and [notice](assets/licenses/CODEX-NOTICE.txt) are retained from the [rust-v0.160.0 tag](https://github.com/openai/codex/tree/rust-v0.160.0). Review bundled native-component notices and update these files when upgrading the dependency. |
+| Other npm dependencies | Each package retains its own license and notices. Consult the locked dependency tree and the license/notice files in the actual installed packages; include those required by the files shipped. Development-only dependencies need separate review if included in a distributable. |
+
+This file summarizes the principal components; it does not replace their complete license texts or the notices bundled with native binaries. Before distributing a build, verify the final archive contains the required runtime, font, and dependency license files. Retain upstream attribution when modifying or replacing any third-party material.
+
+The Windows Codex platform package also contains `vendor/x86_64-pc-windows-msvc/codex-resources/voice/NOTICE.md`, its `licenses/` directory, and source/version records. Its notice identifies dynamically linked voice libraries and a separately licensed Microsoft Visual C++ runtime; preserve these files and review the applicable redistribution terms. The bundled `codex-path/rg.exe` reports ripgrep 15.2.0 with PCRE2 10.45. The upstream [ripgrep MIT license](assets/licenses/RIPGREP-15.2.0-MIT.txt) and [PCRE2 license](assets/licenses/PCRE2-10.45-LICENCE.md) are included; ripgrep is also offered under the Unlicense. The complete license and notice obligations of the other bundled native components have not yet been established.
+
+The installed Windows voice payload was checked against all 39 hashes in its upstream `manifest.json`; `vcruntime140.dll` also had a valid Microsoft Windows Authenticode signature on 2026-11-02. Its `windows-crt.json` identifies version 14.50.35719 and records the upstream DLL digest and license links. Microsoft states that redistribution of Visual C++ runtime files is limited to licensed Visual Studio users and subject to the applicable terms: see [Redistribute Visual C++ files](https://learn.microsoft.com/en-us/cpp/windows/redistributing-visual-cpp-files) and [Visual Studio 2026 redistribution](https://learn.microsoft.com/en-us/visualstudio/releases/2026/redistribution). Before release, the distributor must establish its own eligibility and applicable conditions; a valid signature or inclusion in Codex does not prove that. The LGPL-covered libraries also require a separate review of the distribution and source-access obligations.

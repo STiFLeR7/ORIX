@@ -1,0 +1,29 @@
+node_modules/
+*.log
+.env
+.env.*
+.claude/
+dist/
+
+# Original extracted runtime; keep it out of source control.
+/recovered/
+/.verification/
+
+# User-supplied visual references have no established redistribution license.
+/dashboard-rewamp/*.jpg
+/dashboard-rewamp/mascots/
+
+# Unapproved logo sketches and generated explorations are local working material.
+/dashboard-rewamp/brand-exploration/
+
+# Generated local document previews.
+/output/pdf/
+/output/ORIX-brand-review-*/
+/output/ORIX-brand-review-*.zip
+
+# Generated video projects are local review artifacts.
+/brag-output/
+/brag-output-*/
+
+# Local PowerShell module cache, not project source.
+/Microsoft/Windows/PowerShell/ModuleAnalysisCache

@@ -1,0 +1,11 @@
+<artifact-configuration xmlns="http://signpath.io/artifact-configuration/v1">
+  <parameters>
+    <parameter name="version" required="true" />
+    <parameter name="fileVersion" required="true" />
+  </parameters>
+  <zip-file>
+    <pe-file path="ORIX-Setup-${version}.exe" product-name="ORIX" company-name="ORIX" file-version="${fileVersion}">
+      <authenticode-sign description="ORIX Setup" description-url="https://github.com/STiFLeR7/ORIX" />
+    </pe-file>
+  </zip-file>
+</artifact-configuration>

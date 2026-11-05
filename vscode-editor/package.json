@@ -1,0 +1,22 @@
+{
+  "name": "project-editor",
+  "publisher": "twocode",
+  "displayName": "ORIX Project Editor",
+  "version": "0.1.1",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "activationEvents": [
+    "onUri"
+  ],
+  "main": "./extension.js",
+  "description": "Local project integration for ORIX.",
+  "extensionKind": [
+    "ui"
+  ],
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": true
+    }
+  }
+}

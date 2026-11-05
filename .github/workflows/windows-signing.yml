@@ -1,0 +1,110 @@
+name: Windows build and signing
+
+on:
+  workflow_dispatch:
+    inputs:
+      sign:
+        description: Submit the installer to SignPath after project acceptance
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  windows:
+    if: github.repository == 'STiFLeR7/ORIX'
+    runs-on: windows-2022
+    timeout-minutes: 60
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Check signing prerequisites
+        if: inputs.sign
+        env:
+          SIGNPATH_ORGANIZATION_ID: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          SIGNPATH_PROJECT_SLUG: ${{ vars.SIGNPATH_PROJECT_SLUG }}
+          SIGNPATH_SIGNING_POLICY_SLUG: ${{ vars.SIGNPATH_SIGNING_POLICY_SLUG }}
+          SIGNPATH_ARTIFACT_CONFIGURATION_SLUG: ${{ vars.SIGNPATH_ARTIFACT_CONFIGURATION_SLUG }}
+        run: |
+          $version = (Get-Content package.json -Raw | ConvertFrom-Json).version
+          if ($env:GITHUB_REF -cne "refs/tags/v$version") {
+            throw 'Signing requires a reviewed release tag matching package.json.'
+          }
+          foreach ($name in @('SIGNPATH_ORGANIZATION_ID', 'SIGNPATH_PROJECT_SLUG', 'SIGNPATH_SIGNING_POLICY_SLUG', 'SIGNPATH_ARTIFACT_CONFIGURATION_SLUG')) {
+            if (-not [Environment]::GetEnvironmentVariable($name)) {
+              throw "Configure $name after SignPath accepts the project."
+            }
+          }
+      - name: Install dependencies
+        run: |
+          npm ci --ignore-scripts
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node node_modules/electron/install.js
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Test
+        run: npm test
+      - name: Build ZIP
+        run: npm run package:windows
+      - name: Build installer
+        id: setup
+        run: |
+          $version = (Get-Content package.json -Raw | ConvertFrom-Json).version
+          node tools/make-setup.cjs "dist/ORIX-Windows-$version.zip"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $fileVersion = (Get-Item "dist/ORIX-Setup-$version.exe").VersionInfo.FileVersion
+          "version=$version" >> $env:GITHUB_OUTPUT
+          "file-version=$fileVersion" >> $env:GITHUB_OUTPUT
+      - name: Upload unsigned installer
+        id: unsigned
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: ORIX-unsigned-installer
+          path: dist/ORIX-Setup-${{ steps.setup.outputs.version }}.exe
+          if-no-files-found: error
+          retention-days: 14
+      - name: Request signing
+        if: inputs.sign
+        uses: SignPath/github-action-submit-signing-request@f6d04783b4569d051e0c80105fe66e82819d0092 # v3
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          project-slug: ${{ vars.SIGNPATH_PROJECT_SLUG }}
+          signing-policy-slug: ${{ vars.SIGNPATH_SIGNING_POLICY_SLUG }}
+          artifact-configuration-slug: ${{ vars.SIGNPATH_ARTIFACT_CONFIGURATION_SLUG }}
+          github-artifact-id: ${{ steps.unsigned.outputs.artifact-id }}
+          parameters: |
+            version: "${{ steps.setup.outputs.version }}"
+            fileVersion: "${{ steps.setup.outputs.file-version }}"
+          wait-for-completion: true
+          wait-for-completion-timeout-in-seconds: '1800'
+          output-artifact-directory: signed
+      - name: Verify signed installer and write checksum
+        if: inputs.sign
+        env:
+          ORIX_VERSION: ${{ steps.setup.outputs.version }}
+        run: |
+          $installer = Get-Item "signed/ORIX-Setup-$env:ORIX_VERSION.exe"
+          $signature = Get-AuthenticodeSignature -LiteralPath $installer.FullName
+          if ($signature.Status -ne 'Valid' -or $signature.SignerCertificate.Subject -notmatch '\bSignPath Foundation\b' -or -not $signature.TimeStamperCertificate) {
+            throw 'Expected a valid, timestamped SignPath Foundation signature.'
+          }
+          $hash = (Get-FileHash -Algorithm SHA256 -LiteralPath $installer.FullName).Hash.ToLowerInvariant()
+          "$hash  $($installer.Name)" | Set-Content signed/SHA256SUMS.txt -Encoding ascii
+      - name: Upload verified signed installer
+        if: inputs.sign
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: ORIX-signed-installer
+          path: signed/
+          if-no-files-found: error
+          retention-days: 14
