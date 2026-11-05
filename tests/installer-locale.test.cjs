@@ -67,14 +67,23 @@ test('installer refuses to kill a running app during upgrade', { skip: process.p
     fs.writeFileSync(path.join(dir, 'Setup.cs'), '\ufeff' + source);
     fs.writeFileSync(path.join(dir, 'Check.cs'), `using System;
 class Check { static int Main(string[] args) { try { Installer.Run(args[0], null); return 2; }
-  catch (Exception e) { return e.Message.Contains(args.Length > 1 ? "drive root" : "Quit ORIX") ? 0 : 3; } } }`);
+  catch (Exception e) {
+    if (e.Message.Contains(args.Length > 1 ? "drive root" : "Quit ORIX")) return 0;
+    Console.Error.WriteLine("Install path: " + args[0] + "; error: " + e.Message);
+    foreach (var p in System.Diagnostics.Process.GetProcessesByName("ORIX")) {
+      try { Console.Error.WriteLine("Running executable: " + p.MainModule.FileName); }
+      catch (Exception inspection) { Console.Error.WriteLine("Process inspection: " + inspection.Message); }
+      finally { p.Dispose(); }
+    }
+    return 3;
+  } } }`);
     const check = path.join(dir, 'Check.exe');
     execFileSync(csc, ['/nologo', '/target:exe', '/main:Check', '/codepage:65001', '/out:' + check,
       ...['System.dll', 'System.Drawing.dll', 'System.Windows.Forms.dll', 'System.IO.Compression.dll', 'System.IO.Compression.FileSystem.dll'].map(r => '/r:' + path.join(fw, r)),
       path.join(dir, 'Setup.cs'), path.join(dir, 'Check.cs')], { stdio: 'pipe' });
     child = spawn(exe, [], { windowsHide: true });
     await new Promise((resolve, reject) => { child.once('spawn', resolve); child.once('error', reject); });
-    execFileSync(check, [app], { timeout: 15000, stdio: 'pipe' });
+    execFileSync(check, [app], { timeout: 15000, stdio: ['ignore', 'pipe', 'inherit'] });
     execFileSync(check, [app + path.sep], { timeout: 15000, stdio: 'pipe' });
     execFileSync(check, [path.parse(app).root, 'root'], { timeout: 15000, stdio: 'pipe' });
     assert.equal(child.exitCode, null, 'running app must remain alive');

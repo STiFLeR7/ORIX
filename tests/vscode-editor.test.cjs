@@ -47,7 +47,7 @@ test('VS Code extension refuses dirty documents and saves an approved synthetic 
 test('project editor accepts only one concurrent ready request per claimed job', async t => {
   const folder = fs.mkdtempSync(path.join(os.tmpdir(), 'orix-ready-test-'));
   t.after(() => fs.rmSync(folder, { recursive: true, force: true }));
-  const root = fs.realpathSync(folder), file = path.join(root, 'sample.txt'); fs.writeFileSync(file, 'sample');
+  const root = await fs.promises.realpath(folder), file = path.join(root, 'sample.txt'); fs.writeFileSync(file, 'sample');
   const http = require('node:http'); let quit, statuses, slow = false;
   const storage = Object.create(fs);
   Object.defineProperty(storage, 'promises', { value: { ...fs.promises, async realpath(...args) {
