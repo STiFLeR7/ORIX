@@ -1469,20 +1469,6 @@ footer {
   color: var(--muted);
   flex-wrap: wrap;
 }
-.footer-bottom {
-  display: flex;
-  justify-content: space-between;
-  gap: 30px;
-  font-size: 9px;
-  color: var(--muted);
-  padding-top: 29px;
-  margin-top: 26px;
-  border-top: 1px solid var(--line);
-}
-.footer-bottom a {
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
 .motion-region:not(.in-view) .ambient {
   animation-play-state: paused;
 }
@@ -1851,8 +1837,7 @@ html[data-effects="off"] *::after {
   .faq-head p {
     max-width: 40ch;
   }
-  .footer-top,
-  .footer-bottom {
+  .footer-top {
     flex-direction: column;
     align-items: flex-start;
     gap: 23px;

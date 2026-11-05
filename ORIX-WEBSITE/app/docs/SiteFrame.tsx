@@ -22,12 +22,13 @@ export default function SiteFrame({ children }: { children: ReactNode }) {
       {children}
       <footer className={styles.siteFooter}>
         <div className={styles.siteFooterInner}>
-          <span>ORIX · Free and open source under ISC</span>
+          <span>ORIX</span>
           <nav aria-label="Footer navigation">
             <a href="/docs/">Documentation</a>
             <a href="/privacy/">Privacy</a>
             <a href="https://github.com/STiFLeR7/ORIX">Source code</a>
             <a href={release.releaseUrl}>Releases</a>
+            <a href="https://github.com/STiFLeR7/ORIX/blob/main/THIRD_PARTY_NOTICES.md">Licenses</a>
           </nav>
         </div>
       </footer>

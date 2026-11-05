@@ -1041,26 +1041,14 @@ export default function HomePage() {
             <nav className="footer-links" aria-label="Footer">
               <a href="/docs/">Documentation</a>
               <a href="/privacy/">Privacy</a>
+              <a href="https://github.com/STiFLeR7/ORIX/blob/main/THIRD_PARTY_NOTICES.md">
+                Licenses
+              </a>
               <a href="https://github.com/STiFLeR7/ORIX/releases">Releases</a>
               <a href="https://github.com/STiFLeR7/ORIX/issues">
                 Report an issue ↗
               </a>
             </nav>
-          </div>
-          <div className="footer-bottom">
-            <span>
-              ORIX project · Free &amp; open source under ISC.
-              <br />
-              Inter by Rasmus Andersson. Integration artwork from
-              <a href="https://github.com/devicons/devicon">Devicon</a> and
-              <a href="https://github.com/pheralb/svgl">SVGL</a>.<br />
-              Third-party trademarks belong to their respective owners.
-            </span>
-            <span>
-              Illustrative interactions use prepared data.
-              <br />
-              Desktop captures are actual beta views.
-            </span>
           </div>
         </div>
       </footer>
