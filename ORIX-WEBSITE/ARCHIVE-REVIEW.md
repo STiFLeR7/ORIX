@@ -18,31 +18,31 @@ The sheet link opens the first of two full-span sheets. Its sibling `sheet-02.jp
 
 | Site | Recording | Duration | Review evidence |
 | --- | --- | ---: | --- |
-| AGENTCAT | `agentcat__desktop__scroll.webm` | 15.60 s | [Temporal sheets](../output/playwright/archive-review/AGENTCAT/00-agentcat__desktop__scroll/sheet-01.jpg) |
-| AGILOFT | `agiloft__desktop__scroll.webm` | 22.04 s | [Temporal sheets](../output/playwright/archive-review/AGILOFT/00-agiloft__desktop__scroll/sheet-01.jpg) |
-| AMPEROS | `amperos__desktop__scroll.webm` | 33.48 s | [Temporal sheets](../output/playwright/archive-review/AMPEROS/00-amperos__desktop__scroll/sheet-01.jpg) |
-| ANIMEJS | `animejs__desktop__scroll.webm` | 216.92 s | [Temporal sheets](../output/playwright/archive-review/ANIMEJS/00-animejs__desktop__scroll/sheet-01.jpg) |
-| CONCURRENCE | `concurrence__desktop__scroll.webm` | 34.16 s | [Temporal sheets](../output/playwright/archive-review/CONCURRENCE/00-concurrence__desktop__scroll/sheet-01.jpg) |
-| CONTRALABS | `contralabs__desktop__scroll.webm` | 28.48 s | [Temporal sheets](../output/playwright/archive-review/CONTRALABS/00-contralabs__desktop__scroll/sheet-01.jpg) |
-| FIN-AI | `fin__desktop__rec-hero-intro-scrub.webm` | 23.52 s | [Temporal sheets](../output/playwright/archive-review/FIN-AI/00-fin__desktop__rec-hero-intro-scrub/sheet-01.jpg) |
-| FIN-AI | `fin__desktop__scroll.webm` | 38.28 s | [Temporal sheets](../output/playwright/archive-review/FIN-AI/01-fin__desktop__scroll/sheet-01.jpg) |
-| GIGA | `giga__desktop__scroll.webm` | 35.32 s | [Temporal sheets](../output/playwright/archive-review/GIGA/00-giga__desktop__scroll/sheet-01.jpg) |
-| GRANOLA | `granola__desktop__scroll.webm` | 21.92 s | [Temporal sheets](../output/playwright/archive-review/GRANOLA/00-granola__desktop__scroll/sheet-01.jpg) |
-| GUILD | `guild__desktop__scroll.webm` | 11.64 s | [Temporal sheets](../output/playwright/archive-review/GUILD/00-guild__desktop__scroll/sheet-01.jpg) |
-| HANDHOLD | `handhold__desktop__scroll.webm` | 24.56 s | [Temporal sheets](../output/playwright/archive-review/HANDHOLD/00-handhold__desktop__scroll/sheet-01.jpg) |
-| INTERCOM | `intercom-helpdesk__desktop__scroll.webm` | 26.92 s | [Temporal sheets](../output/playwright/archive-review/INTERCOM/00-intercom-helpdesk__desktop__scroll/sheet-01.jpg) |
-| INTERCOM | `intercom__desktop__scroll.webm` | 70.08 s | [Temporal sheets](../output/playwright/archive-review/INTERCOM/01-intercom__desktop__scroll/sheet-01.jpg) |
-| PARLOA | `parloa__desktop__scroll.webm` | 15.28 s | [Temporal sheets](../output/playwright/archive-review/PARLOA/00-parloa__desktop__scroll/sheet-01.jpg) |
-| POLAR | `polar__desktop__scroll.webm` | 19.28 s | [Temporal sheets](../output/playwright/archive-review/POLAR/00-polar__desktop__scroll/sheet-01.jpg) |
-| RELACE | `relace-old__desktop__scroll.webm` | 13.12 s | [Temporal sheets](../output/playwright/archive-review/RELACE/00-relace-old__desktop__scroll/sheet-01.jpg) |
-| RELACE | `relace__desktop__scroll.webm` | 4.88 s | [Temporal sheets](../output/playwright/archive-review/RELACE/01-relace__desktop__scroll/sheet-01.jpg) |
-| REVENI | `reveni__desktop__scroll.webm` | 76.72 s | [Temporal sheets](../output/playwright/archive-review/REVENI/00-reveni__desktop__scroll/sheet-01.jpg) |
-| SOLIDROAD | `solidroad__desktop__scroll.webm` | 11.48 s | [Temporal sheets](../output/playwright/archive-review/SOLIDROAD/00-solidroad__desktop__scroll/sheet-01.jpg) |
-| SUPERSET | `superset__desktop__interaction-session.webm` | 117.44 s | [Temporal sheets](../output/playwright/archive-review/SUPERSET/00-superset__desktop__interaction-session/sheet-01.jpg) |
-| SUPERSET | `superset__desktop__scroll.webm` | 16.52 s | [Temporal sheets](../output/playwright/archive-review/SUPERSET/01-superset__desktop__scroll/sheet-01.jpg) |
-| TEMPO | `tempo__desktop__scroll.webm` | 16.36 s | [Temporal sheets](../output/playwright/archive-review/TEMPO/00-tempo__desktop__scroll/sheet-01.jpg) |
-| V7LABS | `v7labs__desktop__scroll.webm` | 13.40 s | [Temporal sheets](../output/playwright/archive-review/V7LABS/00-v7labs__desktop__scroll/sheet-01.jpg) |
-| ZOAH | `zoah__desktop__scroll.webm` | 19.20 s | [Temporal sheets](../output/playwright/archive-review/ZOAH/00-zoah__desktop__scroll/sheet-01.jpg) |
+| AGENTCAT | `agentcat__desktop__scroll.webm` | 15.60 s | [Temporal sheets](../docs/reviews/website/archive-review/AGENTCAT/00-agentcat__desktop__scroll/sheet-01.jpg) |
+| AGILOFT | `agiloft__desktop__scroll.webm` | 22.04 s | [Temporal sheets](../docs/reviews/website/archive-review/AGILOFT/00-agiloft__desktop__scroll/sheet-01.jpg) |
+| AMPEROS | `amperos__desktop__scroll.webm` | 33.48 s | [Temporal sheets](../docs/reviews/website/archive-review/AMPEROS/00-amperos__desktop__scroll/sheet-01.jpg) |
+| ANIMEJS | `animejs__desktop__scroll.webm` | 216.92 s | [Temporal sheets](../docs/reviews/website/archive-review/ANIMEJS/00-animejs__desktop__scroll/sheet-01.jpg) |
+| CONCURRENCE | `concurrence__desktop__scroll.webm` | 34.16 s | [Temporal sheets](../docs/reviews/website/archive-review/CONCURRENCE/00-concurrence__desktop__scroll/sheet-01.jpg) |
+| CONTRALABS | `contralabs__desktop__scroll.webm` | 28.48 s | [Temporal sheets](../docs/reviews/website/archive-review/CONTRALABS/00-contralabs__desktop__scroll/sheet-01.jpg) |
+| FIN-AI | `fin__desktop__rec-hero-intro-scrub.webm` | 23.52 s | [Temporal sheets](../docs/reviews/website/archive-review/FIN-AI/00-fin__desktop__rec-hero-intro-scrub/sheet-01.jpg) |
+| FIN-AI | `fin__desktop__scroll.webm` | 38.28 s | [Temporal sheets](../docs/reviews/website/archive-review/FIN-AI/01-fin__desktop__scroll/sheet-01.jpg) |
+| GIGA | `giga__desktop__scroll.webm` | 35.32 s | [Temporal sheets](../docs/reviews/website/archive-review/GIGA/00-giga__desktop__scroll/sheet-01.jpg) |
+| GRANOLA | `granola__desktop__scroll.webm` | 21.92 s | [Temporal sheets](../docs/reviews/website/archive-review/GRANOLA/00-granola__desktop__scroll/sheet-01.jpg) |
+| GUILD | `guild__desktop__scroll.webm` | 11.64 s | [Temporal sheets](../docs/reviews/website/archive-review/GUILD/00-guild__desktop__scroll/sheet-01.jpg) |
+| HANDHOLD | `handhold__desktop__scroll.webm` | 24.56 s | [Temporal sheets](../docs/reviews/website/archive-review/HANDHOLD/00-handhold__desktop__scroll/sheet-01.jpg) |
+| INTERCOM | `intercom-helpdesk__desktop__scroll.webm` | 26.92 s | [Temporal sheets](../docs/reviews/website/archive-review/INTERCOM/00-intercom-helpdesk__desktop__scroll/sheet-01.jpg) |
+| INTERCOM | `intercom__desktop__scroll.webm` | 70.08 s | [Temporal sheets](../docs/reviews/website/archive-review/INTERCOM/01-intercom__desktop__scroll/sheet-01.jpg) |
+| PARLOA | `parloa__desktop__scroll.webm` | 15.28 s | [Temporal sheets](../docs/reviews/website/archive-review/PARLOA/00-parloa__desktop__scroll/sheet-01.jpg) |
+| POLAR | `polar__desktop__scroll.webm` | 19.28 s | [Temporal sheets](../docs/reviews/website/archive-review/POLAR/00-polar__desktop__scroll/sheet-01.jpg) |
+| RELACE | `relace-old__desktop__scroll.webm` | 13.12 s | [Temporal sheets](../docs/reviews/website/archive-review/RELACE/00-relace-old__desktop__scroll/sheet-01.jpg) |
+| RELACE | `relace__desktop__scroll.webm` | 4.88 s | [Temporal sheets](../docs/reviews/website/archive-review/RELACE/01-relace__desktop__scroll/sheet-01.jpg) |
+| REVENI | `reveni__desktop__scroll.webm` | 76.72 s | [Temporal sheets](../docs/reviews/website/archive-review/REVENI/00-reveni__desktop__scroll/sheet-01.jpg) |
+| SOLIDROAD | `solidroad__desktop__scroll.webm` | 11.48 s | [Temporal sheets](../docs/reviews/website/archive-review/SOLIDROAD/00-solidroad__desktop__scroll/sheet-01.jpg) |
+| SUPERSET | `superset__desktop__interaction-session.webm` | 117.44 s | [Temporal sheets](../docs/reviews/website/archive-review/SUPERSET/00-superset__desktop__interaction-session/sheet-01.jpg) |
+| SUPERSET | `superset__desktop__scroll.webm` | 16.52 s | [Temporal sheets](../docs/reviews/website/archive-review/SUPERSET/01-superset__desktop__scroll/sheet-01.jpg) |
+| TEMPO | `tempo__desktop__scroll.webm` | 16.36 s | [Temporal sheets](../docs/reviews/website/archive-review/TEMPO/00-tempo__desktop__scroll/sheet-01.jpg) |
+| V7LABS | `v7labs__desktop__scroll.webm` | 13.40 s | [Temporal sheets](../docs/reviews/website/archive-review/V7LABS/00-v7labs__desktop__scroll/sheet-01.jpg) |
+| ZOAH | `zoah__desktop__scroll.webm` | 19.20 s | [Temporal sheets](../docs/reviews/website/archive-review/ZOAH/00-zoah__desktop__scroll/sheet-01.jpg) |
 
 ## Source-specific findings and disposition
 
@@ -74,10 +74,10 @@ The selection combines complementary patterns into the existing ORIX page. It pr
 
 ## Detailed study reports
 
-- [Group A](../output/playwright/archive-review/group-a.md) covers AgentCat, Agiloft, Amperos, Anime.js and Concurrence.
-- [Group B](../output/playwright/archive-review/group-b.md) covers Contra Labs, Fin AI, Giga, Granola and Guild.
-- [Group C](../output/playwright/archive-review/group-c.md) covers Handhold, Intercom, Parloa, Polar and Relace.
-- [Root group](../output/playwright/archive-review/group-d.md) covers Reveni, Solidroad, Superset, Tempo, V7 Labs, Zoah and shared archive material.
+- [Group A](../docs/reviews/website/archive-review/group-a.md) covers AgentCat, Agiloft, Amperos, Anime.js and Concurrence.
+- [Group B](../docs/reviews/website/archive-review/group-b.md) covers Contra Labs, Fin AI, Giga, Granola and Guild.
+- [Group C](../docs/reviews/website/archive-review/group-c.md) covers Handhold, Intercom, Parloa, Polar and Relace.
+- [Root group](../docs/reviews/website/archive-review/group-d.md) covers Reveni, Solidroad, Superset, Tempo, V7 Labs, Zoah and shared archive material.
 
 ## Verification boundary
 

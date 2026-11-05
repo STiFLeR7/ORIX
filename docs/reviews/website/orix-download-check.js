@@ -1,0 +1,33 @@
+async (page) => {
+  const url = 'https://github.com/STiFLeR7/ORIX/releases/download/v0.1.0-beta.3/ORIX-Setup-0.1.0-beta.3.exe';
+  const filename = 'ORIX-Setup-0.1.0-beta.3.exe';
+  const check = (value, message) => { if (!value) throw new Error(message); };
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.goto('http://127.0.0.1:43870/index.html');
+  const downloads = page.locator('a[href$=".exe"]');
+  check(await downloads.count() === 3, 'All three download actions are connected');
+  for (const link of await downloads.all()) {
+    check(await link.getAttribute('href') === url, 'Download uses the published installer');
+  }
+  check(await page.getByRole('link', { name: 'Download for Windows', exact: true }).count() === 2, 'Hero and closing labels describe the download');
+  check(await page.getByRole('link', { name: 'release notes and checksums', exact: true }).getAttribute('href') === 'https://github.com/STiFLeR7/ORIX/releases/tag/v0.1.0-beta.3', 'Release details remain accessible');
+  const event = page.waitForEvent('download', { timeout: 45000 });
+  await page.locator('#overview').getByRole('link', { name: 'Download for Windows', exact: true }).click();
+  const download = await event;
+  check(download.suggestedFilename() === filename, 'Browser receives the installer filename');
+  await download.cancel();
+  check(page.url().startsWith('http://127.0.0.1:43870/index.html'), 'Download keeps the website open');
+  await page.screenshot({ path: 'docs/reviews/website/orix-direct-download-desktop.png' });
+  for (const width of [320,390,768,1024,1440]) {
+    await page.setViewportSize({ width, height: 900 });
+    check(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'No overflow at ' + width);
+    check(await page.locator('#overview').getByRole('link', { name: 'Download for Windows', exact: true }).isVisible(), 'Hero download available at ' + width);
+    if (width === 390) await page.screenshot({ path: 'docs/reviews/website/orix-direct-download-mobile.png' });
+  }
+  const context = await page.context().browser().newContext({ javaScriptEnabled: false });
+  const staticPage = await context.newPage();
+  await staticPage.goto('http://127.0.0.1:43870/index.html');
+  check(await staticPage.locator('a[href$=".exe"]').count() === 3, 'All downloads exist without JavaScript');
+  await context.close();
+  return { status: 'PASS', download: filename, browserDownloadStarted: true, cancelledAfterFilenameCheck: true, widths: [320,390,768,1024,1440], noJavaScript: true };
+}

@@ -2,7 +2,7 @@
 
 ## Intended graph
 
-Use the JSON-LD fragments in [templates](templates/) after matching their facts to the visible pages. Their URLs follow the planned production origin and proposed route inventory.
+Use the JSON-LD fragments in [templates](templates) after matching their facts to the visible pages. Their URLs follow the planned production origin and proposed route inventory.
 
 | Entity | Stable identifier | Purpose |
 | --- | --- | --- |

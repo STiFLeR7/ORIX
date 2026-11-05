@@ -7,7 +7,7 @@ const vm = require('node:vm');
 const { createRequire } = require('node:module');
 
 function load(file, electron, imports = {}) {
-  const filename = path.resolve(__dirname, '..', file), mod = { exports: {} };
+  const filename = path.resolve(__dirname, '../src', file), mod = { exports: {} };
   const realRequire = createRequire(filename);
   vm.runInNewContext('(function () {\n' + fs.readFileSync(filename, 'utf8') + '\n})()', {
     module: mod, exports: mod.exports, __dirname: path.dirname(filename),
@@ -20,7 +20,7 @@ function load(file, electron, imports = {}) {
 }
 
 test('self-install preserves a stranded backup when the target is missing', () => {
-  const source = fs.readFileSync(path.join(__dirname, '../self-install.cjs'), 'utf8');
+  const source = fs.readFileSync(path.join(__dirname, '../src/self-install.cjs'), 'utf8');
   const home = 'C:\\fixture\\installed', here = 'C:\\fixture\\source';
   let homeExists = false; const removed = [];
   const fakeFs = { existsSync: p => p === path.join(here, 'resources', 'app', 'package.json') || p === home + '.old' || (p === home && homeExists),
@@ -77,7 +77,7 @@ test('Spotify without an ORIX client ID fails before an OAuth server or browser 
 
 test('legacy account requests stay disconnected without reading or sending old credentials', async () => {
   let service;
-  assert.doesNotThrow(() => { service = require('../companion-service.cjs'); });
+  assert.doesNotThrow(() => { service = require('../src/companion-service.cjs'); });
   const connection = service.getConnection();
   assert.equal(connection.connected, false);
   assert.equal(connection.user, null);

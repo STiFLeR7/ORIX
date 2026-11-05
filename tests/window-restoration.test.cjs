@@ -16,7 +16,7 @@ async function recover(visible) {
     webContents: { id: page, isDestroyed: () => false, getURL: () => 'file:///app/' + page,
       executeJavaScript: async () => ({}) }
   });
-  vm.runInNewContext(fs.readFileSync(require.resolve('../island-window-main.js'), 'utf8'), {
+  vm.runInNewContext(fs.readFileSync(require.resolve('../src/island-window-main.js'), 'utf8'), {
     require: name => {
       if (name === './orix-layer-main.cjs') return { isVisible: () => visible, findIsland: () => window('mascot.html') };
       assert.equal(name, 'electron');

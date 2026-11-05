@@ -9,7 +9,7 @@ test('ORIX layer mark uses the approved aperture and retains the status indicato
   const canvasContext = new Proxy({}, { get: (_, key) => (...args) => drawing.push([key, ...args]), set: (_, key, value) => { drawing.push([key, value]); return true; } });
   const canvas = { width: 0, height: 0, getContext: () => canvasContext };
   const sandbox = { window: {}, document: { createElement: () => canvas, documentElement: { dataset: { theme: 'dark' } } } };
-  vm.runInNewContext(fs.readFileSync(path.join(__dirname, '../orix-brand-ui.js'), 'utf8'), sandbox);
+  vm.runInNewContext(fs.readFileSync(path.join(__dirname, '../src/orix-brand-ui.js'), 'utf8'), sandbox);
   const ctx = new Proxy({}, { get: (_, key) => (...args) => calls.push([key, ...args]), set: (_, key, value) => { calls.push([key, value]); return true; } });
   sandbox.window.__orixMark(ctx, 20, 30, 40, '#ffb000');
   assert.deepEqual(calls[0], ['save']);
@@ -32,7 +32,7 @@ test('packaged Windows and tray icons use the approved 86% tile artwork', () => 
   assert.equal(digest('settings-icon.ico'), digest('icon.ico'));
 });
 
-const settings = fs.readFileSync(path.join(__dirname, '../settings-app.html'), 'utf8');
+const settings = fs.readFileSync(path.join(__dirname, '../src/settings-app.html'), 'utf8');
 test('dashboard header uses the selected wordmark in light and dark themes', () => {
   for (const name of ['orix-lockup-light.svg', 'orix-lockup-dark.svg']) {
     assert.match(settings, new RegExp(name.replace('.', '\\.')));
@@ -41,14 +41,14 @@ test('dashboard header uses the selected wordmark in light and dark themes', () 
 });
 
 test('dashboard brand provides readable text in high-contrast mode', () => {
-  const css = fs.readFileSync(path.join(__dirname, '../orix-dashboard.css'), 'utf8');
+  const css = fs.readFileSync(path.join(__dirname, '../src/orix-dashboard.css'), 'utf8');
   assert.match(settings, /class="brand-high-contrast"[^>]*>ORIX</);
   assert.match(css, /data-high-contrast=true[^{}]*\.brand-high-contrast/);
   assert.match(css, /@media\s*\(forced-colors:\s*active\)/);
 });
 
 test('both desktop marks pulse busy status and keep questions steady without leaking canvas alpha', () => {
-  const mascot = fs.readFileSync(path.join(__dirname, '../mascot.html'), 'utf8');
+  const mascot = fs.readFileSync(path.join(__dirname, '../src/mascot.html'), 'utf8');
   const source = mascot.slice(mascot.indexOf('function drawGhost('), mascot.indexOf('window.__orixIslandEyes = drawIslandEyes;'));
   let status, time, alpha;
   const stack = [];
@@ -86,7 +86,7 @@ test('Apps offers free tool switches without purchase or activation controls', (
   const apps = settings.slice(settings.indexOf('const APPS ='), settings.indexOf('async function loadApps'));
   const draw = settings.slice(settings.indexOf('function drawApps()'), settings.indexOf('// ---------- Nieuws ----------'));
   let html;
-  const sandbox = { ORIXNavigation: require('../orix-navigation-ui.js'), tab: 'apps', lang: 'en', esc: String, icon: () => '', t: () => ({ always: 'Always on', inApp: 'Enabled', notIn: 'Disabled', soon: 'More tools', soonHelp: 'Free tools' }), paint: value => { html = value; } };
+  const sandbox = { ORIXNavigation: require('../src/orix-navigation-ui.js'), tab: 'apps', lang: 'en', esc: String, icon: () => '', t: () => ({ always: 'Always on', inApp: 'Enabled', notIn: 'Disabled', soon: 'More tools', soonHelp: 'Free tools' }), paint: value => { html = value; } };
   vm.runInNewContext(apps + draw + '\ndrawApps();', sandbox);
   for (const id of ['focus', 'tray', 'clips', 'note', 'spotify']) assert.ok(html.includes(`data-app="${id}"`), id);
   assert.doesNotMatch(html, /packCode|data-code=|data-url=|🔒/);
@@ -96,7 +96,7 @@ test('Apps offers free tool switches without purchase or activation controls', (
 test('legacy license actions keep every bundled tool unlocked without a code', () => {
   const handlers = {};
   const sandbox = { require: name => { assert.equal(name, 'electron'); return { ipcMain: { handle: (name, handler) => { handlers[name] = handler; } } }; }, module: { exports: {} } };
-  vm.runInNewContext(fs.readFileSync(path.join(__dirname, '../license-main.cjs'), 'utf8'), sandbox);
+  vm.runInNewContext(fs.readFileSync(path.join(__dirname, '../src/license-main.cjs'), 'utf8'), sandbox);
   const trusted = { senderFrame: { url: 'file:///app/settings-app.html' } };
   for (const action of ['get', 'activate', 'remove']) {
     const result = handlers[`license:${action}`](trusted, '');

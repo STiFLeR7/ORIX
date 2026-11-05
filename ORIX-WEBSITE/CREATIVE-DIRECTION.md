@@ -46,4 +46,4 @@ The arc and fan are alternative gallery compositions for comparison. Particle, c
 
 The supplied JPGs are local creative references. Production artwork needs its own documented source, license and publication permission. Reference ownership and permission to redistribute remain unverified. Source illustrations, models, textures and provider logos through the [asset plan](ASSET-AND-CAPTURE-PLAN.md).
 
-Motion behavior and fallback states are specified in [Animation and interaction](ANIMATION-AND-INTERACTION.md). The underlying identity is documented in the [ORIX brand system](../dashboard-rewamp/orix-system/BRAND-SYSTEM.md).
+Motion behavior and fallback states are specified in [Animation and interaction](ANIMATION-AND-INTERACTION.md). The underlying identity is documented in the [ORIX brand system](../docs/design/orix-system/BRAND-SYSTEM.md).

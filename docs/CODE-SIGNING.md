@@ -22,7 +22,7 @@ After the service and certificate are granted, add the required attribution to t
 
 ORIX stores settings and persistent tool data in its local application profile. Enabled clipboard history retains up to eight text entries in memory. Disable Clipboard in Modules and save to clear its history and stop capture. Hiding the layer leaves enabled integrations running. AI requests, selected project data and requested screenshots can be sent to the selected provider. Spotify authentication and controls contact Spotify. The optional weather module sends the configured city and resulting coordinates to Open-Meteo. Provider services apply their own privacy terms. These behaviors need to remain visible in the release documentation.
 
-See the [privacy policy and provider disclosures](PRIVACY.md), [removal instructions](ORIX-REMOVAL.md) and [release checks](../RELEASE.md).
+See the [privacy policy and provider disclosures](PRIVACY.md), [removal instructions](ORIX-REMOVAL.md) and [release checks](RELEASE.md).
 
 ## Source requirements
 

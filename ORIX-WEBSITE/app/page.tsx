@@ -846,7 +846,7 @@ export default function HomePage() {
                   </a>
                   <a
                     className="text-link"
-                    href="https://github.com/STiFLeR7/ORIX/blob/main/CONTRIBUTING.md"
+                    href="https://github.com/STiFLeR7/ORIX/blob/main/docs/CONTRIBUTING.md"
                   >
                     Contribute ↗
                   </a>

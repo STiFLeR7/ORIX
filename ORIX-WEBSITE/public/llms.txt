@@ -16,10 +16,10 @@ The project uses the ISC license. Optional connected services have their own acc
 ## Documentation and policies
 
 - [Application privacy and connected services](https://raw.githubusercontent.com/STiFLeR7/ORIX/main/docs/PRIVACY.md)
-- [Release checklist and availability](https://raw.githubusercontent.com/STiFLeR7/ORIX/main/RELEASE.md)
+- [Release checklist and availability](https://raw.githubusercontent.com/STiFLeR7/ORIX/main/docs/RELEASE.md)
 - [Code signing policy](https://raw.githubusercontent.com/STiFLeR7/ORIX/main/docs/CODE-SIGNING.md)
 - [Removal guidance](https://raw.githubusercontent.com/STiFLeR7/ORIX/main/docs/ORIX-REMOVAL.md)
-- [Contribution guidance](https://raw.githubusercontent.com/STiFLeR7/ORIX/main/CONTRIBUTING.md)
+- [Contribution guidance](https://raw.githubusercontent.com/STiFLeR7/ORIX/main/docs/CONTRIBUTING.md)
 
 ## Release and source
 

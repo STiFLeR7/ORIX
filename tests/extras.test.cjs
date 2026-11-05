@@ -1,7 +1,7 @@
 'use strict';
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { parseIcs, nextStart, icsDate } = require('../extras-main.cjs');
+const { parseIcs, nextStart, icsDate } = require('../src/extras-main.cjs');
 
 const ICS = [
   'BEGIN:VCALENDAR',

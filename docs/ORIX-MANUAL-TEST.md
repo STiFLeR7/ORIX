@@ -1,6 +1,6 @@
 # ORIX beta manual test procedure
 
-Use this procedure to record checks that automation has not established. The current build and known limits are in [RELEASE.md](../RELEASE.md). Record the build version, Windows version, display scaling and pass/fail/blocked for each row; include reproduction steps for failures. Do not include credentials, clipboard history, private messages, hook tokens or screenshots containing personal data in test reports.
+Use this procedure to record checks that automation has not established. The current build and known limits are in [RELEASE.md](RELEASE.md). Record the build version, Windows version, display scaling and pass/fail/blocked for each row; include reproduction steps for failures. Do not include credentials, clipboard history, private messages, hook tokens or screenshots containing personal data in test reports.
 
 Use a disposable Windows account or test machine with a backup of its profile. Install the candidate there and use only a disposable note, text string and file. The Clipboard module reads the system clipboard when enabled; copy a harmless test string before testing it. Do not connect real agent profiles or services in the basic checks. Do not overwrite an existing installation or profile to create a test environment.
 

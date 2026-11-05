@@ -1,10 +1,10 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs'), vm = require('node:vm');
-const { normalize } = require('../orix-appearance-ui.js');
+const { normalize } = require('../src/orix-appearance-ui.js');
 
 test('Spotify transfer returns English app errors and preserves provider errors', async () => {
-  const source = fs.readFileSync(require.resolve('../main.js'), 'utf8');
+  const source = fs.readFileSync(require.resolve('../src/main.js'), 'utf8');
   const start = source.indexOf('async function spotifyTransfer(');
   const end = source.indexOf('// SPOTIFY CONTROL', start);
   let failure;
@@ -20,7 +20,7 @@ test('Spotify transfer returns English app errors and preserves provider errors'
 });
 
 test('Spotify connection and control failures use English app messages', async () => {
-  const source = fs.readFileSync(require.resolve('../main.js'), 'utf8');
+  const source = fs.readFileSync(require.resolve('../src/main.js'), 'utf8');
   const section = (start, end) => source.slice(source.indexOf(start), source.indexOf(end, source.indexOf(start)));
   let cleared = false;
   const context = { spotifyRateLimitedUntil: Date.now() + 60000, spotifyToken: async () => null,
@@ -37,7 +37,7 @@ test('Spotify connection and control failures use English app messages', async (
 });
 
 test('project search reports English validation errors', async () => {
-  const source = fs.readFileSync(require.resolve('../main.js'), 'utf8');
+  const source = fs.readFileSync(require.resolve('../src/main.js'), 'utf8');
   const start = source.indexOf('async function searchProject(');
   const end = source.indexOf('// PROJECT READ', start);
   let selected = null;
@@ -50,7 +50,7 @@ test('project search reports English validation errors', async () => {
 });
 
 test('unavailable Windows secure storage is reported in English', () => {
-  const source = fs.readFileSync(require.resolve('../main.js'), 'utf8');
+  const source = fs.readFileSync(require.resolve('../src/main.js'), 'utf8');
   const start = source.indexOf('function encryptString('), end = source.indexOf('function decryptString(', start);
   const context = { safeStorage: { isEncryptionAvailable: () => false } };
   vm.runInNewContext(source.slice(start, end), context);
@@ -65,15 +65,15 @@ test('project editor and agent report English safety errors', async () => {
     vm.runInNewContext(fs.readFileSync(require.resolve(file), 'utf8'), context);
     return context.module.exports;
   }
-  const editor = load('../project-editor-main.js')({ resolveProjectFile: async () => ({ actual: path.resolve('credentials.json') }) });
+  const editor = load('../src/project-editor-main.js')({ resolveProjectFile: async () => ({ actual: path.resolve('credentials.json') }) });
   await assert.rejects(editor.fileState('credentials.json'), /Files containing keys or login credentials are not edited/);
-  load('../project-agent-main.js')({ loadProjectPath: () => null }, editor);
+  load('../src/project-agent-main.js')({ loadProjectPath: () => null }, editor);
   assert.equal((await handlers['project-agent:get']({}, {})).error, 'Choose a project folder first.');
 });
 
 test('project AI instructions request English summaries', () => {
-  const agent = fs.readFileSync(require.resolve('../project-agent-main.js'), 'utf8');
-  const editor = fs.readFileSync(require.resolve('../project-editor-main.js'), 'utf8');
+  const agent = fs.readFileSync(require.resolve('../src/project-agent-main.js'), 'utf8');
+  const editor = fs.readFileSync(require.resolve('../src/project-editor-main.js'), 'utf8');
   assert.match(agent, /Respond in English/);
   assert.doesNotMatch(agent, /Antwoord in Nederlands/);
   assert.match(editor, /write the summary in English/);
@@ -81,7 +81,7 @@ test('project AI instructions request English summaries', () => {
 });
 
 test('project connection test and file chat request English responses', async () => {
-  const source = fs.readFileSync(require.resolve('../project-mode-main.js'), 'utf8');
+  const source = fs.readFileSync(require.resolve('../src/project-mode-main.js'), 'utf8');
   const start = source.indexOf('async function testSelectedAI()'), end = source.indexOf('async function ', start + 1);
   const calls = [], context = { resolveAIConfig: async () => ({ provider: 'chatgpt' }), chatgpt: { answer: async (...args) => calls.push(args) } };
   vm.runInNewContext(source.slice(start, end), context);
@@ -92,7 +92,7 @@ test('project connection test and file chat request English responses', async ()
 });
 
 test('project mode reports English storage and file-boundary errors', async () => {
-  const source = fs.readFileSync(require.resolve('../project-mode-main.js'), 'utf8'), path = require('node:path');
+  const source = fs.readFileSync(require.resolve('../src/project-mode-main.js'), 'utf8'), path = require('node:path');
   const encryptStart = source.indexOf('function encrypt('), encryptEnd = source.indexOf('function decrypt(', encryptStart);
   const fileStart = source.indexOf('async function resolveProjectFile('), fileEnd = source.indexOf('async function listProjectFiles(', fileStart);
   let selected = null;
@@ -107,7 +107,7 @@ test('project mode reports English storage and file-boundary errors', async () =
 });
 
 test('project progress keeps its percentages and file names with English labels', () => {
-  const source = fs.readFileSync(require.resolve('../project-agent-main.js'), 'utf8');
+  const source = fs.readFileSync(require.resolve('../src/project-agent-main.js'), 'utf8');
   const start = source.indexOf('  function progress('), end = source.indexOf('  const objectSchema', start);
   const sent = [], context = {};
   vm.runInNewContext(source.slice(start, end), context);
@@ -131,15 +131,15 @@ test('VS Code extension presents ORIX branding on connection failures', async ()
   const vscode = { window: { registerUriHandler: handler => { uriHandler = handler; return {}; }, showWarningMessage: showWarning } };
   const http = { request: () => { const req = new EventEmitter(); req.setTimeout = () => {}; req.end = () => process.nextTick(() => req.emit('error', new Error('Synthetic failure'))); return req; } };
   const context = { exports: {}, require: name => name === 'vscode' ? vscode : name === 'http' ? http : require(name), URLSearchParams, Buffer, process, console };
-  vm.runInNewContext(fs.readFileSync(require.resolve('../vscode-editor/extension.js'), 'utf8'), context);
+  vm.runInNewContext(fs.readFileSync(require.resolve('../src/vscode-editor/extension.js'), 'utf8'), context);
   context.exports.activate({ subscriptions: [] });
   uriHandler.handleUri({ authority: 'orix.project-editor', path: '/connect', query: `port=12345&token=${'a'.repeat(64)}&job=${'b'.repeat(36)}` });
   assert.equal(await warning, 'ORIX: Synthetic failure');
-  assert.equal(require('../vscode-editor/package.json').displayName, 'ORIX Project Editor');
+  assert.equal(require('../src/vscode-editor/package.json').displayName, 'ORIX Project Editor');
 });
 
 test('ChatGPT integration uses English app errors and keeps redaction', async () => {
-  const source = fs.readFileSync(require.resolve('../chatgpt-provider.js'), 'utf8');
+  const source = fs.readFileSync(require.resolve('../src/chatgpt-provider.js'), 'utf8');
   const safeStart = source.indexOf('function safeMessage('), safeEnd = source.indexOf('function revision(', safeStart);
   const start = source.indexOf('async function start('), end = source.indexOf('async function ', start + 1);
   const context = { quitting: true };
@@ -153,7 +153,7 @@ test('ChatGPT integration uses English app errors and keeps redaction', async ()
 
 test('old Dutch preferences and Dutch Windows locale resolve to English without losing other choices', () => {
   assert.equal(normalize({ lang: 'nl', themeMode: 'light' }, null, 'nl-NL').lang, 'en');
-  const source = fs.readFileSync(require.resolve('../orix-fun.js'), 'utf8');
+  const source = fs.readFileSync(require.resolve('../src/orix-fun.js'), 'utf8');
   const script = source.slice(source.indexOf('const DEFAULTS'), source.indexOf('// Old saves only')) + '\nglobalThis.snapshot = prefs;';
   const context = { window: { ORIXAppearance: { normalize } }, navigator: { language: 'nl-NL' },
     store: { get: () => ({ lang: 'nl', warnAt: 90, themeMode: 'light' }), set() {} } };
@@ -162,7 +162,7 @@ test('old Dutch preferences and Dutch Windows locale resolve to English without 
 });
 
 test('General settings no longer render a language selector', () => {
-  const source = fs.readFileSync(require.resolve('../orix-fun.js'), 'utf8'), seen = [];
+  const source = fs.readFileSync(require.resolve('../src/orix-fun.js'), 'utf8'), seen = [];
   const start = source.indexOf('window.__orixSettingsExtra =');
   const script = source.slice(start, source.indexOf('// Settings: click a block', start));
   const context = { window: {}, row: () => '', toggle: () => '', chips: key => { seen.push(key); return ''; },
@@ -172,7 +172,7 @@ test('General settings no longer render a language selector', () => {
 });
 
 test('AI live status announces combined provider states in English', () => {
-  const source = fs.readFileSync(require.resolve('../ai-monitor-ui.js'), 'utf8');
+  const source = fs.readFileSync(require.resolve('../src/ai-monitor-ui.js'), 'utf8');
   const declarations = source.slice(source.indexOf('  const labels ='), source.indexOf('  let state ='));
   const assignment = source.match(/statusReader\.textContent = [^;]+;/)?.[0];
   assert.ok(assignment, 'status announcement assignment must exist');
@@ -191,7 +191,7 @@ test('AI live status announces combined provider states in English', () => {
 });
 
 test('AI notifications use English and identify the originating agent', () => {
-  const source = fs.readFileSync(require.resolve('../ai-monitor-main.cjs'), 'utf8');
+  const source = fs.readFileSync(require.resolve('../src/ai-monitor-main.cjs'), 'utf8');
   const start = source.indexOf('  function notify(session)'), end = source.indexOf('  async function poll()', start);
   assert.ok(start >= 0 && end > start); const shown = [], clicks = [];
   class Notification { static isSupported() { return true; } constructor(data) { this.data = data; this.events = {}; shown.push(this); } on(key, fn) { this.events[key] = fn; } show() {} }
@@ -209,7 +209,7 @@ test('AI notifications use English and identify the originating agent', () => {
 });
 
 test('focus completion and usage notifications use English', () => {
-  const source = fs.readFileSync(require.resolve('../orix-fun.js'), 'utf8');
+  const source = fs.readFileSync(require.resolve('../src/orix-fun.js'), 'utf8');
   const start = source.indexOf('    if (wasFocus && !focus.active())');
   const end = source.indexOf('    wasFocus = focus.active();', start); assert.ok(start >= 0 && end > start);
   const messages = [], noop = () => {};
@@ -223,7 +223,7 @@ test('focus completion and usage notifications use English', () => {
 });
 
 test('achievement notification labels are English without changing saved badge IDs', () => {
-  const source = fs.readFileSync(require.resolve('../orix-fun.js'), 'utf8'), start = source.indexOf('  const BADGES = ['), end = source.indexOf('  function bump(', start);
+  const source = fs.readFileSync(require.resolve('../src/orix-fun.js'), 'utf8'), start = source.indexOf('  const BADGES = ['), end = source.indexOf('  function bump(', start);
   assert.ok(start >= 0 && end > start); const messages = [], saved = [], noop = () => {};
   const context = { store: { get: (_key, fallback) => fallback, set: (key, value) => saved.push([key, value]) }, say: (...args) => messages.push(args), chime: noop, confetti: noop, jump: noop, feel: noop };
   vm.runInNewContext(source.slice(start, end), context); context.earn('first');
@@ -232,7 +232,7 @@ test('achievement notification labels are English without changing saved badge I
 });
 
 test('Spotify playback failures are visible and restore the confirmed play state', async () => {
-  const source = fs.readFileSync(require.resolve('../spotify-ui.js'), 'utf8');
+  const source = fs.readFileSync(require.resolve('../src/spotify-ui.js'), 'utf8');
   const start = source.indexOf('  async function control('), end = source.indexOf('  // ---- swipe', start);
   for (const response of [{ ok: false, error: 'No active device found' }, new Error('offline'), { ok: true }]) {
     const flashes = [], refreshes = [], state = { is_playing: false };
@@ -250,7 +250,7 @@ test('Spotify playback failures are visible and restore the confirmed play state
 });
 
 test('home music buttons use the shared Spotify control error handling', () => {
-  const source = fs.readFileSync(require.resolve('../ai-monitor-ui.js'), 'utf8');
+  const source = fs.readFileSync(require.resolve('../src/ai-monitor-ui.js'), 'utf8');
   const start = source.indexOf('  // Quick buttons on the home widgets'), end = source.indexOf('  // ---- Apps', start);
   let click, target; const actions = [];
   const state = { is_playing: false };
@@ -264,7 +264,7 @@ test('home music buttons use the shared Spotify control error handling', () => {
 });
 
 test('Spotify device messages are English and preserve provider errors', async () => {
-  const source = fs.readFileSync(require.resolve('../spotify-ui.js'), 'utf8'), start = source.indexOf('  async function loadDevices()'), end = source.indexOf('  // The player:', start);
+  const source = fs.readFileSync(require.resolve('../src/spotify-ui.js'), 'utf8'), start = source.indexOf('  async function loadDevices()'), end = source.indexOf('  // The player:', start);
   assert.ok(start >= 0 && end > start); let response, reject = false;
   const api = { spotifyDevices: async () => { if (reject) throw Error('offline'); return response; }, spotifyTransfer: async () => response };
   const context = { api, window: {}, setTimeout() {}, refreshSpotify() {} };
@@ -280,7 +280,7 @@ test('Spotify device messages are English and preserve provider errors', async (
 });
 
 test('battery and calendar alerts use English while preserving device names and event titles', async () => {
-  const source = fs.readFileSync(require.resolve('../extras-ui.js'), 'utf8'), start = source.indexOf('  // Battery of this laptop'), end = source.indexOf('  // ---------- real sound wave:', start);
+  const source = fs.readFileSync(require.resolve('../src/extras-ui.js'), 'utf8'), start = source.indexOf('  // Battery of this laptop'), end = source.indexOf('  // ---------- real sound wave:', start);
   assert.ok(start >= 0 && end > start); const flashes = [], notifications = []; let bluetooth;
   const battery = { charging: false, level: 0.19, addEventListener() {} };
   const now = Date.now(); const title = 'Klaar';
@@ -297,7 +297,7 @@ test('battery and calendar alerts use English while preserving device names and 
 });
 
 test('compact alerts preserve dynamic text without disabling translation for ordinary messages', () => {
-  const source = fs.readFileSync(require.resolve('../ai-monitor-ui.js'), 'utf8'), start = source.indexOf('    if (message) {', source.indexOf('const message = window.__orixCompactMessage')), end = source.indexOf('    if (p && (needsYou', start);
+  const source = fs.readFileSync(require.resolve('../src/ai-monitor-ui.js'), 'utf8'), start = source.indexOf('    if (message) {', source.indexOf('const message = window.__orixCompactMessage')), end = source.indexOf('    if (p && (needsYou', start);
   assert.ok(start >= 0 && end > start); const calls = [], raw = [];
   const context = { message: '🎧 Klaar: 15% remaining', left: 0, cy: 0, right: 300, text: value => calls.push(value), window: { __orixCompactMessageIsRaw: () => true, __orixRawText: value => raw.push(value) } };
   vm.runInNewContext('(function(){' + source.slice(start, end) + '})()', context);
@@ -307,7 +307,7 @@ test('compact alerts preserve dynamic text without disabling translation for ord
 });
 
 test('compact alert raw-text flag follows the current alert and expires', () => {
-  const source = fs.readFileSync(require.resolve('../extras-ui.js'), 'utf8'), start = source.indexOf('  let hud = null;'), end = source.indexOf('  // Volume bar:', start); assert.ok(start >= 0 && end > start);
+  const source = fs.readFileSync(require.resolve('../src/extras-ui.js'), 'utf8'), start = source.indexOf('  let hud = null;'), end = source.indexOf('  // Volume bar:', start); assert.ok(start >= 0 && end > start);
   let now = 0; const window = { __orixCompactMessage: () => 'fallback' };
   const context = { window, introFinished: true, performance: { now: () => now }, mode: 'compact', setMode() {}, setTimeout: () => 1, clearTimeout() {} };
   vm.runInNewContext(source.slice(start, end), context);
@@ -317,7 +317,7 @@ test('compact alert raw-text flag follows the current alert and expires', () => 
 });
 
 test('project file chat requests English while passing file and user text unchanged', async () => {
-  const source = fs.readFileSync(require.resolve('../project-mode-main.js'), 'utf8');
+  const source = fs.readFileSync(require.resolve('../src/project-mode-main.js'), 'utf8');
   const fn = source.indexOf('async function sendProjectChat('), start = source.indexOf('  let input;', fn), end = source.indexOf('  } catch (error)', start);
   assert.ok(fn >= 0 && start > fn && end > start); let request;
   const context = { path: require('node:path'), chat: { contextSent: false, conversationId: 'fixture' }, resolved: { root: 'project', relative: 'sample.txt' }, content: 'Klaar: inhoud', message: 'Wat is dit?', config: { model: 'fixture' }, openAIRequest: async (_config, _url, data) => { request = data; return {}; } };
@@ -329,7 +329,7 @@ test('project file chat requests English while passing file and user text unchan
 });
 
 test('project agent rules use English and retain source-code trust boundaries', async () => {
-  const source = fs.readFileSync(require.resolve('../project-agent-main.js'), 'utf8'), start = source.indexOf('  async function ask(config, schema, instructions, data)'), end = source.indexOf('  function appendChat(', start);
+  const source = fs.readFileSync(require.resolve('../src/project-agent-main.js'), 'utf8'), start = source.indexOf('  async function ask(config, schema, instructions, data)'), end = source.indexOf('  function appendChat(', start);
   assert.ok(start >= 0 && end > start); let prompt, rules;
   const context = { chatgpt: { answer: async (p, r) => { prompt = p; rules = r; return '{}'; } } };
   vm.runInNewContext(source.slice(start, end), context);
@@ -340,7 +340,7 @@ test('project agent rules use English and retain source-code trust boundaries', 
 });
 
 test('ChatGPT project file chat preserves content and uses English safety rules', async () => {
-  const source = fs.readFileSync(require.resolve('../project-mode-main.js'), 'utf8'), start = source.indexOf('async function sendProjectChat('), end = source.indexOf('// RESET CHAT', start); assert.ok(start >= 0 && end > start);
+  const source = fs.readFileSync(require.resolve('../src/project-mode-main.js'), 'utf8'), start = source.indexOf('async function sendProjectChat('), end = source.indexOf('// RESET CHAT', start); assert.ok(start >= 0 && end > start);
   let prompt, rules; const store = { chats: {} }, context = { path: require('node:path'), fs: { promises: { readFile: async () => 'Klaar: inhoud' } }, resolveAIConfig: async () => ({ ready: true, provider: 'chatgpt', model: 'fixture', fingerprint: 'test' }), resolveProjectFile: async () => ({ root: 'project', relative: 'sample.txt', actual: 'fake' }), hashContent: () => 'hash', loadChats: () => store, chatKey: () => 'id', saveChats() {}, MAX_CHAT_MESSAGES: 10,
     chatgpt: { answer: async (p, r) => { prompt = JSON.parse(p); rules = r; return 'English response'; } } };
   vm.runInNewContext(source.slice(start, end), context); const result = await context.sendProjectChat('sample.txt', 'Wat is dit?');
@@ -349,7 +349,7 @@ test('ChatGPT project file chat preserves content and uses English safety rules'
 });
 
 test('project editor planning uses English instructions and preserves user context', async () => {
-  const source = fs.readFileSync(require.resolve('../project-editor-main.js'), 'utf8'), start = source.indexOf('  async function plan(config, before, message, history)'), end = source.indexOf('  function remember(', start); assert.ok(start >= 0 && end > start);
+  const source = fs.readFileSync(require.resolve('../src/project-editor-main.js'), 'utf8'), start = source.indexOf('  async function plan(config, before, message, history)'), end = source.indexOf('  function remember(', start); assert.ok(start >= 0 && end > start);
   let prompt, rules; const context = { schema: { type: 'object' }, norm: text => text, chatgpt: { answer: async (p, r) => { prompt = JSON.parse(p); rules = r; return '{"summary":"Done","edits":[]}'; } } };
   vm.runInNewContext(source.slice(start, end), context); const result = await context.plan({ provider: 'chatgpt' }, { relative: 'file.txt', text: 'Klaar' }, 'Wat is dit?', []);
   assert.equal(result.summary, 'Done'); assert.equal(prompt.fileContent, 'Klaar'); assert.equal(prompt.request, 'Wat is dit?');
@@ -357,7 +357,7 @@ test('project editor planning uses English instructions and preserves user conte
 });
 
 test('project chat reports a safe error when the selected file becomes unreadable', async () => {
-  const source = fs.readFileSync(require.resolve('../project-mode-main.js'), 'utf8'), start = source.indexOf('async function getProjectChat('), end = source.indexOf('// RESET CHAT', start); assert.ok(start >= 0 && end > start); let calls = 0;
+  const source = fs.readFileSync(require.resolve('../src/project-mode-main.js'), 'utf8'), start = source.indexOf('async function getProjectChat('), end = source.indexOf('// RESET CHAT', start); assert.ok(start >= 0 && end > start); let calls = 0;
   const context = { resolveAIConfig: async () => ({ ready: true }), resolveProjectFile: async () => ({ actual: 'fixture', root: 'project', relative: 'file.txt' }), fs: { promises: { readFile: async () => { throw new Error('private filesystem path'); } } }, loadChats: () => { calls++; throw Error('should not load chats'); } };
   vm.runInNewContext(source.slice(start, end), context);
   for (const result of [await context.getProjectChat('file.txt'), await context.sendProjectChat('file.txt', 'Question')]) {
@@ -367,7 +367,7 @@ test('project chat reports a safe error when the selected file becomes unreadabl
 });
 
 test('project UI load failures are English and preserve external error text', async () => {
-  const source = fs.readFileSync(require.resolve('../project-mode-ui.js'), 'utf8'), start = source.indexOf('  async function load()'), end = source.indexOf('  async function choose()', start); assert.ok(start >= 0 && end > start);
+  const source = fs.readFileSync(require.resolve('../src/project-mode-ui.js'), 'utf8'), start = source.indexOf('  async function load()'), end = source.indexOf('  async function choose()', start); assert.ok(start >= 0 && end > start);
   let result = { ok: false }; const context = { window: { orix: { projectV2Get: async () => result } }, error: '', loaded: false, render() {} };
   vm.runInNewContext(source.slice(start, end), context); await context.load(); assert.equal(context.error, 'Could not load the project.');
   result = { ok: false, error: 'Klaar' }; await context.load(); assert.equal(context.error, 'Klaar');
@@ -375,14 +375,14 @@ test('project UI load failures are English and preserve external error text', as
 });
 
 test('project panel keeps progress and project names outside translation and avoids duplicate stopped prefixes', () => {
-  const source = fs.readFileSync(require.resolve('../project-mode-ui.js'), 'utf8'), start = source.indexOf('  function finish(ok, text, answer'), end = source.indexOf('  function meta()', start); assert.ok(start >= 0 && end > start);
+  const source = fs.readFileSync(require.resolve('../src/project-mode-ui.js'), 'utf8'), start = source.indexOf('  function finish(ok, text, answer'), end = source.indexOf('  function meta()', start); assert.ok(start >= 0 && end > start);
   const context = { setIndicator() {}, performance: { now: () => 5000 }, startedAt: 0, elapsed: 0, busy: true, waiting: true, progressState: 'running', status: 'Stopped · Read: Klaar.txt' };
   vm.runInNewContext(source.slice(start, end), context); context.finish(false, ''); assert.equal(context.status, 'Stopped · Read: Klaar.txt');
   assert.match(source, /class="tc-title" data-user-content/); assert.match(source, /class="tc-status" data-user-content/); assert.match(source, /aria-label="Task progress"/);
 });
 
 test('project request failures keep unrecorded drafts without duplicating chat history', async () => {
-  const source = fs.readFileSync(require.resolve('../project-mode-ui.js'), 'utf8'), start = source.indexOf('  async function send()'), end = source.indexOf('  async function undo()', start); assert.ok(start >= 0 && end > start);
+  const source = fs.readFileSync(require.resolve('../src/project-mode-ui.js'), 'utf8'), start = source.indexOf('  async function send()'), end = source.indexOf('  async function undo()', start); assert.ok(start >= 0 && end > start);
   const old = { role: 'assistant', text: 'Earlier' }; let send;
   const c = { busy: false, project: {}, ai: { ready: true }, draft: '  Keep this request  ', messages: [old], canUndo: false, error: '', begin() {}, render() {}, scroll() {}, finish() {}, window: { orix: { projectAgentSend: text => send(text) } } };
   vm.runInNewContext(source.slice(start, end), c); send = async () => { throw Error('Connection lost'); }; await c.send();
@@ -392,7 +392,7 @@ test('project request failures keep unrecorded drafts without duplicating chat h
 });
 
 test('successful project requests clear the draft and show recorded messages', async () => {
-  const source = fs.readFileSync(require.resolve('../project-mode-ui.js'), 'utf8'), start = source.indexOf('  async function send()'), end = source.indexOf('  async function undo()', start); const recorded = [{ role: 'user', text: 'Change it' }, { role: 'assistant', text: 'Done' }]; let sent;
+  const source = fs.readFileSync(require.resolve('../src/project-mode-ui.js'), 'utf8'), start = source.indexOf('  async function send()'), end = source.indexOf('  async function undo()', start); const recorded = [{ role: 'user', text: 'Change it' }, { role: 'assistant', text: 'Done' }]; let sent;
   const c = { busy: false, project: {}, ai: { ready: true }, draft: 'Change it', messages: [], canUndo: false, error: '', begin() {}, render() {}, scroll() {}, finish() {}, window: { orix: { projectAgentSend: async text => { sent = text; return { ok: true, applied: true, undo: true, messages: recorded, answer: 'Done' }; } } } };
   vm.runInNewContext(source.slice(start, end), c); await c.send(); assert.equal(sent, 'Change it'); assert.equal(c.draft, ''); assert.equal(c.messages, recorded); assert.equal(c.canUndo, true);
 });

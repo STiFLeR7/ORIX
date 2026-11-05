@@ -12,7 +12,7 @@
 
 This is **0.1.0-beta.3**, an unsigned beta. Windows may display an unknown-publisher warning while signing is pending. [All release files and checksums](https://github.com/STiFLeR7/ORIX/releases/tag/v0.1.0-beta.3)
 
-Beta.3 fixes Windows Codex hook transport and event ordering. Review new or changed Codex hooks through `/hooks`. [Validation details](RELEASE.md#windows-beta3--2026-11-05)
+Beta.3 fixes Windows Codex hook transport and event ordering. Review new or changed Codex hooks through `/hooks`. [Validation details](docs/RELEASE.md#windows-beta3--2026-11-05)
 
 ## See it in action
 
@@ -45,6 +45,18 @@ https://github.com/user-attachments/assets/86b043c3-a29e-49e2-81fa-2595c121343c
 ## Get started
 
 Download and open the installer, then choose your tools in **ORIX Settings → Modules**. Open Settings from the tray or Start menu to connect services and choose Light, Dark or System appearance.
+
+### Repository layout
+
+```text
+src/             Desktop application, UI, native helpers and editor extension
+assets/          Icons, fonts and licensed artwork
+tests/           Automated checks
+tools/           Windows diagnostics, launchers and build tools
+docs/            Guides, release checks, design records and review captures
+ORIX-WEBSITE/    Product website
+.github/         Build and signing workflows
+```
 
 <details>
 <summary><b>Run from source</b></summary>
@@ -83,7 +95,7 @@ The first command runs the automated suite. The Windows check inspects supported
 
 Packaged ORIX uses its own application identity and `%LOCALAPPDATA%\Programs\ORIX` installation. Updates preserve existing ORIX beta settings and history.
 
-For VS Code project editing with the current source, install [ORIX Project Editor](vscode-editor/orix-project-editor.vsix) through **Extensions → Install from VSIX**. This 0.2.0 extension uses the `orix.project-editor` identity.
+For VS Code project editing with the current source, install [ORIX Project Editor](src/vscode-editor/orix-project-editor.vsix) through **Extensions → Install from VSIX**. This 0.2.0 extension uses the `orix.project-editor` identity.
 
 </details>
 
@@ -92,7 +104,7 @@ For VS Code project editing with the current source, install [ORIX Project Edito
 
 The [privacy policy](docs/PRIVACY.md) describes local data, network destinations, provider policies and removal controls.
 
-Core desktop tools run locally. Updates are [manual](UPDATES.md).
+Core desktop tools run locally. Updates are [manual](docs/UPDATES.md).
 
 The Clipboard module is enabled by default. While enabled, ORIX checks for copied text and keeps up to eight entries in memory; this history is not written to disk. To stop collection and clear ORIX’s in-memory history, switch **Clipboard** off in **Modules** and press **Save**. This does not clear the Windows clipboard. Hiding the desktop layer does not disable enabled modules.
 
@@ -104,7 +116,7 @@ Direct Spotify login uses PKCE and requires a public client ID supplied as `ORIX
 
 ## Build with us
 
-Found something rough? Open an issue with the version and steps to reproduce. Feature ideas and focused pull requests are welcome. [Contributing](CONTRIBUTING.md) · [Report an issue](https://github.com/STiFLeR7/ORIX/issues/new)
+Found something rough? Open an issue with the version and steps to reproduce. Feature ideas and focused pull requests are welcome. [Contributing](docs/CONTRIBUTING.md) · [Report an issue](https://github.com/STiFLeR7/ORIX/issues/new)
 
 ### Code signing policy
 
@@ -126,10 +138,10 @@ The package retains the text Codex runtime and helpers. Its unused real-time voi
 
 </details>
 
-See the [brand system](dashboard-rewamp/orix-system/BRAND-SYSTEM.md) and [interface design system](dashboard-rewamp/orix-system/DESIGN-SYSTEM.md) for the visual direction.
+See the [brand system](docs/design/orix-system/BRAND-SYSTEM.md) and [interface design system](docs/design/orix-system/DESIGN-SYSTEM.md) for the visual direction.
 
 ORIX application code is distributed under [ISC](LICENSE). Dependencies, runtime components, fonts and other third-party material retain their own terms and [attribution](THIRD_PARTY_NOTICES.md).
 
 <p align="center"><img src="assets/icon-64.png" width="36" alt="ORIX aperture mark"><br><b>ORIX</b> · Free and open source under ISC.</p>
 
-[Release checks](RELEASE.md) · [Media credits](docs/media/README.md)
+[Release checks](docs/RELEASE.md) · [Media credits](docs/media/README.md)

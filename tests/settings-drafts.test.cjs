@@ -2,8 +2,8 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const vm = require('node:vm');
 const fs = require('node:fs');
-const appearance = require('../orix-appearance-ui.js');
-const appRequire = require('node:module').createRequire(require('node:path').resolve(__dirname, '../settings-app-main.cjs'));
+const appearance = require('../src/orix-appearance-ui.js');
+const appRequire = require('node:module').createRequire(require('node:path').resolve(__dirname, '../src/settings-app-main.cjs'));
 
 function bridge(initialOff = []) {
   let prefs = { lang: 'en', themeMode: 'dark', motionMode: 'system', name: 'Keep', lightBusy: '#ff9a1f' }, preview, failSave = false;
@@ -16,7 +16,7 @@ function bridge(initialOff = []) {
     __orixPrefs: () => prefs, __orixPreviewPrefs: p => { preview = p ? { ...p } : null; },
     __orixWithDraft: (_prefs, fn) => fn(), __orixSaveDraft: p => { if (failSave) throw new Error('Save failed'); prefs = { ...p }; },
     __orixSaveSettingsServices: (...args) => saveServices(...args) };
-  vm.runInNewContext(fs.readFileSync(require.resolve('../settings-bridge-ui.js'), 'utf8'), {
+  vm.runInNewContext(fs.readFileSync(require.resolve('../src/settings-bridge-ui.js'), 'utf8'), {
     window, document: { getElementById: () => ({ appendChild() {} }), createElement: () => box, querySelectorAll: () => [] },
     setView() {}, sleepEnabled: false, performance: { now: () => 0 },
     localStorage: { getItem: key => values.get(key) ?? null, setItem: (key, value) => { if (failModules && key === 'orix:apps-off') throw new Error('Storage unavailable'); values.set(key, value); } },
@@ -92,7 +92,7 @@ test('failed startup persistence retains its settings draft', async () => {
 });
 
 test('settings service writes update caches only after successful awaited IPC', async () => {
-  const source = fs.readFileSync(require.resolve('../orix-fun.js'), 'utf8');
+  const source = fs.readFileSync(require.resolve('../src/orix-fun.js'), 'utf8');
   const start = source.indexOf('window.__orixSaveSettingsServices =');
   assert.notEqual(start, -1, 'awaitable settings service writer is required');
   let configResult = { ok: false, error: 'Paste an https or webcal calendar link.' }, loginResult = { ok: false };
@@ -119,8 +119,8 @@ test('main relay validates appearance values before evaluating a request in the 
     isDestroyed() { return false; } setMenuBarVisibility() {} setAppDetails() {} loadFile() {} once() {} on() {}
   }
   const mod = { exports: {} };
-  vm.runInNewContext(fs.readFileSync(require.resolve('../settings-app-main.cjs'), 'utf8'), {
-    module: mod, __dirname: require('node:path').resolve(__dirname, '..'), process: { argv: [], env: {}, platform: 'win32', execPath: 'ORIX.exe' },
+  vm.runInNewContext(fs.readFileSync(require.resolve('../src/settings-app-main.cjs'), 'utf8'), {
+    module: mod, __dirname: require('node:path').resolve(__dirname, '../src'), process: { argv: [], env: {}, platform: 'win32', execPath: 'ORIX.exe' },
     require: name => name === './orix-layer-main.cjs' ? { findIsland: () => island, trusted: e => e.senderFrame === e.sender?.mainFrame, isVisible: () => visible, reveal: view => { toolShown = true; requests.push(['extras:shortcut', view]); return true; } } : name === 'electron' ? { app: { on() {} }, BrowserWindow: Window,
       ipcMain: { on() {}, handle: (key, fn) => handlers.set(key, fn) } } : appRequire(name)
   });
@@ -140,7 +140,7 @@ test('main relay validates appearance values before evaluating a request in the 
   assert.deepEqual(requests.at(-1), ['extras:shortcut', 'ai-settings']);
 });
 test('dashboard does not announce success or clear a draft after a failed save', async () => {
-  const source = fs.readFileSync(require.resolve('../settings-app.html'), 'utf8');
+  const source = fs.readFileSync(require.resolve('../src/settings-app.html'), 'utf8');
   const start = source.indexOf('async function saveAll()');
   const script = source.slice(start, source.indexOf('async function cancelAll()', start));
   const messages = [], button = { disabled: false };
@@ -153,7 +153,7 @@ test('dashboard does not announce success or clear a draft after a failed save',
   assert.equal(button.disabled, false);
 });
 test('new dashboard controls cannot shift legacy delegated settings button indices', () => {
-  const source = fs.readFileSync(require.resolve('../settings-app.html'), 'utf8');
+  const source = fs.readFileSync(require.resolve('../src/settings-app.html'), 'utf8');
   const script = source.match(/function islandIndex\(b\) \{[^\n]+\}/)[0];
   const extra = { closest: () => null }, first = { closest: () => null }, second = { closest: () => null };
   const context = { list: { querySelectorAll: selector => selector === '.island-settings button' ? [first, second] : [extra, first, second] } };
@@ -170,8 +170,8 @@ test('reopening the dashboard reuses its window and does not register new IPC ha
     on(name, fn) { this.events.set(name, fn); }
   }
   const mod = { exports: {} };
-  vm.runInNewContext(fs.readFileSync(require.resolve('../settings-app-main.cjs'), 'utf8'), {
-    module: mod, __dirname: require('node:path').resolve(__dirname, '..'), process: { argv: [], env: {}, platform: 'win32' },
+  vm.runInNewContext(fs.readFileSync(require.resolve('../src/settings-app-main.cjs'), 'utf8'), {
+    module: mod, __dirname: require('node:path').resolve(__dirname, '../src'), process: { argv: [], env: {}, platform: 'win32' },
     require: name => name === './orix-layer-main.cjs' ? { findIsland: () => null } : name === 'electron' ? { app: { on: (...args) => listeners.push(args) }, BrowserWindow: Window,
       ipcMain: { on: (...args) => handlers.push(args), handle: (...args) => handlers.push(args) } } : appRequire(name)
   });
@@ -199,8 +199,8 @@ test('closing Settings after a failed Save retains the window and draft', async 
     on(key, fn) { this.events.set(key, fn); } close() { closed++; }
   }
   const mod = { exports: {} };
-  vm.runInNewContext(fs.readFileSync(require.resolve('../settings-app-main.cjs'), 'utf8'), {
-    module: mod, __dirname: require('node:path').resolve(__dirname, '..'), process: { argv: [], env: {}, platform: 'win32' },
+  vm.runInNewContext(fs.readFileSync(require.resolve('../src/settings-app-main.cjs'), 'utf8'), {
+    module: mod, __dirname: require('node:path').resolve(__dirname, '../src'), process: { argv: [], env: {}, platform: 'win32' },
     require: name => name === './orix-layer-main.cjs' ? { findIsland: () => island, trusted: e => e.senderFrame === e.sender?.mainFrame } : name === 'electron' ? { app: { on() {} }, BrowserWindow: Window,
       ipcMain: { on: (key, fn) => events.set(key, fn), handle() {} },
       dialog: { showMessageBox: async (_win, options) => { dialogs.push(options); return { response: 0 }; } }
@@ -251,7 +251,7 @@ test('malformed saved module lists do not enable clipboard capture', async () =>
 });
 
 test('project AI settings request opens the AI tab instead of General', () => {
-  const source = fs.readFileSync(require.resolve('../ai-settings-ui.js'), 'utf8');
+  const source = fs.readFileSync(require.resolve('../src/ai-settings-ui.js'), 'utf8');
   const start = source.indexOf("  window.addEventListener('orix:open-ai-settings'");
   const end = source.indexOf('  // Algemeen:', start);
   assert.ok(start >= 0 && end > start);
@@ -263,7 +263,7 @@ test('project AI settings request opens the AI tab instead of General', () => {
 });
 
 test('project AI settings bypass the dashboard redirect and expand the layer', () => {
-  const bridgeSource = fs.readFileSync(require.resolve('../settings-bridge-ui.js'), 'utf8');
+  const bridgeSource = fs.readFileSync(require.resolve('../src/settings-bridge-ui.js'), 'utf8');
   const start = bridgeSource.indexOf('  const openView = setView;');
   const end = bridgeSource.indexOf('  const root = document.getElementById', start);
   let opened, mode;
@@ -271,13 +271,13 @@ test('project AI settings bypass the dashboard redirect and expand the layer', (
   vm.runInNewContext(bridgeSource.slice(start, end), context);
   assert.equal(typeof context.window.__orixOpenInlineSettings, 'function');
   context.window.__orixOpenInlineSettings(); assert.equal(opened, 'settings'); assert.equal(mode, 'expanded');
-  const project = fs.readFileSync(require.resolve('../project-mode-ui.js'), 'utf8');
+  const project = fs.readFileSync(require.resolve('../src/project-mode-ui.js'), 'utf8');
   const body = project.slice(project.indexOf('  function settings() {'), project.indexOf('  function render() {')); 
   assert.match(body, /__orixOpenInlineSettings/);
 });
 
 test('advanced AI settings use English for provider details and key controls', () => {
-  const source = fs.readFileSync(require.resolve('../ai-settings-ui.js'), 'utf8');
+  const source = fs.readFileSync(require.resolve('../src/ai-settings-ui.js'), 'utf8');
   const start = source.indexOf('  function keyFields(type)'), end = source.indexOf('  const sleepRow', start);
   assert.ok(start >= 0 && end > start);
   const context = { settings: { selectedProvider: 'openai', openai: { hasKey: false } }, loggingIn: false, escape: String, button: label => label };
@@ -291,7 +291,7 @@ test('advanced AI settings use English for provider details and key controls', (
 });
 
 test('AI settings IPC rejects untrusted windows before invoking sensitive actions', async () => {
-  const source = fs.readFileSync(require.resolve('../project-mode-main.js'), 'utf8');
+  const source = fs.readFileSync(require.resolve('../src/project-mode-main.js'), 'utf8');
   const start = source.indexOf('// AI SETTINGS IPC'), end = source.indexOf('const projectEditor =', start);
   assert.ok(start >= 0 && end > start);
   const handlers = new Map(), calls = [];
@@ -308,7 +308,7 @@ test('AI settings IPC rejects untrusted windows before invoking sensitive action
 });
 
 test('project IPC rejects untrusted requests before calling project operations', async () => {
-  const source = fs.readFileSync(require.resolve('../project-mode-main.js'), 'utf8');
+  const source = fs.readFileSync(require.resolve('../src/project-mode-main.js'), 'utf8');
   const start = source.indexOf('// PROJECT IPC'), end = source.indexOf('// AI SETTINGS IPC', start);
   const handlers = new Map(), calls = [];
   const f = name => () => { calls.push(name); return { ok: true }; };
@@ -321,7 +321,7 @@ test('project IPC rejects untrusted requests before calling project operations',
 });
 
 test('agent and editor IPC wrappers reject untrusted requests before invoking actions', async () => {
-  for (const [file, name, end] of [['../project-agent-main.js', 'handle', "  handle('project-agent:get'"], ['../project-editor-main.js', 'handler', "  handler('project-editor:open'"]]) {
+  for (const [file, name, end] of [['../src/project-agent-main.js', 'handle', "  handle('project-agent:get'"], ['../src/project-editor-main.js', 'handler', "  handler('project-editor:open'"]]) {
     const source = fs.readFileSync(require.resolve(file), 'utf8'), start = source.indexOf(`  function ${name}(name, fn) {`), stop = source.indexOf(end, start);
     assert.ok(start >= 0 && stop > start); let handler, calls = 0;
     const context = { ipcMain: { handle: (_name, fn) => { handler = fn; } }, require: request => request === './orix-layer-main.cjs' ? { trusted: e => e.trusted === true } : appRequire(request) };
@@ -332,7 +332,7 @@ test('agent and editor IPC wrappers reject untrusted requests before invoking ac
 });
 
 test('legacy project, Spotify and window IPC reject foreign renderers', async () => {
-  const source = fs.readFileSync(require.resolve('../main.js'), 'utf8');
+  const source = fs.readFileSync(require.resolve('../src/main.js'), 'utf8');
   const start = source.indexOf('// ORIX IPC'), end = source.indexOf('// Goodbye:', start);
   assert.ok(start >= 0 && end > start);
   const handlers = new Map(), events = new Map(), calls = [];
@@ -362,8 +362,8 @@ test('cancelling a Settings close clears a pending restart request', async () =>
     isDestroyed() { return false; } setMenuBarVisibility() {} setAppDetails() {} loadFile() {} once() {} on(k, f) { this.events.set(k, f); } close() { closes++; }
   }
   const mod = { exports: {} };
-  vm.runInNewContext(fs.readFileSync(require.resolve('../settings-app-main.cjs'), 'utf8'), {
-    module: mod, __dirname: require('node:path').resolve(__dirname, '..'), process: { argv: [], env: {}, platform: 'win32' },
+  vm.runInNewContext(fs.readFileSync(require.resolve('../src/settings-app-main.cjs'), 'utf8'), {
+    module: mod, __dirname: require('node:path').resolve(__dirname, '../src'), process: { argv: [], env: {}, platform: 'win32' },
     require: name => name === './orix-layer-main.cjs' ? { findIsland: () => island, trusted: e => e.senderFrame === e.sender?.mainFrame } : name === 'electron' ? { app, BrowserWindow: Window,
       ipcMain: { on: (key, fn) => events.set(key, fn), handle() {} }, dialog: { showMessageBox: async () => ({ response }) } } : appRequire(name)
   });
@@ -389,8 +389,8 @@ test('shutdown asks about a Settings draft before closing its windows', async ()
     isDestroyed() { return false; } setMenuBarVisibility() {} setAppDetails() {} loadFile() {} once() {} on(k, f) { this.events.set(k, f); } close() { closes++; }
   }
   const mod = { exports: {} };
-  vm.runInNewContext(fs.readFileSync(require.resolve('../settings-app-main.cjs'), 'utf8'), {
-    module: mod, __dirname: require('node:path').resolve(__dirname, '..'), process: { argv: [], env: {}, platform: 'win32' },
+  vm.runInNewContext(fs.readFileSync(require.resolve('../src/settings-app-main.cjs'), 'utf8'), {
+    module: mod, __dirname: require('node:path').resolve(__dirname, '../src'), process: { argv: [], env: {}, platform: 'win32' },
     require: name => name === './orix-layer-main.cjs' ? { findIsland: () => island, trusted: e => e.senderFrame === e.sender?.mainFrame } : name === 'electron' ? { app, BrowserWindow: Window,
       ipcMain: { on: (key, fn) => events.set(key, fn), handle() {} }, dialog: { showMessageBox: async () => ({ response }) } } : appRequire(name)
   });

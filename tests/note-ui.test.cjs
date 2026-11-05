@@ -3,7 +3,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs'), vm = require('node:vm');
 
 async function fixture(text = 'My note\n[ ] Ship it', loaded = true) {
-  const source = fs.readFileSync(require.resolve('../tools-ui.js'), 'utf8'), events = {}, inputEvents = {}, timers = new Map();
+  const source = fs.readFileSync(require.resolve('../src/tools-ui.js'), 'utf8'), events = {}, inputEvents = {}, timers = new Map();
   let serial = 0, result = { ok: false }, focused = false;
   const status = {}, retry = {}, area = { value: text, addEventListener: (key, fn) => { inputEvents[key] = fn; },
     focus: () => { focused = true; }, setSelectionRange() {} };
@@ -59,7 +59,7 @@ test('quit flushes a pending note and reports a failed write', async () => {
 
 
 test('hidden-layer quit waits for note flush and stays open on failure', async () => {
-  const source = fs.readFileSync(require.resolve('../main.js'), 'utf8');
+  const source = fs.readFileSync(require.resolve('../src/main.js'), 'utf8');
   const start = source.indexOf('// Goodbye'), end = source.indexOf("  'orix:notify'", start);
   const boundary = source.lastIndexOf('ipcMain.on(', end); assert.ok(start >= 0 && boundary > start);
   let handler, resolveFlush, quits = 0, errors = 0;
@@ -85,7 +85,7 @@ test('a note edited while flushing is saved again before quit proceeds', async (
 });
 
 test('successful note flush allows a hidden-layer quit', async () => {
-  const source = fs.readFileSync(require.resolve('../main.js'), 'utf8');
+  const source = fs.readFileSync(require.resolve('../src/main.js'), 'utf8');
   const start = source.indexOf('// Goodbye'), end = source.indexOf("  'orix:notify'", start), boundary = source.lastIndexOf('ipcMain.on(', end);
   assert.ok(start >= 0 && boundary > start); let handler, quits = 0;
   const app = { on: (_name, fn) => { handler = fn; }, quit: () => { quits++; } };
@@ -99,7 +99,7 @@ test('successful note flush allows a hidden-layer quit', async () => {
 
 
 test('visible-layer quit flushes again after the goodbye animation', async () => {
-  const source = fs.readFileSync(require.resolve('../main.js'), 'utf8');
+  const source = fs.readFileSync(require.resolve('../src/main.js'), 'utf8');
   const start = source.indexOf('// Goodbye'), end = source.indexOf("  'orix:notify'", start), boundary = source.lastIndexOf('ipcMain.on(', end);
   assert.ok(start >= 0 && boundary > start); let handler, flushes = 0, goodbye = 0, goodbyeTimer;
   const app = { on: (_name, fn) => { handler = fn; }, quit() { handler(event()); } };
@@ -115,7 +115,7 @@ test('visible-layer quit flushes again after the goodbye animation', async () =>
 
 
 test('restart is scheduled only when shutdown reaches will-quit', () => {
-  const source = fs.readFileSync(require.resolve('../tray-main.cjs'), 'utf8');
+  const source = fs.readFileSync(require.resolve('../src/tray-main.cjs'), 'utf8');
   const start = source.indexOf('function quit()'), end = source.indexOf('function buildMenu()', start);
   assert.ok(start >= 0 && end > start); let shutdown, quits = 0, relaunches = 0;
   const app = { on: (event, fn) => { assert.equal(event, 'will-quit'); shutdown = fn; }, quit: () => { quits++; }, relaunch: () => { relaunches++; } };
@@ -126,7 +126,7 @@ test('restart is scheduled only when shutdown reaches will-quit', () => {
 
 
 test('a stalled note flush blocks duplicate quits, reports failure, and permits a later retry', async () => {
-  const source = fs.readFileSync(require.resolve('../main.js'), 'utf8');
+  const source = fs.readFileSync(require.resolve('../src/main.js'), 'utf8');
   const start = source.indexOf('// Goodbye'), end = source.indexOf("  'orix:notify'", start), boundary = source.lastIndexOf('ipcMain.on(', end);
   assert.ok(start >= 0 && boundary > start);
   let handler, timeout, attempts = 0, quits = 0, errors = 0, shouldStall = true;
@@ -146,7 +146,7 @@ test('a stalled note flush blocks duplicate quits, reports failure, and permits 
 
 
 test('quit leaves all windows open when Settings preflight is cancelled', async () => {
-  const source = fs.readFileSync(require.resolve('../main.js'), 'utf8');
+  const source = fs.readFileSync(require.resolve('../src/main.js'), 'utf8');
   const start = source.indexOf('// Goodbye'), end = source.indexOf("  'orix:notify'", start), boundary = source.lastIndexOf('ipcMain.on(', end);
   let handler, quits = 0, checked = 0;
   const app = { orixRestartRequested: true, on: (_event, fn) => { handler = fn; }, quit: () => { quits++; } };

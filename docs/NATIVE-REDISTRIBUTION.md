@@ -12,7 +12,7 @@ The package also excludes Electron's app-local D3DCompiler and uses Windows 10/1
 
 The release supplies FFmpeg source at Chromium's pinned commit `2b68d2babae73714846961fb0ee47e3b3d2e39a9`, the Electron 44.10.1 source including its patch series/build rules, Chromium 152.0.7977.169 build scripts, DEPS records, license and replacement instructions. These are mirrored in `ORIX-Third-Party-Sources-0.1.0-beta.2.zip` alongside the binaries. A test altered the FFmpeg DLL's DOS-stub text and successfully decoded a generated MP3 through Electron's AudioContext. This verifies that an altered compatible DLL can load. A full FFmpeg rebuild was not performed.
 
-FFmpeg LGPL, Ratatui MIT, Codex Apache/NOTICE, ripgrep/PCRE2, Electron component, font and icon notices are retained. The installer remains unsigned while SignPath enrollment is pending. The beta's remaining Windows checks are listed in [RELEASE.md](../RELEASE.md).
+FFmpeg LGPL, Ratatui MIT, Codex Apache/NOTICE, ripgrep/PCRE2, Electron component, font and icon notices are retained. The installer remains unsigned while SignPath enrollment is pending. The beta's remaining Windows checks are listed in [RELEASE.md](RELEASE.md).
 
 ## Earlier beta.1 review
 
@@ -24,7 +24,7 @@ The reviewed source is published under ISC. Binary distribution remains on hold 
 | --- | --- | --- |
 | ORIX application and setup | First-party source and ISC text are published. The installer is compiled from `tools/setup/Setup.cs`. | Retain the ISC text and attribution. Sign only the first-party setup after approval. |
 | Inter, integration icons and ORIX artwork | OFL/MIT texts and pinned integration sources are retained. ORIX's approved mark is included. Unapproved design references and generated media are excluded. | Preserve attribution and vendor trademark distinctions. |
-| VS Code extension | All four VSIX entries were listed. The embedded extension JavaScript and package manifest match adjacent source byte-for-byte. | Preserve the published source and license. |
+| VS Code extension | All four VSIX entries were listed. The embedded extension JavaScript and package manifest match adjacent source after normalizing Git checkout line endings. | Preserve the published source and license. |
 | Electron 44.10.1 | The package retains Electron's MIT license and `LICENSES.chromium.html`. Its seven native files were matched to the installed Electron package. The notice includes LGPL-covered FFmpeg. Electron's `v44.10.1` DEPS pins Chromium `152.0.7977.169`. | Complete the corresponding FFmpeg source/build-material delivery and replacement review against that exact Electron build. Retaining the notice alone does not finish these obligations. |
 | Codex 0.160.0 and helpers | Apache-2.0 license and notice, ripgrep MIT and PCRE2 license texts are included. Native inventory records package identity. | Review any additional embedded-component obligations against upstream's complete build and notices. |
 | Codex voice libraries | Bundled notices, seven license texts, source manifests and build commit `a956835d020762cb2b570053af06f643a11c0ecc` identify GStreamer/GLib and supporting libraries. Earlier downloads verified all 11 recorded source archive hashes. The upstream source directory includes build and packaging scripts. | Provide complete corresponding source/build material through a durable distribution route and verify the applicable LGPL shared-library replacement conditions. The source archives were previously streamed for hashing, so no ORIX-hosted source mirror exists yet. |

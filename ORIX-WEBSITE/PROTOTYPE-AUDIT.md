@@ -23,7 +23,7 @@ The earlier browser checks established that several controls work and that the l
 
 ## Scope and method
 
-Reviewed the complete HTML/CSS/JavaScript in [the first prototype](../output/playwright/orix-website-v1.html), the [browser check](../output/playwright/orix-prototype-check.js), the creative direction, animation specification, section copy, site structure and capture plan. Visually inspected all 11 supplied reference JPGs again. Inspected the prototype in the owner's open in-app browser and exercised its demo selector, focus control, integration selector and appearance control.
+Reviewed the complete HTML/CSS/JavaScript in [the first prototype](../docs/reviews/website/orix-website-v1.html), the [browser check](../docs/reviews/website/orix-prototype-check.js), the creative direction, animation specification, section copy, site structure and capture plan. Visually inspected all 11 supplied reference JPGs again. Inspected the prototype in the owner's open in-app browser and exercised its demo selector, focus control, integration selector and appearance control.
 
 The expected use is one visitor exploring a local design prototype. This audit evaluates that experience and its correspondence with the handoff. Public hosting, search indexing and the Windows application's operation belong to their respective validation work.
 
@@ -47,7 +47,7 @@ The expected use is one visitor exploring a local design prototype. This audit e
 
 **Problem** The notch is a fixed 150 by 34-pixel decorative element. A separate sample window sits beneath it. Choosing Note, Focus or AI status immediately hides and shows detached panels. There is no collapsed-to-expanded transition, close action or replayable product sequence. Visitors cannot experience ORIX's defining transformation.
 
-**Evidence** The geometry is defined in [index.html](../output/playwright/orix-website-v1.html:102). Selection uses immediate visibility changes in [the demo handler](../output/playwright/orix-website-v1.html:488). The [motion specification](ANIMATION-AND-INTERACTION.md:13) describes a shape transition, and the [product sequence](ANIMATION-AND-INTERACTION.md:23) calls for collapsed and expanded states.
+**Evidence** The geometry is defined in [index.html](../docs/reviews/website/orix-website-v1.html:102). Selection uses immediate visibility changes in [the demo handler](../docs/reviews/website/orix-website-v1.html:488). The [motion specification](ANIMATION-AND-INTERACTION.md:13) describes a shape transition, and the [product sequence](ANIMATION-AND-INTERACTION.md:23) calls for collapsed and expanded states.
 
 **Smallest correction** Use one preview container for collapsed, expanded and tool-open states. Give it an explicit activation and close/replay path, animate the supported geometry between settled states and preserve an immediate reduced-motion path. Match the geometry to prepared app evidence.
 
@@ -61,7 +61,7 @@ The expected use is one visitor exploring a local design prototype. This audit e
 
 **Problem** The hero's tilted card and orbit remain static. The only keyframe sequence changes a faint glow over 14 seconds. There is no aperture/wordmark entrance, related-item stagger or animated transition between demo bodies. The same opacity/translation reveal is applied to unrelated panels. It also hides complete feature articles, including their essential copy, while they wait for the observer.
 
-**Evidence** See [hero artwork and glow](../output/playwright/orix-website-v1.html:66), [generic reveal CSS](../output/playwright/orix-website-v1.html:203) and [the reveal observer](../output/playwright/orix-website-v1.html:457). Compare the [motion roles and identity sequence](ANIMATION-AND-INTERACTION.md:8) and the requirement to keep [essential text present](ANIMATION-AND-INTERACTION.md:43).
+**Evidence** See [hero artwork and glow](../docs/reviews/website/orix-website-v1.html:66), [generic reveal CSS](../docs/reviews/website/orix-website-v1.html:203) and [the reveal observer](../docs/reviews/website/orix-website-v1.html:457). Compare the [motion roles and identity sequence](ANIMATION-AND-INTERACTION.md:8) and the requirement to keep [essential text present](ANIMATION-AND-INTERACTION.md:43).
 
 **Smallest correction** Build a short identity entrance, the product transformation from finding 1 and differentiated reveals for a small related visual group. Keep essential text visible. Select one atmospheric treatment with noticeable depth at the normal viewing size, retain Effects off and reduced motion, and pause continuous work outside view.
 
@@ -75,7 +75,7 @@ The expected use is one visitor exploring a local design prototype. This audit e
 
 **Problem** The actual product evidence is a single full Dark dashboard image in Appearance. The hero supplies an invented floating composition without a Windows workspace. Integration selection changes explanatory text inside a generic terminal. Light/Dark selection changes a small illustrative card while the adjacent actual dashboard remains Dark. No matched actual-theme comparison, expanded-notch capture, connection capture or readable dashboard-detail gallery is supplied.
 
-**Evidence** See [the actual image](../output/playwright/orix-website-v1.html:416), [integration text replacement](../output/playwright/orix-website-v1.html:533) and [the appearance handler](../output/playwright/orix-website-v1.html:545). Compare the required [hero visual](SECTION-CONTENT.md:23), [integration visual](SECTION-CONTENT.md:74), [theme comparison](SECTION-CONTENT.md:88) and [capture inventory](ASSET-AND-CAPTURE-PLAN.md:22).
+**Evidence** See [the actual image](../docs/reviews/website/orix-website-v1.html:416), [integration text replacement](../docs/reviews/website/orix-website-v1.html:533) and [the appearance handler](../docs/reviews/website/orix-website-v1.html:545). Compare the required [hero visual](SECTION-CONTENT.md:23), [integration visual](SECTION-CONTENT.md:74), [theme comparison](SECTION-CONTENT.md:88) and [capture inventory](ASSET-AND-CAPTURE-PLAN.md:22).
 
 **Smallest correction** Prepare a coherent set of real notch/dashboard states. Use a contextual desktop scene and readable crops. Pair integration choices with their corresponding ORIX view, and implement a matched theme comparison. Keep every recreation labeled and use verified sample data.
 
@@ -91,7 +91,7 @@ The expected use is one visitor exploring a local design prototype. This audit e
 
 **Problem** The four choices are small icon-only tiles. They have accessible names, but their names are only displayed for the selected item. Selection changes a border, a slight tint and text in the same terminal layout. Spotify, an AI provider and session monitoring consequently receive almost the same visual treatment. The reference's strong selected-object hierarchy and the handoff's associated product preview are largely absent.
 
-**Evidence** See [tile styling](../output/playwright/orix-website-v1.html:139) and [selection behavior](../output/playwright/orix-website-v1.html:533). Compare [the integration reference](creative-direction/website-inspiration-3.jpg) and [micro-interaction guidance](ANIMATION-AND-INTERACTION.md:33).
+**Evidence** See [tile styling](../docs/reviews/website/orix-website-v1.html:139) and [selection behavior](../docs/reviews/website/orix-website-v1.html:533). Compare [the integration reference](creative-direction/website-inspiration-3.jpg) and [micro-interaction guidance](ANIMATION-AND-INTERACTION.md:33).
 
 **Smallest correction** Add visible service labels, strengthen the selected-state hierarchy and transition the associated product visual. Show each connection's relevant behavior and retain its individual setup explanation. Resolve the real captures through finding 3.
 
@@ -105,7 +105,7 @@ The expected use is one visitor exploring a local design prototype. This audit e
 
 **Problem** The narrow layout stacks the headline, body, two links, supporting copy and a 365-pixel decorative hero region before the demonstration. The saved 390-pixel-wide preview fills most of its first screen with this material. The owner's current narrow in-app view likewise leads with copy and static art. The hero artwork contains decorative tool icons with no tool-selection behavior. The usable layer controls appear later in the document.
 
-**Evidence** See [the narrow layout rules](../output/playwright/orix-website-v1.html:227), [hero artwork](../output/playwright/orix-website-v1.html:66) and [the saved mobile view](../output/playwright/orix-website-mobile.png). The [site structure](SITE-STRUCTURE.md:56) identifies the actual layer shape and behavior as the memorable product moment.
+**Evidence** See [the narrow layout rules](../docs/reviews/website/orix-website-v1.html:227), [hero artwork](../docs/reviews/website/orix-website-v1.html:66) and [the saved mobile view](../docs/reviews/website/orix-website-mobile.png). The [site structure](SITE-STRUCTURE.md:56) identifies the actual layer shape and behavior as the memorable product moment.
 
 **Smallest correction** Move the collapsed-to-expanded demonstration into the initial product composition or bring its entry control and useful state earlier in the narrow layout. Compress the supporting copy/art spacing around it. Verify discoverability in the actual in-app viewport as well as desktop and phone widths.
 
@@ -119,7 +119,7 @@ The expected use is one visitor exploring a local design prototype. This audit e
 
 **Problem** The existing check verifies visibility, text, class changes, selected states, timer behavior and overflow. Its image captures are taken after Effects off is selected. It contains no acceptance check for notch transformation, identity animation, transition progression, matched app captures or a gallery. Passing those assertions could not demonstrate that the prototype met the creative brief.
 
-**Evidence** The check switches effects off in [the browser script](../output/playwright/orix-prototype-check.js:53), then takes its screenshots at [the following capture steps](../output/playwright/orix-prototype-check.js:58). The [motion acceptance list](ANIMATION-AND-INTERACTION.md:65) requires broader visual and behavioral inspection.
+**Evidence** The check switches effects off in [the browser script](../docs/reviews/website/orix-prototype-check.js:53), then takes its screenshots at [the following capture steps](../docs/reviews/website/orix-prototype-check.js:58). The [motion acceptance list](ANIMATION-AND-INTERACTION.md:65) requires broader visual and behavioral inspection.
 
 **Smallest correction** Keep the useful control checks. Add a brief-to-implementation checklist and review the selected motion sequences through start, intermediate and settled states, with a short recording or timestamped frames. Capture a normal-motion pass and a separate reduced-motion/Effects off pass. Check the live narrow viewport with visible interaction cues.
 
@@ -166,6 +166,6 @@ The [full archive review](ARCHIVE-REVIEW.md) replaces the earlier limited refere
 
 The corrected composition now has a working notch morph/replay/scrubber, a selectable tool arc, glass integration controls, an actual-dashboard gallery and flowing terrain. Prototype 03 adds a stable scroll-led tool stage, synchronized chapter controls, self-building illustrative input/work/result panels, optional finite story playback and visible provider signals. Header surfaces coordinate with Cloud and Obsidian sections. The [reference map](MOTION-REFERENCE-MAP.md) identifies the specific sources and adaptations.
 
-The new [45-assertion browser check](../output/playwright/orix-v3-check.js) verifies intermediate/settled states, four scroll chapters, stable stage geometry, keyboard selection, finite playback, pause/offscreen behavior, changing signal geometry, provider cancellation, five viewport widths and reduced-motion/normal-flow fallbacks. The existing interaction suite continues to exercise notch, timer, sample tools/providers, actual theme captures, gallery/dialog, canvas, mobile focus and no-JavaScript content against the current page.
+The new [45-assertion browser check](../docs/reviews/website/orix-v3-check.js) verifies intermediate/settled states, four scroll chapters, stable stage geometry, keyboard selection, finite playback, pause/offscreen behavior, changing signal geometry, provider cancellation, five viewport widths and reduced-motion/normal-flow fallbacks. The existing interaction suite continues to exercise notch, timer, sample tools/providers, actual theme captures, gallery/dialog, canvas, mobile focus and no-JavaScript content against the current page.
 
-Desktop, mobile and reduced-motion captures and a [normal-motion walkthrough](../output/playwright/orix-v3-motion.webm) provide review evidence. The [Prototype 02 baseline](../output/playwright/orix-website-v2.html) preserves the previous implementation. Final owner visual approval, fresh production tool/notch media, screen-reader testing, real-device performance and public deployment/SEO verification remain open.
+Desktop, mobile and reduced-motion captures and a [normal-motion walkthrough](../docs/reviews/website/orix-v3-motion.webm) provide review evidence. The [Prototype 02 baseline](../docs/reviews/website/orix-website-v2.html) preserves the previous implementation. Final owner visual approval, fresh production tool/notch media, screen-reader testing, real-device performance and public deployment/SEO verification remain open.

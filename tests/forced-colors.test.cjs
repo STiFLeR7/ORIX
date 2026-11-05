@@ -6,9 +6,9 @@ if (process.versions.electron) {
   const root = path.join(__dirname, '..');
   app.setPath('userData', process.env.ORIX_TEST_USER_DATA);
   app.whenReady().then(async () => {
-    const html = fs.readFileSync(path.join(root, 'settings-app.html'), 'utf8');
+    const html = fs.readFileSync(path.join(root, 'src/settings-app.html'), 'utf8');
     const inline = html.match(/<style>([\s\S]*?)<\/style>/)[1];
-    const css = inline + '\n' + fs.readFileSync(path.join(root, 'orix-theme.css'), 'utf8') + '\n' + fs.readFileSync(path.join(root, 'orix-dashboard.css'), 'utf8');
+    const css = inline + '\n' + fs.readFileSync(path.join(root, 'src/orix-theme.css'), 'utf8') + '\n' + fs.readFileSync(path.join(root, 'src/orix-dashboard.css'), 'utf8');
     const win = new BrowserWindow({ width: 820, height: 560, show: false, webPreferences: { backgroundThrottling: false } });
     await win.loadURL('data:text/html,' + encodeURIComponent('<!doctype html><style>' + css + '</style><div class="tool-row"><button class="btn ghost" data-tool="note">Open</button></div><div class="appearance-options"><button class="selected">System</button><button>Full</button></div><button class="tc-chip on">Classic</button><button class="tc-swatch on" style="background:#ff9a1f"></button>'));
     win.webContents.debugger.attach('1.3');

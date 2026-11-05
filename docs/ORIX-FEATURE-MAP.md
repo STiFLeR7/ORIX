@@ -11,7 +11,7 @@ Inventory date: 2026-11-02. This is a preservation checklist. The redesign is im
 | Apps / `apps` | Modules | `settings-app:get` apps/app; `orix:apps-off` | Draft; exact nine IDs below |
 | Connections / `connect` | Settings / Connections | `settings-app:connections`, `settings-app:connect`; monitor provider setup | Existing connection actions remain explicit/immediate; do not pretend Save controls installed hooks |
 | AI & Chat / `ai` | Settings / AI & Chat | `ai-settings:*`; dashboard's `aiDirty` and provider selection flow | Preserve existing provider draft vs explicit login/logout/test actions |
-| General / `general` | Settings / General, with theme controls in General | `__orixSettingsExtra`, `settings-bridge-ui.js` | Preserve row delegation and draft/save/discard; action exceptions below |
+| General / `general` | Settings / General, with theme controls in General | `__orixSettingsExtra`, `src/settings-bridge-ui.js` | Preserve row delegation and draft/save/discard; action exceptions below |
 | News / `news` | Settings / Updates | local `settings-app:news`, disabled `update:*` | Manual only; repository link; no vendor checks/downloads |
 | Removed `wardrobe` link | Appearance | legacy route alias | Do not restore retired pet wardrobe or paid activation |
 | About (new destination for existing release facts) | Settings / About | app version, LICENSE, THIRD_PARTY_NOTICES | Read-only, accurate provenance and repository |
@@ -20,10 +20,10 @@ Inventory date: 2026-11-02. This is a preservation checklist. The redesign is im
 
 | ID | Core | Feature / entry points | Existing handler / persisted state | New reachability check |
 | --- | --- | --- | --- | --- |
-| `claude` | yes | AI status, monitor/history, questions/replies; home/footer, Ctrl+Alt+3 | `ai-monitor-*`, `claude-code-hooks.cjs`, reply/statusline helpers | [ ] Overview status → existing monitor, Settings connections/AI |
-| `buddy` | no | Desktop context drag/drop, ask about screen, spelling/Word fixes | `buddy:*`, `buddy-main.cjs`, `chat-ui.js` | [ ] Modules toggle, existing context/chat workflow |
-| `spotify` | no | Playback/devices/connect; home/footer, Ctrl+Alt+2 | `spotify:*`, `spotify-ui.js`; user-supplied public client ID | [ ] Modules, media view, configured/unconfigured states |
-| `focus` | no | Timer/duration presets/start/stop; home/footer, Ctrl+Alt+4 | `focus-ui.js`, `orix-fun.js`; focus duration prefs | [ ] Modules, Focus view; running while layer OFF |
+| `claude` | yes | AI status, monitor/history, questions/replies; home/footer, Ctrl+Alt+3 | `ai-monitor-*`, `src/claude-code-hooks.cjs`, reply/statusline helpers | [ ] Overview status → existing monitor, Settings connections/AI |
+| `buddy` | no | Desktop context drag/drop, ask about screen, spelling/Word fixes | `buddy:*`, `src/buddy-main.cjs`, `src/chat-ui.js` | [ ] Modules toggle, existing context/chat workflow |
+| `spotify` | no | Playback/devices/connect; home/footer, Ctrl+Alt+2 | `spotify:*`, `src/spotify-ui.js`; user-supplied public client ID | [ ] Modules, media view, configured/unconfigured states |
+| `focus` | no | Timer/duration presets/start/stop; home/footer, Ctrl+Alt+4 | `src/focus-ui.js`, `src/orix-fun.js`; focus duration prefs | [ ] Modules, Focus view; running while layer OFF |
 | `tray` | no | Dropped files, open/remove/drag-out; footer and drop target | `extras:tray-*`; `tray.json` | [ ] Modules and file tray with synthetic files |
 | `clips` | no | Clipboard history/copy/clear; footer, Ctrl+Alt+5 | `extras:clips-*`; existing collector | [ ] Modules and clipboard; synthetic inputs only |
 | `note` | no | Note/edit/check circles/autosave; footer, Ctrl+Alt+6 | `extras:note-get/set`; `note.json`, max 20000 chars | [ ] Modules, note persisted across restart |
@@ -49,18 +49,18 @@ Inventory date: 2026-11-02. This is a preservation checklist. The redesign is im
 | Reset preferences | `[data-pref=reset]` | Settings / General; current draft semantics and bounded reset; never reset notes/history/integrations or immediate layer visibility |
 | Start with Windows | `app:login-get/set`, `draft.login` | Settings / General; only applies on Save, no real startup changes in isolated tests |
 | Restart / Quit | `app:restart`, existing quit action | Settings / General and tray; explicit immediate actions outside draft |
-| Project/workspace chat/editor/task tools | `project-mode-*`, `project-agent-main.js`, `project-editor-main.js` | Keep existing layer entry points/IPC, including editor URI/extension compatibility; not a new module |
+| Project/workspace chat/editor/task tools | `project-mode-*`, `src/project-agent-main.js`, `src/project-editor-main.js` | Keep existing layer entry points/IPC, including editor URI/extension compatibility; not a new module |
 | AI provider setup, model, key clearing, Codex login/cancel/logout/test | `ai-settings:*`, existing provider implementation | Settings / AI & Chat → Advanced AI settings and project AI-settings action; retain trust checks, do not log credentials or perform unrequested live login |
 | Activity history/search and daily counters | `settings-app:home`, monitor history | Overview; preserve genuine data, empty state when none |
-| Layer positioning / display work-area behavior | `main.js` positioning and screen events | Preserve existing behavior; no invented position slider if none exists |
+| Layer positioning / display work-area behavior | `src/main.js` positioning and screen events | Preserve existing behavior; no invented position slider if none exists |
 
 ## Launch and visibility paths to audit
 
-- `main.js`: island creation, ready-to-show, interactive/click-through handling.
-- `tray-main.cjs`: tray click/open, `--settings`, second instance, restart and quit.
-- `island-window-main.js`: Ctrl+Alt+T, crashed-renderer restoration. Foundation now targets the island, not first BrowserWindow.
-- `extras-main.cjs`: Ctrl+Alt+1..6; renderer `tools-ui.js` and monitor listeners.
-- `buddy-main.cjs`: grab, regrab, drop/park, flyHome/arrived, delayed return, debug-only startup.
+- `src/main.js`: island creation, ready-to-show, interactive/click-through handling.
+- `src/tray-main.cjs`: tray click/open, `--settings`, second instance, restart and quit.
+- `src/island-window-main.js`: Ctrl+Alt+T, crashed-renderer restoration. Foundation now targets the island, not first BrowserWindow.
+- `src/extras-main.cjs`: Ctrl+Alt+1..6; renderer `src/tools-ui.js` and monitor listeners.
+- `src/buddy-main.cjs`: grab, regrab, drop/park, flyHome/arrived, delayed return, debug-only startup.
 - Renderer hover/blur/expand/collapse, project/chat navigation, file drag-enter, notification and monitor-driven reveals.
 - OFF must retain the hidden island renderer/settings bridge and active tool state. Only explicit tray/dashboard Show re-enables it; other opening paths respect OFF.
 

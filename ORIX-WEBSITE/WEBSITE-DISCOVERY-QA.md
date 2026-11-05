@@ -158,10 +158,10 @@ This table expands the possible content areas from the Q&A. It records options f
 | Reference | Use during later website development |
 | --- | --- |
 | [Product README](../README.md) | Current product description and source/build information |
-| [Brand system](../dashboard-rewamp/orix-system/BRAND-SYSTEM.md) | Existing identity, logo and brand guidance |
-| [Interface design system](../dashboard-rewamp/orix-system/DESIGN-SYSTEM.md) | Application visual language and component context |
+| [Brand system](../docs/design/orix-system/BRAND-SYSTEM.md) | Existing identity, logo and brand guidance |
+| [Interface design system](../docs/design/orix-system/DESIGN-SYSTEM.md) | Application visual language and component context |
 | [Feature map](../docs/ORIX-FEATURE-MAP.md) | Product functionality and feature context |
-| [Release checklist](../RELEASE.md) | Release readiness and outstanding validation |
+| [Release checklist](../docs/RELEASE.md) | Release readiness and outstanding validation |
 | [Privacy policy](../docs/PRIVACY.md) | Local data and connected-service disclosures |
 | [Code signing policy](../docs/CODE-SIGNING.md) | Signing scope and current status |
 | [Third-party notices](../THIRD_PARTY_NOTICES.md) | Asset, dependency and service attribution |

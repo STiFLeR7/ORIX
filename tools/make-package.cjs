@@ -4,24 +4,25 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { execFileSync } = require('node:child_process');
 
-// Explicit runtime allowlist: local profiles and design/restoration files never enter a package.
+// Explicit runtime allowlist keeps profiles and development material outside the package.
 const SOURCE = [
-  'main.js', 'preload.js', 'mascot.html', 'orix-brand-ui.js', 'orix-layer-main.cjs',
-  'orix-appearance-ui.js', 'orix-theme.css', 'orix-icons-ui.js', 'orix-navigation-ui.js', 'orix-dashboard.css',
-  'orix-layer.css', 'orix-layer-ui.js',
-  'orix-copy.cjs', 'orix-compat.cjs',
-  'ai-monitor-main.cjs', 'ai-monitor-model.cjs', 'ai-monitor-ui.js', 'ai-settings-ui.js',
-  'auto-update-core.cjs', 'auto-update.cjs', 'buddy-helper.ps1', 'buddy-look.ps1',
-  'buddy-main.cjs', 'buddy-preload.js', 'buddy-ui.js', 'buddy.html', 'chat-ui.js',
-  'chatgpt-provider.js', 'check-windows.cjs', 'claude-code-hooks.cjs', 'companion-service.cjs',
-  'extras-main.cjs', 'extras-ui.js', 'focus-ui.js', 'i18n-ui.js', 'icons-ui.js',
-  'island-window-main.js', 'island-window-ui.js', 'license-main.cjs', 'pages-ui.js',
-  'project-agent-main.js', 'project-editor-main.js', 'project-mode-main.js', 'project-mode-ui.js',
-  'self-install.cjs', 'settings-app-main.cjs', 'settings-app-preload.js', 'settings-app.html',
-  'settings-bridge-ui.js', 'spotify-ui.js', 'tools-ui.js', 'tray-main.cjs', 'orix-fun.js',
-  'orix-reply.cjs', 'orix-statusline.cjs', 'volume-watch.ps1', 'windows-ai-access.cs',
-  'windows-ai-access.ps1', 'package.json', 'package-lock.json', 'LICENSE', 'THIRD_PARTY_NOTICES.md',
-  'README.md', 'LEES-MIJ.md', 'UPDATES.md', 'assets', 'vscode-editor'
+  'src/main.js', 'src/preload.js', 'src/mascot.html', 'src/orix-brand-ui.js', 'src/orix-layer-main.cjs',
+  'src/orix-appearance-ui.js', 'src/orix-theme.css', 'src/orix-icons-ui.js', 'src/orix-navigation-ui.js', 'src/orix-dashboard.css',
+  'src/orix-layer.css', 'src/orix-layer-ui.js',
+  'src/orix-copy.cjs', 'src/orix-compat.cjs',
+  'src/ai-monitor-main.cjs', 'src/ai-monitor-model.cjs', 'src/ai-monitor-ui.js', 'src/ai-settings-ui.js',
+  'src/auto-update-core.cjs', 'src/auto-update.cjs', 'src/buddy-helper.ps1', 'src/buddy-look.ps1',
+  'src/buddy-main.cjs', 'src/buddy-preload.js', 'src/buddy-ui.js', 'src/buddy.html', 'src/chat-ui.js',
+  'src/chatgpt-provider.js', 'src/claude-code-hooks.cjs', 'src/companion-service.cjs',
+  'src/extras-main.cjs', 'src/extras-ui.js', 'src/focus-ui.js', 'src/i18n-ui.js', 'src/icons-ui.js',
+  'src/island-window-main.js', 'src/island-window-ui.js', 'src/license-main.cjs', 'src/pages-ui.js',
+  'src/project-agent-main.js', 'src/project-editor-main.js', 'src/project-mode-main.js', 'src/project-mode-ui.js',
+  'src/self-install.cjs', 'src/settings-app-main.cjs', 'src/settings-app-preload.js', 'src/settings-app.html',
+  'src/settings-bridge-ui.js', 'src/spotify-ui.js', 'src/tools-ui.js', 'src/tray-main.cjs', 'src/orix-fun.js',
+  'src/orix-reply.cjs', 'src/orix-statusline.cjs', 'src/volume-watch.ps1', 'src/windows-ai-access.cs',
+  'src/windows-ai-access.ps1', 'package.json', 'package-lock.json', 'LICENSE', 'THIRD_PARTY_NOTICES.md',
+  'README.md', 'docs/GETTING-STARTED.md', 'docs/UPDATES.md', 'assets', 'src/vscode-editor',
+  'docs/ORIX-REMOVAL.md', 'tools/check-windows.cjs'
 ];
 
 function stageApplication(root, dest) {
@@ -35,12 +36,11 @@ function stageApplication(root, dest) {
       }
     });
   }
-  const readme = path.join(root, 'PACKAGED-README.md');
+  const readme = path.join(root, 'docs/PACKAGED-README.md');
   if (fs.lstatSync(readme).isSymbolicLink()) throw new Error('Runtime source cannot contain symbolic links');
-  fs.copyFileSync(readme, path.join(dest, 'README.md'));
-  const removal = path.join(root, 'docs', 'ORIX-REMOVAL.md');
-  if (fs.lstatSync(removal).isSymbolicLink()) throw new Error('Runtime source cannot contain symbolic links');
-  fs.copyFileSync(removal, path.join(dest, 'ORIX-REMOVAL.md'));
+  const content = fs.readFileSync(readme, 'utf8').replace(/\]\(([^)]+)\)/g, (link, target) =>
+    /^(?:[a-z]+:|#)/i.test(target) ? link : '](' + path.posix.normalize('docs/' + target) + ')');
+  fs.writeFileSync(path.join(dest, 'README.md'), content);
 }
 
 function validateRuntime(runtime, expected) {

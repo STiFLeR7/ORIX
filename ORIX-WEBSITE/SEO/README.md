@@ -13,7 +13,7 @@ Prepared 2026-11-05 for the planned `https://orix.stifler.in` website. This exte
 | [Page metadata](page-metadata.json) | Concrete metadata for the proposed three primary routes |
 | [Editorial tags](EDITORIAL-TAGS.csv) | Controlled content categories with scope and usage |
 | [Structured data](STRUCTURED-DATA.md) | Entity graph, schema integration and eligibility requirements |
-| [Schema templates](templates/) | Page-specific JSON-LD to embed after visible-content verification |
+| [Schema templates](templates) | Page-specific JSON-LD to embed after visible-content verification |
 | [Crawl and indexing](CRAWL-AND-INDEXING.md) | Robots, sitemaps, AI crawlers, preview handling and Cloudflare checks |
 | [Measurement and launch](MEASUREMENT-AND-LAUNCH.md) | Verification, search/citation measurement and maintenance |
 | [robots.txt](../public/robots.txt) | Proposed public-crawl policy and sitemap discovery |

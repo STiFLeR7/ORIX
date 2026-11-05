@@ -4,7 +4,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
-const { createHub, EVENTS, PORT } = require('../claude-code-hooks.cjs');
+const { createHub, EVENTS, PORT } = require('../src/claude-code-hooks.cjs');
 
 function temp() {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'orix-hooks-'));
@@ -52,7 +52,7 @@ for (const legacy of ['unquoted stdin', 'background callbacks']) test('starting 
 
 test('older beta callback identities upgrade without removing unrelated hooks', () => {
   const t = temp(), codexHome = path.join(t.dir, 'codex');
-  const { previous } = require('../orix-compat.cjs');
+  const { previous } = require('../src/orix-compat.cjs');
   const hub = createHub({ userData: t.dir, settingsFile: t.settingsFile, codexHome });
   try {
     hub.install(); hub.installCodex();
@@ -75,6 +75,32 @@ test('older beta callback identities upgrade without removing unrelated hooks', 
     }
     hub.uninstall(); hub.uninstallCodex();
     for (const file of [t.settingsFile, codexFile]) assert.deepEqual(JSON.parse(fs.readFileSync(file, 'utf8')), { hooks: { Stop: [unrelated] } });
+  } finally { hub.stop(); t.cleanup(); }
+});
+
+test('relocating helpers into src upgrades earlier root callbacks and status lines', () => {
+  const t = temp();
+  const hub = createHub({ userData: t.dir, settingsFile: t.settingsFile });
+  try {
+    hub.install();
+    const sourceDirectory = path.dirname(require.resolve('../src/claude-code-hooks.cjs'));
+    const earlierDirectory = path.dirname(sourceDirectory);
+    const config = JSON.parse(fs.readFileSync(t.settingsFile, 'utf8'));
+    for (const group of config.hooks.Stop) for (const hook of group.hooks) {
+      if (hook.command) hook.command = hook.command.replace(path.join(sourceDirectory, 'orix-reply.cjs'), path.join(earlierDirectory, 'orix-reply.cjs'));
+    }
+    config.statusLine.command = config.statusLine.command.replace(path.join(sourceDirectory, 'orix-statusline.cjs'), path.join(earlierDirectory, 'orix-statusline.cjs'));
+    const unrelated = { hooks: [{ type: 'command', command: 'echo custom' }] };
+    config.hooks.Stop.unshift(unrelated);
+    fs.writeFileSync(t.settingsFile, JSON.stringify(config));
+    hub.start();
+    assert.equal(hub.installed(), true);
+    const updated = JSON.parse(fs.readFileSync(t.settingsFile, 'utf8'));
+    assert.equal(updated.hooks.Stop.length, 3);
+    assert.deepEqual(updated.hooks.Stop[0], unrelated);
+    assert.ok(updated.statusLine.command.includes(path.join(sourceDirectory, 'orix-statusline.cjs')));
+    hub.uninstall();
+    assert.deepEqual(JSON.parse(fs.readFileSync(t.settingsFile, 'utf8')), { hooks: { Stop: [unrelated] } });
   } finally { hub.stop(); t.cleanup(); }
 });
 
@@ -120,7 +146,7 @@ test('hook prompts use English app labels while preserving provider text', () =>
 
 test('ORIX hook install and uninstall preserve a separate earlier application', () => {
   const t = temp();
-  const { previous } = require('../orix-compat.cjs');
+  const { previous } = require('../src/orix-compat.cjs');
   try {
     const oldHttp = { hooks: [{ type: 'http', url: `http://127.0.0.1:47823/${previous}-hook?v=4` }] };
     const oldReply = { hooks: [{ type: 'command', command: `node "C:\\Old\\App\\${previous}-reply.cjs" old-token` }] };
@@ -281,7 +307,7 @@ test('status line prints usage and forwards it to the ring; your own status line
     const input = JSON.stringify({ session_id: 's', context_window: { used_percentage: 8.4 },
       rate_limits: { five_hour: { used_percentage: 23.5, resets_at: Math.floor(Date.now() / 1000) + 3600 }, seven_day: { used_percentage: 41.2 } } });
     const { execFileSync } = require('node:child_process');
-    const out = execFileSync(process.execPath, [path.join(__dirname, '..', 'orix-statusline.cjs'), token], { input, encoding: 'utf8' });
+    const out = execFileSync(process.execPath, [path.join(__dirname, '..', 'src/orix-statusline.cjs'), token], { input, encoding: 'utf8' });
     assert.equal(out.trim(), 'ORIX · 5 uur: 24% · week: 41% · gesprek: 8% vol');
     await new Promise(resolve => setTimeout(resolve, 150));
     const usage = hub.view().usage;
@@ -299,10 +325,17 @@ test('answer typed in the island wakes Claude (exit 2); typing in the terminal c
   const hub = createHub({ userData: t.dir, settingsFile: t.settingsFile });
   const { spawn } = require('node:child_process');
   const run = (token, sessionId) => {
-    const child = spawn(process.execPath, [path.join(__dirname, '..', 'orix-reply.cjs'), token]);
+    const child = spawn(process.execPath, [path.join(__dirname, '..', 'src/orix-reply.cjs'), token], { timeout: 10000 });
     let stderr = ''; child.stderr.on('data', d => { stderr += d; });
     child.stdin.end(JSON.stringify({ session_id: sessionId, hook_event_name: 'Stop' }));
     return new Promise(resolve => child.on('exit', code => resolve({ code, stderr })));
+  };
+  const waitForReply = async () => {
+    for (let attempt = 0; attempt < 200; attempt++) {
+      if (hub.view().canReply) return;
+      await new Promise(resolve => setTimeout(resolve, 25));
+    }
+    assert.fail('Reply test helper did not connect within five seconds');
   };
   try {
     hub.install(); hub.start();
@@ -313,7 +346,7 @@ test('answer typed in the island wakes Claude (exit 2); typing in the terminal c
 
     hub.apply({ session_id: 'r', hook_event_name: 'Stop', last_assistant_message: 'Welke kleur wil je?' });
     const woke = run(token, 'r');
-    await new Promise(resolve => setTimeout(resolve, 400));
+    await waitForReply();
     assert.equal(hub.view().canReply, true);
     hub.reply('r', 'Blauw graag');
     const result = await woke;
@@ -321,7 +354,7 @@ test('answer typed in the island wakes Claude (exit 2); typing in the terminal c
     assert.equal(hub.view().state, 'running');
 
     const cancelled = run(token, 'r');
-    await new Promise(resolve => setTimeout(resolve, 400));
+    await waitForReply();
     hub.apply({ session_id: 'r', hook_event_name: 'UserPromptSubmit' });
     assert.equal((await cancelled).code, 0);
     assert.throws(() => hub.reply('r', 'te laat'), /no longer waiting/);
@@ -346,7 +379,7 @@ test('server only accepts posts with the right token', async () => {
 
 test('in-flight earlier beta callbacks retain token authentication', async () => {
   const t = temp();
-  const { previous } = require('../orix-compat.cjs');
+  const { previous } = require('../src/orix-compat.cjs');
   const hub = createHub({ userData: t.dir, settingsFile: t.settingsFile });
   try {
     hub.install(); hub.start();

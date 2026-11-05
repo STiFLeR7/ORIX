@@ -1,8 +1,0 @@
-/* Shared tokens. Production surfaces adopt them after the visual-preview review. */
-@font-face{font-family:Inter;src:url('./assets/fonts/inter-latin-opsz-normal.woff2') format('woff2');font-weight:100 900;font-display:swap}
-:root{--orix-bg:#111318;--orix-surface:#1c2024;--orix-text:#f4f5f7;--orix-muted:#b4bdc6;--orix-border:#414950;--orix-action:#82b4ff;--orix-busy:#ff9a1f;--orix-done:#22e05a;--orix-error:#ff3b3b;--orix-panel-radius:20px;--orix-control-radius:10px;--orix-duration:160ms;--orix-expand-duration:220ms;--orix-font:Inter,'Segoe UI',sans-serif;color-scheme:dark}
-:root[data-theme=light]{--orix-bg:#f4f5f7;--orix-surface:#fff;--orix-text:#171b20;--orix-muted:#505b66;--orix-border:#b8c2cc;--orix-action:#3974d4;color-scheme:light}
-:root[data-high-contrast=true]{--orix-bg:Canvas;--orix-surface:Canvas;--orix-text:CanvasText;--orix-muted:CanvasText;--orix-border:CanvasText;--orix-action:LinkText}
-:root[data-reduced-motion=true]{--orix-duration:0ms;--orix-expand-duration:0ms}
-:root[data-reduced-motion=true] *, :root[data-reduced-motion=true] *::before, :root[data-reduced-motion=true] *::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
-@media(forced-colors:active){:root{--orix-bg:Canvas;--orix-surface:Canvas;--orix-text:CanvasText;--orix-muted:CanvasText;--orix-border:CanvasText;--orix-action:LinkText}}

@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const nav = require('../orix-navigation-ui.js');
+const nav = require('../src/orix-navigation-ui.js');
 
 test('canonical dashboard routes and every legacy entry map to working destinations', () => {
   const cases = { home: ['overview', null], overview: ['overview', null], karakter: ['appearance', null], wardrobe: ['appearance', null],
@@ -19,7 +19,7 @@ test('navigation preserves all existing catalog IDs and core items', () => {
 
  test('Connections omits unavailable future chat-app placeholders but keeps existing coding integrations', () => {
   const fs = require('node:fs'), vm = require('node:vm');
-  const source = fs.readFileSync(require.resolve('../settings-app.html'), 'utf8');
+  const source = fs.readFileSync(require.resolve('../src/settings-app.html'), 'utf8');
   const draw = source.slice(source.indexOf('function drawConnect()'), source.indexOf('async function toggleConnect('));
   let html = '';
   const context = { tab: 'connect', cxs: { list: [
@@ -32,7 +32,7 @@ test('navigation preserves all existing catalog IDs and core items', () => {
 });
 
 test('connection switches expose their state and update it on click', () => {
-  const fs = require('node:fs'), vm = require('node:vm'), source = fs.readFileSync(require.resolve('../settings-app.html'), 'utf8');
+  const fs = require('node:fs'), vm = require('node:vm'), source = fs.readFileSync(require.resolve('../src/settings-app.html'), 'utf8');
   const draw = source.slice(source.indexOf('function drawConnect()'), source.indexOf('async function toggleConnect(')); let html = '';
   const context = { tab: 'connect', cxs: { list: [{ id: 'claudecode', available: true, on: true }, { id: 'codex', available: false, on: false }] }, t: () => ({ cx: { claudecode: ['Claude Code', 'coding'], codex: ['Codex', 'coding'] }, cxAgents: 'Coding AI', cxHow: 'Connections', cxOn: 'Connected', cxMissing: 'Unavailable' }), esc: x => x, icon: () => '', cxNote: {}, cxPending: false, paint: value => { html = value; }, $: () => ({ classList: { toggle() {} } }) };
   vm.runInNewContext(draw + '\ndrawConnect();', context);
@@ -48,7 +48,7 @@ test('connection switches expose their state and update it on click', () => {
 });
 
 test('connection changes ignore duplicate requests and restore confirmed state after failure', async () => {
-  const fs = require('node:fs'), vm = require('node:vm'), source = fs.readFileSync(require.resolve('../settings-app.html'), 'utf8');
+  const fs = require('node:fs'), vm = require('node:vm'), source = fs.readFileSync(require.resolve('../src/settings-app.html'), 'utf8');
   const start = source.indexOf('async function toggleConnect('), end = source.indexOf('async function drawAbout()', start); assert.ok(start >= 0 && end > start);
   let reject, count = 0, draws = 0; const errors = [], original = { ok: true, list: [{ id: 'codex', on: false }] };
   const context = { S: { connect: () => { count++; return new Promise((_resolve, fail) => { reject = fail; }); }, connections: async () => original }, t: () => ({ cx: { codex: ['Codex'] }, cxRestart: () => '', cxCodexTrust: '' }), cxNote: {}, cxs: original, cxPending: false, drawConnect: () => { draws++; }, toast: (text, bad) => errors.push([text, bad]) };
@@ -59,7 +59,7 @@ test('connection changes ignore duplicate requests and restore confirmed state a
 });
 
 test('connection failure still redraws the last confirmed state when refresh also fails', async () => {
-  const fs = require('node:fs'), vm = require('node:vm'), source = fs.readFileSync(require.resolve('../settings-app.html'), 'utf8');
+  const fs = require('node:fs'), vm = require('node:vm'), source = fs.readFileSync(require.resolve('../src/settings-app.html'), 'utf8');
   const start = source.indexOf('async function toggleConnect('), end = source.indexOf('async function drawAbout()', start); const original = { ok: true, list: [{ id: 'codex', on: false }] }; let drawn, message;
   const context = { S: { connect: async () => null, connections: async () => { throw Error('offline'); } }, t: () => ({ cx: { codex: ['Codex'] } }), cxNote: {}, cxs: original, cxPending: false, drawConnect: () => { drawn = context.cxs; }, toast: text => { message = text; } };
   vm.runInNewContext(source.slice(start, end), context); await context.toggleConnect('codex', true);
@@ -67,7 +67,7 @@ test('connection failure still redraws the last confirmed state when refresh als
 });
 
 test('successful connection updates confirmed state and clears pending flag', async () => {
-  const fs = require('node:fs'), vm = require('node:vm'), source = fs.readFileSync(require.resolve('../settings-app.html'), 'utf8');
+  const fs = require('node:fs'), vm = require('node:vm'), source = fs.readFileSync(require.resolve('../src/settings-app.html'), 'utf8');
   const start = source.indexOf('async function toggleConnect('), end = source.indexOf('async function drawAbout()', start), updated = { ok: true, list: [{ id: 'codex', on: true }] }; let drawn = 0;
   const context = { S: { connect: async () => updated }, t: () => ({ cx: { codex: ['Codex'] }, cxRestart: name => 'Restart ' + name, cxCodexTrust: 'Trust ORIX' }), cxNote: {}, cxs: null, cxPending: false, drawConnect: () => drawn++, toast: () => { throw Error('unexpected error'); } };
   vm.runInNewContext(source.slice(start, end), context); await context.toggleConnect('codex', true);
@@ -75,7 +75,7 @@ test('successful connection updates confirmed state and clears pending flag', as
 });
 
 test('Overview tool buttons identify the tool in their accessible names', () => {
-  const fs = require('node:fs'), vm = require('node:vm'), source = fs.readFileSync(require.resolve('../settings-app.html'), 'utf8');
+  const fs = require('node:fs'), vm = require('node:vm'), source = fs.readFileSync(require.resolve('../src/settings-app.html'), 'utf8');
   const declaration = source.match(/const tool = \(id, shape, title\) => [^\n]+/); assert.ok(declaration);
   const c = { icon: () => '', esc: value => String(value).replace(/&/g, '&amp;').replace(/"/g, '&quot;'), layerState: { visible: true }, t: () => ({ openTool: 'Open', showToOpen: 'Show the layer first' }) };
   vm.runInNewContext(declaration[0] + '\nglobalThis.makeTool = tool;', c);

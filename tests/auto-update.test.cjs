@@ -6,7 +6,7 @@ const os = require('os');
 const path = require('path');
 const crypto = require('crypto');
 const { execFileSync, spawn } = require('child_process');
-const core = require('../auto-update-core.cjs');
+const core = require('../src/auto-update-core.cjs');
 
 const win = process.platform === 'win32';
 const tmp = () => fs.mkdtempSync(path.join(os.tmpdir(), 'orix-update-test-'));

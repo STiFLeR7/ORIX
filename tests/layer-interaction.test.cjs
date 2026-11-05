@@ -3,7 +3,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
 test('explicit keyboard or dashboard opening stays accessible without hovering, normal hover still collapses', () => {
-  const source = fs.readFileSync(require.resolve('../mascot.html'), 'utf8');
+  const source = fs.readFileSync(require.resolve('../src/mascot.html'), 'utf8');
   const script = source.slice(source.indexOf('function updateHover('), source.indexOf('function isTyping()'));
   let collapsed = 0;
   const state = { window: { __orixKeepOpen: true }, introFinished: true, currentView: 'focus', mode: 'expanded',
@@ -14,7 +14,7 @@ test('explicit keyboard or dashboard opening stays accessible without hovering, 
 });
 
 test('an explicit tool shortcut expands even when leaving the project view', () => {
-  const source = fs.readFileSync(require.resolve('../tools-ui.js'), 'utf8');
+  const source = fs.readFileSync(require.resolve('../src/tools-ui.js'), 'utf8');
   const start = source.indexOf('api.onShortcut?.('), end = source.indexOf("addEventListener('keydown'", start);
   let callback; const state = { mode: 'expanded', currentView: 'project', window: {},
     api: { onShortcut: fn => { callback = fn; } }, setMode: next => { state.mode = next; },
@@ -25,9 +25,9 @@ test('an explicit tool shortcut expands even when leaving the project view', () 
 });
 
 test('the Claude shortcut opens the monitor and keeps it open without hover', () => {
-  const tools = fs.readFileSync(require.resolve('../tools-ui.js'), 'utf8');
+  const tools = fs.readFileSync(require.resolve('../src/tools-ui.js'), 'utf8');
   const start = tools.indexOf('api.onShortcut?.('), end = tools.indexOf("addEventListener('keydown'", start);
-  const mascot = fs.readFileSync(require.resolve('../mascot.html'), 'utf8');
+  const mascot = fs.readFileSync(require.resolve('../src/mascot.html'), 'utf8');
   const hover = mascot.slice(mascot.indexOf('function updateHover('), mascot.indexOf('function isTyping()'));
   let callback, opened, collapsed = 0;
   const state = { window: { __orixMonitor: { open: provider => { opened = provider; } } },
@@ -40,7 +40,7 @@ test('the Claude shortcut opens the monitor and keeps it open without hover', ()
 });
 
 test('the AI monitor hover override honors explicit keep-open and still collapses normally', () => {
-  const source = fs.readFileSync(require.resolve('../ai-monitor-ui.js'), 'utf8');
+  const source = fs.readFileSync(require.resolve('../src/ai-monitor-ui.js'), 'utf8');
   const start = source.indexOf('  updateHover = function (now) {');
   const end = source.indexOf('  // ---- Home:', start);
   assert.ok(start >= 0 && end > start);
@@ -58,7 +58,7 @@ test('the AI monitor hover override honors explicit keep-open and still collapse
 });
 
 test('Escape from the AI monitor releases explicit keep-open', () => {
-  const source = fs.readFileSync(require.resolve('../ai-monitor-ui.js'), 'utf8');
+  const source = fs.readFileSync(require.resolve('../src/ai-monitor-ui.js'), 'utf8');
   const end = source.indexOf('  api.onAiMonitorState(update);');
   const start = source.lastIndexOf("  window.addEventListener('keydown'", end);
   assert.ok(start >= 0 && end > start);
@@ -72,7 +72,7 @@ test('Escape from the AI monitor releases explicit keep-open', () => {
 
 
 test('AI settings shortcut opens the existing provider panel', () => {
-  const source = fs.readFileSync(require.resolve('../tools-ui.js'), 'utf8');
+  const source = fs.readFileSync(require.resolve('../src/tools-ui.js'), 'utf8');
   const start = source.indexOf('api.onShortcut?.('), end = source.indexOf("addEventListener('keydown'", start);
   let callback, dispatched, opened = 0;
   const state = { window: { dispatchEvent: e => { dispatched = e.type; }, __orixOpenInlineSettings: () => opened++ }, CustomEvent: class { constructor(type) { this.type = type; } }, api: { onShortcut: fn => { callback = fn; } }, setView() {}, setMode() {} };

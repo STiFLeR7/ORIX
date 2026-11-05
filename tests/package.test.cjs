@@ -11,18 +11,18 @@ test('application staging includes runtime entry points and licenses, excludes l
   t.after(() => fs.rmSync(dest, { recursive: true, force: true }));
   const root = path.resolve(__dirname, '..');
   stageApplication(root, dest);
-  for (const file of ['main.js', 'preload.js', 'mascot.html', 'settings-app.html', 'LICENSE', 'THIRD_PARTY_NOTICES.md', 'ORIX-REMOVAL.md', 'assets/icon.ico', 'assets/licenses/CODEX-APACHE-2.0.txt', 'assets/licenses/CODEX-NOTICE.txt', 'assets/licenses/RIPGREP-15.2.0-MIT.txt', 'assets/licenses/PCRE2-10.45-LICENCE.md', 'vscode-editor/extension.js']) {
+  for (const file of ['src/main.js', 'src/preload.js', 'src/mascot.html', 'src/settings-app.html', 'LICENSE', 'THIRD_PARTY_NOTICES.md', 'docs/ORIX-REMOVAL.md', 'assets/icon.ico', 'assets/licenses/CODEX-APACHE-2.0.txt', 'assets/licenses/CODEX-NOTICE.txt', 'assets/licenses/RIPGREP-15.2.0-MIT.txt', 'assets/licenses/PCRE2-10.45-LICENCE.md', 'src/vscode-editor/extension.js']) {
     assert.ok(fs.existsSync(path.join(dest, file)), file);
   }
-  for (const file of ['baseline', '.verification', 'dist', 'node_modules', '.env', 'dashboard-rewamp', 'tests', 'tools', 'docs']) {
+  for (const file of ['baseline', '.verification', 'dist', 'node_modules', '.env', 'docs/design', 'tests', 'tools/make-package.cjs', 'tools/setup', 'docs/TESTING.md', 'docs/RELEASE.md']) {
     assert.equal(fs.existsSync(path.join(dest, file)), false, file);
   }
-  assert.equal(JSON.parse(fs.readFileSync(path.join(dest, 'package.json'))).main, 'main.js');
-  for (const file of ['README.md', 'LEES-MIJ.md', 'UPDATES.md', 'THIRD_PARTY_NOTICES.md', 'ORIX-REMOVAL.md']) {
+  assert.equal(JSON.parse(fs.readFileSync(path.join(dest, 'package.json'))).main, 'src/main.js');
+  for (const file of ['README.md', 'docs/GETTING-STARTED.md', 'docs/UPDATES.md', 'THIRD_PARTY_NOTICES.md', 'docs/ORIX-REMOVAL.md']) {
     const content = fs.readFileSync(path.join(dest, file), 'utf8');
     for (const match of content.matchAll(/\]\(([^)#]+)(?:#[^)]*)?\)/g)) {
       const target = match[1];
-      if (!/^(https?:|mailto:)/i.test(target)) assert.ok(fs.existsSync(path.join(dest, target)), `${file}: ${target}`);
+      if (!/^(https?:|mailto:)/i.test(target)) assert.ok(fs.existsSync(path.resolve(dest, path.dirname(file), target)), `${file}: ${target}`);
     }
   }
 });

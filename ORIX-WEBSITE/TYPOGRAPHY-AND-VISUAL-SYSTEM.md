@@ -67,4 +67,4 @@ Apply perspective to illustrative compositions with an equivalent flat view at n
 | Loading | Named progress/status without blocking unrelated navigation |
 | Error | Specific readable explanation and a relevant restoration action |
 
-Use a proposed 44 by 44 CSS-pixel minimum touch target for interactive controls. Verify keyboard navigation, browser zoom, long labels and forced-color presentation. The [app design system](../dashboard-rewamp/orix-system/DESIGN-SYSTEM.md) and [token reference](../dashboard-rewamp/orix-system/tokens.css) provide the existing foundations.
+Use a proposed 44 by 44 CSS-pixel minimum touch target for interactive controls. Verify keyboard navigation, browser zoom, long labels and forced-color presentation. The [app design system](../docs/design/orix-system/DESIGN-SYSTEM.md) and [token reference](../docs/design/orix-system/tokens.css) provide the existing foundations.

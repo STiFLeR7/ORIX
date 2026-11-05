@@ -1,12 +1,12 @@
 'use strict';
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { check } = require('../check-windows.cjs');
+const { check } = require('../tools/check-windows.cjs');
 test('Windows helper reports invalid targets and unknown commands in English', { skip: process.platform !== 'win32' }, () => {
   const { spawnSync } = require('node:child_process');
   const input = [JSON.stringify({ id: 1, method: 'read', target: { id: 'invalid', handle: 0, pid: 0, started: '' } }),
     JSON.stringify({ id: 2, method: 'unknown' })].join('\n') + '\n';
-  const result = spawnSync('powershell.exe', ['-NoLogo', '-NoProfile', '-NonInteractive', '-File', require('node:path').resolve(__dirname, '../windows-ai-access.ps1')], { input, encoding: 'utf8', timeout: 20000 });
+  const result = spawnSync('powershell.exe', ['-NoLogo', '-NoProfile', '-NonInteractive', '-File', require('node:path').resolve(__dirname, '../src/windows-ai-access.ps1')], { input, encoding: 'utf8', timeout: 20000 });
   assert.equal(result.status, 0, result.stderr);
   const lines = result.stdout.trim().split(/\r?\n/).map(JSON.parse);
   assert.equal(lines[0].result.error, 'The connected window is closed.');

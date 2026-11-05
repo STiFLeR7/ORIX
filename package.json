@@ -10,12 +10,12 @@
     "url": "https://github.com/STiFLeR7/ORIX/issues"
   },
   "homepage": "https://github.com/STiFLeR7/ORIX#readme",
-  "main": "main.js",
+  "main": "src/main.js",
   "scripts": {
     "package:windows": "node tools/make-package.cjs",
     "test": "node --test tests/*.test.cjs",
     "start": "electron .",
-    "check:windows": "node check-windows.cjs"
+    "check:windows": "node tools/check-windows.cjs"
   },
   "keywords": [],
   "author": "",

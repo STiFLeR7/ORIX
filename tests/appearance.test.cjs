@@ -1,7 +1,7 @@
 'use strict';
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const appearance = require('../orix-appearance-ui.js');
+const appearance = require('../src/orix-appearance-ui.js');
 const { normalize, resolve, apply } = appearance;
 const fs = require('node:fs'), vm = require('node:vm');
 
@@ -37,7 +37,7 @@ test('applying resolved appearance sets accessible state without altering prefer
 });
 
 test('actual preference initialization migrates Dutch and preserves unrelated preferences', () => {
-  const source = fs.readFileSync(require.resolve('../orix-fun.js'), 'utf8');
+  const source = fs.readFileSync(require.resolve('../src/orix-fun.js'), 'utf8');
   const script = source.slice(source.indexOf('const DEFAULTS'), source.indexOf('// Old saves only')) + '\nglobalThis.snapshot = prefs;';
   const context = { window: { ORIXAppearance: { normalize } }, navigator: { language: 'en-US' },
     store: { get: () => ({ lang: 'nl', warnAt: 90 }), set() {} } };
@@ -46,7 +46,7 @@ test('actual preference initialization migrates Dutch and preserves unrelated pr
 });
 
 test('actual preference Save does not mutate committed values when local storage fails', () => {
-  const source = fs.readFileSync(require.resolve('../orix-fun.js'), 'utf8');
+  const source = fs.readFileSync(require.resolve('../src/orix-fun.js'), 'utf8');
   const start = source.indexOf('function commitPreferences(');
   const script = source.slice(start, source.indexOf('// Draw the app', start));
   const context = { window: {}, prefs: { themeMode: 'dark' },
@@ -64,14 +64,14 @@ test('floating surfaces use matching readable palettes in both themes and system
   assert.equal(appearance.palette({ highContrast: true }).text, 'CanvasText');
 });
 test('Focus countdown and progress use the resolved foreground color', () => {
-  const source = fs.readFileSync(require.resolve('../focus-ui.js'), 'utf8');
+  const source = fs.readFileSync(require.resolve('../src/focus-ui.js'), 'utf8');
   for (const selector of ['.fo-big b', '.fo-bar i']) {
     const rule = source.split(`#orix-focus ${selector}{`)[1]?.split('}')[0];
     assert.match(rule || '', /(?:color|background):var\(--orix-text/);
   }
 });
 test('reduced-motion mark effects return a complete stable transform', () => {
-  const source = fs.readFileSync(require.resolve('../orix-fun.js'), 'utf8');
+  const source = fs.readFileSync(require.resolve('../src/orix-fun.js'), 'utf8');
   const script = source.slice(source.indexOf('function fx()'), source.indexOf('window.__orixGhostFx ='));
   const context = { window: { __orixResolvedAppearance: () => ({ reducedMotion: true }) } };
   vm.runInNewContext(script, context); const effect = context.fx();
@@ -80,7 +80,7 @@ test('reduced-motion mark effects return a complete stable transform', () => {
 });
 
 test('status presets and color swatches expose their selection and English labels', () => {
-  const source = fs.readFileSync(require.resolve('../orix-fun.js'), 'utf8');
+  const source = fs.readFileSync(require.resolve('../src/orix-fun.js'), 'utf8');
   const script = source.slice(source.indexOf('  const preview = p =>'), source.indexOf('  const MOOD_DEMO =')) + '\nglobalThis.render = lightsBlock;';
   const prefs = { lightBusy: '#ff9a1f', lightDone: '#22e05a', lightError: '#ff3b3b' };
   const context = { prefs };

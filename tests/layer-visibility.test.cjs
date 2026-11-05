@@ -17,7 +17,7 @@ function fixture(t, storage = fs) {
   Object.assign(nativeTheme, { shouldUseDarkColors: true, shouldUseHighContrastColors: false });
   function window(page) {
     const win = new EventEmitter(); let visible = false;
-    win.webContents = { getURL: () => pathToFileURL(path.resolve(__dirname, '..', page)).href,
+    win.webContents = { getURL: () => pathToFileURL(path.resolve(__dirname, '../src', page)).href,
       mainFrame: {}, send: (...args) => { win.messages.push(args); } };
     win.messages = []; win.isDestroyed = () => false;
     win.isMinimized = () => false; win.focus = () => { win.focused = true; };
@@ -31,9 +31,9 @@ function fixture(t, storage = fs) {
   }
   function load() {
     const mod = { exports: {} };
-    vm.runInNewContext(fs.readFileSync(path.resolve(__dirname, '../orix-layer-main.cjs'), 'utf8'), {
-      module: mod, __dirname: path.resolve(__dirname, '..'), console,
-      require: name => name === 'electron' ? { app, nativeTheme, BrowserWindow: { getAllWindows: () => windows }, ipcMain: { handle: (key, fn) => handlers.set(key, fn) } } : name === 'node:fs' ? storage : name === './orix-copy.cjs' ? require('../orix-copy.cjs') : require(name)
+    vm.runInNewContext(fs.readFileSync(path.resolve(__dirname, '../src/orix-layer-main.cjs'), 'utf8'), {
+      module: mod, __dirname: path.resolve(__dirname, '../src'), console,
+      require: name => name === 'electron' ? { app, nativeTheme, BrowserWindow: { getAllWindows: () => windows }, ipcMain: { handle: (key, fn) => handlers.set(key, fn) } } : name === 'node:fs' ? storage : name === './orix-copy.cjs' ? require('../src/orix-copy.cjs') : require(name)
     });
     return mod.exports;
   }
@@ -157,9 +157,9 @@ test('tray explicit Show restores OFF, while a second launch opens Settings and 
     Menu: { buildFromTemplate: template => { menu = template; return template; } },
     Tray: class extends EventEmitter { constructor() { super(); tray = this; } setToolTip() {} setContextMenu() {} }
   };
-  vm.runInNewContext(fs.readFileSync(path.resolve(__dirname, '../tray-main.cjs'), 'utf8'), {
-    module: { exports: {} }, __dirname: path.resolve(__dirname, '..'), process: { platform: 'linux', execPath: 'ORIX.exe', argv: [] },
-    require: name => name === 'electron' ? electron : name === './orix-layer-main.cjs' ? c : name === './orix-copy.cjs' ? require('../orix-copy.cjs') : require(name)
+  vm.runInNewContext(fs.readFileSync(path.resolve(__dirname, '../src/tray-main.cjs'), 'utf8'), {
+    module: { exports: {} }, __dirname: path.resolve(__dirname, '../src'), process: { platform: 'linux', execPath: 'ORIX.exe', argv: [] },
+    require: name => name === 'electron' ? electron : name === './orix-layer-main.cjs' ? c : name === './orix-copy.cjs' ? require('../src/orix-copy.cjs') : require(name)
   });
   await Promise.resolve();
   f.app.emit('second-instance', {}, []);
@@ -177,13 +177,13 @@ test('OFF ends context dragging without clearing pending AI work or hiding the i
   const f = fixture(t), island = f.window('mascot.html'), c = f.load();
   const cleared = [];
   const context = vm.createContext({
-    module: { exports: {} }, __dirname: path.resolve(__dirname, '..'), process: { env: {} },
+    module: { exports: {} }, __dirname: path.resolve(__dirname, '../src'), process: { env: {} },
     setTimeout, clearTimeout, setInterval: () => 123, clearInterval: id => cleared.push(id), console,
     require: name => name === 'electron' ? { app: Object.assign(f.app, { whenReady: () => ({ then() {} }) }),
       BrowserWindow: { getAllWindows: () => f.windows }, ipcMain: { on() {}, handle() {} } }
       : name === './orix-layer-main.cjs' ? c : name === './chatgpt-provider' ? {} : require(name)
   });
-  vm.runInContext(fs.readFileSync(path.resolve(__dirname, '../buddy-main.cjs'), 'utf8'), context);
+  vm.runInContext(fs.readFileSync(path.resolve(__dirname, '../src/buddy-main.cjs'), 'utf8'), context);
   vm.runInContext("state='carry'; follow=123; chatTarget={title:'keep AI context'}; pendingChat={text:'keep pending work'};", context);
   c.setVisible(false);
   assert.ok(cleared.includes(123));
@@ -204,7 +204,7 @@ test('island-only controls reject spoofed frame URLs and subframes', t => {
   const f = fixture(t), island = f.window('mascot.html'), foreign = f.window('other.html'), c = f.load();
   island.webContents.mainFrame.url = 'file:///mascot.html';
   for (const file of ['settings-app-main.cjs', 'buddy-main.cjs', 'tray-main.cjs']) {
-    const source = fs.readFileSync(path.resolve(__dirname, '..', file), 'utf8');
+    const source = fs.readFileSync(path.resolve(__dirname, '../src', file), 'utf8');
     const declaration = source.match(/const fromIsland = [^\n]+/);
     assert.ok(declaration, file);
     const context = { desktopLayer: c, require: name => name === './orix-layer-main.cjs' ? c : require(name) };
@@ -221,7 +221,7 @@ test('window selection ignores foreign mascot-named URLs for Settings, buddy and
   foreign.webContents.getURL = () => 'data:text/html,<title>mascot.html</title>';
   assert.equal(c.findIsland(), island);
   for (const file of ['settings-app-main.cjs', 'buddy-main.cjs']) {
-    const source = fs.readFileSync(path.resolve(__dirname, '..', file), 'utf8');
+    const source = fs.readFileSync(path.resolve(__dirname, '../src', file), 'utf8');
     const declaration = source.match(/const island = [^\n]+/); assert.ok(declaration, file);
     const context = { desktopLayer: c, BrowserWindow: { getAllWindows: () => f.windows }, require: name => name === './orix-layer-main.cjs' ? c : require(name) };
     vm.runInNewContext(declaration[0] + '\nglobalThis.select = island;', context);
@@ -232,7 +232,7 @@ test('window selection ignores foreign mascot-named URLs for Settings, buddy and
 test('dashboard and context controls require their own trusted main frame', t => {
   const f = fixture(t), dashboard = f.window('settings-app.html'), buddy = f.window('buddy.html'), foreign = f.window('other.html'), c = f.load();
   for (const [file, guard, binding, win] of [['settings-app-main.cjs', 'fromApp', 'win', dashboard], ['buddy-main.cjs', 'fromLayer', 'layer', buddy]]) {
-    const source = fs.readFileSync(path.resolve(__dirname, '..', file), 'utf8');
+    const source = fs.readFileSync(path.resolve(__dirname, '../src', file), 'utf8');
     const declaration = source.match(new RegExp('const ' + guard + ' = [^\\n]+')); assert.ok(declaration, file);
     const context = { [binding]: win, desktopLayer: c, require: name => name === './orix-layer-main.cjs' ? c : require(name) };
     vm.runInNewContext(declaration[0] + '\nglobalThis.check = ' + guard + ';', context);

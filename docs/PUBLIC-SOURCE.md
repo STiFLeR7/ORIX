@@ -12,7 +12,7 @@ Keep dependency licenses and attribution with distributed files. [Third-party no
 
 The beta.3 Windows build passed 234 automated tests and produced reviewed ZIP and installer artifacts. Its native payload matched the reviewed dependencies. These results describe the published beta.3 candidate. Later source changes require fresh validation before another binary release.
 
-Source publication candidates passed Gitleaks scans. Detailed release evidence and remaining Windows and AI checks are maintained in [RELEASE.md](../RELEASE.md), [TESTING.md](../TESTING.md) and the [validation ledger](ORIX-REDESIGN-VALIDATION.md).
+Source publication candidates passed Gitleaks scans. Detailed release evidence and remaining Windows and AI checks are maintained in [RELEASE.md](RELEASE.md), [TESTING.md](TESTING.md) and the [validation ledger](ORIX-REDESIGN-VALIDATION.md).
 
 ## Publication process
 

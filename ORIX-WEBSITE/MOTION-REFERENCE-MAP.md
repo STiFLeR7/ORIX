@@ -39,6 +39,6 @@ Normal scrolling, anchor navigation, labeled buttons and the keyboard-operable r
 
 The prepared tool content enters over approximately 1.65 seconds, then holds. Optional playback advances every 3.2 seconds and finishes after one pass. The finite provider signal shares the existing 1.6-second sample-session completion timer. Pointer/touch scrolling, navigation keys, offscreen state, a hidden tab and motion preference changes stop story playback. Decorative CSS is paused offscreen or while the tab is hidden.
 
-The [45-assertion Prototype 03 check](../output/playwright/orix-v3-check.js) and [result](../output/playwright/orix-v3-check-result.txt) cover the new story and signal behavior. The [existing interaction check](../output/playwright/orix-v2-check.js) also runs against the updated prototype. The [Prototype 02 baseline](../output/playwright/orix-website-v2.html) is retained for comparison.
+The [45-assertion Prototype 03 check](../docs/reviews/website/orix-v3-check.js) and [result](../docs/reviews/website/orix-v3-check-result.txt) cover the new story and signal behavior. The [existing interaction check](../docs/reviews/website/orix-v2-check.js) also runs against the updated prototype. The [Prototype 02 baseline](../docs/reviews/website/orix-website-v2.html) is retained for comparison.
 
 The product interactions remain prepared illustrations. The gallery uses actual beta Overview images and detail crops. Fresh production tool/notch/connection captures, owner visual approval and real-device performance profiling remain open.

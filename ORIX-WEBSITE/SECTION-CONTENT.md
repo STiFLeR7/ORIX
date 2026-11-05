@@ -127,7 +127,7 @@ Use the supplied ORIX lockup with links to Features, How it works, Documentation
 
 **Visual** A settled ORIX product composition or a restrained particle background with an opaque readable action surface.
 
-**Acceptance** Each action label describes its destination. Artifact information corresponds to the exact linked file. Binary availability, signing and system requirements follow [the release checklist](../RELEASE.md).
+**Acceptance** Each action label describes its destination. Artifact information corresponds to the exact linked file. Binary availability, signing and system requirements follow [the release checklist](../docs/RELEASE.md).
 
 ## 8. FAQ and closing action — `faq`
 

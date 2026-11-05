@@ -2,7 +2,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs'), path = require('node:path'), os = require('node:os'), vm = require('node:vm');
 const { pathToFileURL } = require('node:url');
-const appRequire = require('node:module').createRequire(path.resolve(__dirname, '../extras-main.cjs'));
+const appRequire = require('node:module').createRequire(path.resolve(__dirname, '../src/extras-main.cjs'));
 
 function fixture(t, existingFolder, start = false) {
   const folder = existingFolder || fs.mkdtempSync(path.join(os.tmpdir(), 'orix-extras-write-'));
@@ -16,12 +16,12 @@ function fixture(t, existingFolder, start = false) {
   const opened = [], polls = []; let clipboardText = '', reads = 0;
   const electron = { clipboard: { readText() { reads++; return clipboardText; }, writeText(text) { clipboardText = text; } }, globalShortcut: { register() {}, unregister() {} }, session: { defaultSession: { setDisplayMediaRequestHandler() {} } }, shell: { async openPath(file) { opened.push(file); return ''; } }, nativeImage: { createFromDataURL: () => 'icon' }, app: { getPath: () => folder, on() {}, whenReady: () => ({ then(fn) { if (start) fn(); } }) },
     ipcMain: { on: (channel, fn) => events.set(channel, fn), handle: (channel, fn) => handlers.set(channel, fn) }, BrowserWindow: { getAllWindows: () => [] } };
-  vm.runInNewContext(fs.readFileSync(require.resolve('../extras-main.cjs'), 'utf8'), {
-    module: { exports: {} }, __dirname: path.resolve(__dirname, '..'), process: { versions: { electron: '44.10.1' }, env: {}, platform: 'linux' },
+  vm.runInNewContext(fs.readFileSync(require.resolve('../src/extras-main.cjs'), 'utf8'), {
+    module: { exports: {} }, __dirname: path.resolve(__dirname, '../src'), process: { versions: { electron: '44.10.1' }, env: {}, platform: 'linux' },
     require: name => name === 'electron' ? electron : name === 'node:fs' ? storage : appRequire(name),
     setInterval(fn, ms) { if (ms === 1000) polls.push(fn); return { unref() {} }; }, clearInterval() {}, setTimeout() {}, clearTimeout, console
   });
-  const drags = []; const sender = { getURL: () => pathToFileURL(path.resolve(__dirname, '../mascot.html')).href, mainFrame: {}, startDrag: data => drags.push(data) };
+  const drags = []; const sender = { getURL: () => pathToFileURL(path.resolve(__dirname, '../src/mascot.html')).href, mainFrame: {}, startDrag: data => drags.push(data) };
   const event = { sender, senderFrame: sender.mainFrame };
   return { folder, opened, drags, writeClipboard: fn => { electron.clipboard.writeText = fn; }, drag: (file, main) => events.get('extras:tray-drag')({ sender, senderFrame: main ? sender.mainFrame : {} }, file), subframe: (channel, payload) => handlers.get(channel)({ sender, senderFrame: {} }, payload), poll: () => polls[0](), reads: () => reads, clipboard: text => { clipboardText = text; }, foreign: (channel, payload) => handlers.get(channel)({ sender: { getURL: () => 'https://example.invalid' } }, payload), fail: value => { failure = value; }, call: (channel, payload) => handlers.get(channel)(event, payload) };
 }
@@ -74,7 +74,7 @@ for (const saved of [JSON.stringify({ unexpected: 'content' }), '{invalid']) tes
 });
 
 test('an empty tray displays its load error', () => {
-  const source = fs.readFileSync(require.resolve('../extras-ui.js'), 'utf8');
+  const source = fs.readFileSync(require.resolve('../src/extras-ui.js'), 'utf8');
   const render = source.slice(source.indexOf('  function render() {'), source.indexOf('  // ---------- quick mirror'));
   const root = { innerHTML: '', querySelectorAll: () => [] };
   vm.runInNewContext(render + '\nrender();', { root, currentView: 'tray', trayFiles: [], trayError: 'Could not load tray', window: { __orixPrefs: () => ({ lang: 'en' }) }, esc: String });
@@ -82,7 +82,7 @@ test('an empty tray displays its load error', () => {
 });
 
 test('tray load failure is passed to the renderer and clears after a successful reload', async () => {
-  const source = fs.readFileSync(require.resolve('../extras-ui.js'), 'utf8');
+  const source = fs.readFileSync(require.resolve('../src/extras-ui.js'), 'utf8');
   const loader = source.slice(source.indexOf('  async function loadTray()'), source.indexOf('  window.__orixTrayReload'));
   let response = { ok: false, error: 'Could not load tray' }, renders = 0;
   const context = { api: { trayGet: async () => response }, trayFiles: [], trayError: '', render: () => renders++ };
@@ -157,7 +157,7 @@ test('disabling clipboard collection during a copy keeps history cleared', async
 });
 
 test('tray file controls expose keyboard-operable open and visible remove buttons', async () => {
-  const source = fs.readFileSync(require.resolve('../extras-ui.js'), 'utf8');
+  const source = fs.readFileSync(require.resolve('../src/extras-ui.js'), 'utf8');
   const render = source.slice(source.indexOf('  function render() {'), source.indexOf('  // ---------- quick mirror'));
   const root = { innerHTML: '', querySelectorAll: () => [] };
   const context = { root, currentView: 'tray', trayFiles: [{ name: 'fixture.txt', path: 'C:\\fixture.txt', size: 10 }], trayError: '', window: { __orixPrefs: () => ({ lang: 'en' }) }, esc: String };

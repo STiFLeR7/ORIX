@@ -24,7 +24,7 @@ test('published source and filenames use the ORIX identity', () => {
 });
 
 test('profile migration preserves originals, existing destinations and raw chat text', t => {
-  const { migrateProfile } = require('../orix-compat.cjs');
+  const { migrateProfile } = require('../src/orix-compat.cjs');
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'orix-identity-'));
   t.after(() => fs.rmSync(dir, { recursive: true, force: true }));
   const old = path.join(dir, previous + '-project-chats.json');
@@ -43,17 +43,17 @@ test('profile migration preserves originals, existing destinations and raw chat 
 test('renderer migration runs before settings readers and preserves current preferences', () => {
   const data = new Map([[previous + ':prefs', '{"themeMode":"light"}'], [previous + ':sound', 'false'], ['orix:sound', 'true'], ['unrelated', 'keep']]);
   const localStorage = { get length() { return data.size; }, key: index => [...data.keys()][index], getItem: key => data.get(key) ?? null, setItem: (key, value) => data.set(key, value) };
-  vm.runInNewContext(fs.readFileSync(path.join(root, 'orix-compat.cjs'), 'utf8'), { window: {}, localStorage });
+  vm.runInNewContext(fs.readFileSync(path.join(root, 'src/orix-compat.cjs'), 'utf8'), { window: {}, localStorage });
   assert.equal(data.get('orix:prefs'), '{"themeMode":"light"}');
   assert.equal(data.get('orix:sound'), 'true');
   assert.equal(data.get(previous + ':prefs'), '{"themeMode":"light"}');
   assert.equal(data.get('unrelated'), 'keep');
-  const html = fs.readFileSync(path.join(root, 'mascot.html'), 'utf8');
+  const html = fs.readFileSync(path.join(root, 'src/mascot.html'), 'utf8');
   assert.ok(html.indexOf('src="./orix-compat.cjs"') < html.indexOf('<script>'));
 });
 
 test('earlier launch variables remain usable while explicit ORIX values win', () => {
-  const { migrateEnvironment } = require('../orix-compat.cjs');
+  const { migrateEnvironment } = require('../src/orix-compat.cjs');
   const env = { [previous.toUpperCase() + '_INSTALL_DIR']: 'disposable-profile', [previous.toUpperCase() + '_AI_MODEL']: 'earlier-model', ORIX_AI_MODEL: 'current-model' };
   migrateEnvironment(env);
   assert.equal(env.ORIX_INSTALL_DIR, 'disposable-profile');
@@ -62,7 +62,7 @@ test('earlier launch variables remain usable while explicit ORIX values win', ()
 });
 
 test('profile migration does not publish a partial file when copying fails', t => {
-  const { migrateProfile } = require('../orix-compat.cjs');
+  const { migrateProfile } = require('../src/orix-compat.cjs');
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'orix-identity-failure-'));
   t.after(() => fs.rmSync(dir, { recursive: true, force: true }));
   fs.writeFileSync(path.join(dir, previous + '-project.json'), 'preserve');
@@ -77,11 +77,15 @@ test('profile migration does not publish a partial file when copying fails', t =
 });
 
 test('bundled editor archive matches its ORIX source and manifest', t => {
-  const { extractZip } = require('../auto-update-core.cjs');
+  const { extractZip } = require('../src/auto-update-core.cjs');
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'orix-editor-identity-'));
   t.after(() => fs.rmSync(dir, { recursive: true, force: true }));
-  extractZip(fs.readFileSync(path.join(root, 'vscode-editor/orix-project-editor.vsix')), dir);
-  for (const file of ['package.json', 'extension.js']) assert.deepEqual(fs.readFileSync(path.join(dir, 'extension', file)), fs.readFileSync(path.join(root, 'vscode-editor', file)));
+  extractZip(fs.readFileSync(path.join(root, 'src/vscode-editor/orix-project-editor.vsix')), dir);
+  for (const file of ['package.json', 'extension.js']) {
+    const bundled = fs.readFileSync(path.join(dir, 'extension', file), 'utf8');
+    const source = fs.readFileSync(path.join(root, 'src/vscode-editor', file), 'utf8');
+    assert.equal(bundled.replace(/\r\n/g, '\n'), source.replace(/\r\n/g, '\n'));
+  }
   const manifest = fs.readFileSync(path.join(dir, 'extension.vsixmanifest'), 'utf8');
   assert.match(manifest, /Publisher="orix"/);
   assert.match(manifest, /Version="0\.2\.0"/);
@@ -89,7 +93,7 @@ test('bundled editor archive matches its ORIX source and manifest', t => {
 });
 
 test('deleted runtime settings do not return from a previous storage snapshot', () => {
-  const { migrateStorage } = require('../orix-compat.cjs');
+  const { migrateStorage } = require('../src/orix-compat.cjs');
   const data = new Map([[previous + ':focus-end', '100']]);
   const storage = { get length() { return data.size; }, key: index => [...data.keys()][index], getItem: key => data.get(key) ?? null, setItem: (key, value) => data.set(key, value) };
   migrateStorage(storage);
@@ -99,10 +103,10 @@ test('deleted runtime settings do not return from a previous storage snapshot', 
 });
 
 test('earlier encrypted provider settings keep their credentials and selected provider', () => {
-  const source = fs.readFileSync(path.join(root, 'project-mode-main.js'), 'utf8');
+  const source = fs.readFileSync(path.join(root, 'src/project-mode-main.js'), 'utf8');
   const body = source.slice(source.indexOf('function loadAISettingsRaw()'), source.indexOf('function saveAISettingsRaw('));
   const result = vm.runInNewContext(body + '\nloadAISettingsRaw()', {
-    require: name => { assert.equal(name, './orix-compat.cjs'); return require('../orix-compat.cjs'); },
+    require: name => { assert.equal(name, './orix-compat.cjs'); return require('../src/orix-compat.cjs'); },
     readJson: () => ({ provider: previous, [previous + 'DevKey']: 'encrypted-synthetic-value' }),
     AI_SETTINGS_FILE: () => 'unused', ALLOWED_OPENAI_MODELS: new Set(), DEFAULT_OPENAI_MODEL: 'fixture-model'
   });

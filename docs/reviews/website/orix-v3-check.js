@@ -1,0 +1,113 @@
+async (page) => {
+  const results = [];
+  const check = (value, message) => {
+    if (!value) throw new Error(message);
+    results.push(message);
+  };
+  const errors = [];
+  page.on('pageerror', error => errors.push(error.message));
+  await page.goto('http://127.0.0.1:43870/index.html');
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  const stage = page.locator('.tour-stage');
+  const track = page.locator('#tour-track');
+  const play = page.locator('#tour-play');
+  const moveChapter = async (index) => {
+    await track.evaluate((element, chapter) => {
+      const stage = element.querySelector('.tour-stage');
+      const travel = element.offsetHeight - stage.offsetHeight;
+      scrollTo({ top: scrollY + element.getBoundingClientRect().top - 88 + travel * (chapter + .3) / 4, behavior: 'instant' });
+    }, index);
+    await page.waitForTimeout(100);
+  };
+  for (const [index, name] of ['Notes', 'Focus', 'Clipboard', 'File tray'].entries()) {
+    await moveChapter(index);
+    const selected = page.locator('[data-tool][aria-pressed="true"]');
+    check((await selected.textContent()).trim() === name, 'Native scrolling selects ' + name);
+    check(Math.abs((await stage.boundingBox()).y - 88) < 2, 'Stable stage in chapter ' + index);
+  }
+  await page.locator('[data-tour="note"]').click();
+  await page.waitForTimeout(80);
+  check(await page.locator('[data-tool="note"]').getAttribute('aria-pressed') === 'true', 'Chapter button synchronizes tool arc');
+  check(await page.locator('.topbar').getAttribute('data-surface') === 'light', 'Header adopts Cloud section');
+  await page.locator('[data-tour="files"]').focus();
+  await page.keyboard.press('Enter');
+  await page.waitForTimeout(80);
+  check(await page.locator('[data-tool="files"]').getAttribute('aria-pressed') === 'true', 'Keyboard chapter activation');
+  await play.click();
+  await page.waitForTimeout(180);
+  await page.screenshot({ path: 'docs/reviews/website/orix-v3-tour-building.png' });
+  const arriving = await page.locator('.work-result').evaluate(element => Number(getComputedStyle(element).opacity));
+  check(arriving < 1, 'Result has a genuine intermediate reveal');
+  await page.waitForTimeout(1700);
+  check(await page.locator('.work-result').evaluate(element => Number(getComputedStyle(element).opacity)) === 1, 'Result settles into readable content');
+  await page.screenshot({ path: 'docs/reviews/website/orix-v3-tour.png' });
+  await page.waitForTimeout(1700);
+  check(await page.locator('[data-tool="focus"]').getAttribute('aria-pressed') === 'true', 'Finite story advances to Focus');
+  await play.click();
+  const paused = await page.locator('[data-tool][aria-pressed="true"]').getAttribute('data-tool');
+  await page.waitForTimeout(3400);
+  check(await page.locator('[data-tool][aria-pressed="true"]').getAttribute('data-tool') === paused, 'Pause holds story chapter');
+  await play.click();
+  await page.locator('#integrations').scrollIntoViewIfNeeded();
+  await page.waitForTimeout(200);
+  check(await play.getAttribute('aria-pressed') === 'false', 'Leaving the story stops its timer');
+  check(await page.locator('.topbar').getAttribute('data-surface') === 'dark', 'Header returns to Obsidian section');
+  await page.locator('[data-integration="codex"]').click();
+  await page.locator('#connection-action').click();
+  await page.waitForTimeout(150);
+  check(await page.locator('#signal-route').getAttribute('data-state') === 'working', 'Integration launches visible signal');
+  const start = await page.locator('.signal-packet').evaluate(element => getComputedStyle(element).strokeDashoffset);
+  await page.waitForTimeout(300);
+  check(start !== await page.locator('.signal-packet').evaluate(element => getComputedStyle(element).strokeDashoffset), 'Connection packet progresses over time');
+  await page.screenshot({ path: 'docs/reviews/website/orix-v3-connection-working.png' });
+  await page.waitForTimeout(1300);
+  check(await page.locator('#signal-route').getAttribute('data-state') === 'complete', 'Signal and session share completion state');
+  await page.screenshot({ path: 'docs/reviews/website/orix-v3-connections.png' });
+  await page.locator('#connection-action').click();
+  await page.locator('[data-integration="chatgpt"]').click();
+  await page.waitForTimeout(1700);
+  check(await page.locator('#signal-route').getAttribute('data-state') === 'idle', 'Changing provider cancels stale completion');
+  check(await page.locator('#signal-destination').textContent() === 'ChatGPT', 'Signal destination follows provider');
+  await page.locator('#connection-action').click();
+  check(await page.locator('#signal-route').getAttribute('data-state') === 'complete', 'Prepared reply resolves signal');
+  await page.getByRole('button', { name: 'Pause background animation', exact: true }).click();
+  await track.scrollIntoViewIfNeeded();
+  check(await track.getAttribute('data-pinned') === 'false', 'Paused animation releases sticky scroll budget');
+  check(await play.isHidden(), 'Paused animation removes timed-story control');
+  await page.locator('[data-tour="clipboard"]').click();
+  check(await page.locator('.work-result').evaluate(element => Number(getComputedStyle(element).opacity)) === 1, 'Paused-animation manual chapter resolves immediately');
+  await page.getByRole('button', { name: 'Resume background animation', exact: true }).click();
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.waitForTimeout(80);
+  check(await track.getAttribute('data-pinned') === 'false', 'System reduced motion releases pin');
+  check(await page.evaluate(() => document.getAnimations().filter(animation => animation.playState === 'running').length) === 0, 'No running animation with reduced motion');
+  await page.screenshot({ path: 'docs/reviews/website/orix-v3-tour-reduced.png' });
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  for (const width of [320, 390, 768, 1024, 1440]) {
+    await page.setViewportSize({ width, height: 900 });
+    await page.locator('[data-tour="note"]').click();
+    await page.waitForTimeout(100);
+    check(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'No overflow at ' + width);
+    if (width < 1100) {
+      check(await stage.evaluate(element => getComputedStyle(element).position) !== 'sticky', 'Normal flow at ' + width);
+      await page.locator('[data-tour="clipboard"]').click();
+      check(await page.locator('[data-tool="clipboard"]').getAttribute('aria-pressed') === 'true', 'Manual story usable at ' + width);
+    }
+    if (width === 390) {
+      await page.locator('#tool-detail').scrollIntoViewIfNeeded();
+      await page.waitForTimeout(1700);
+      await page.screenshot({ path: 'docs/reviews/website/orix-v3-mobile-tour.png' });
+    }
+  }
+  await page.setViewportSize({ width: 1440, height: 700 });
+  check(await track.getAttribute('data-pinned') === 'false', 'Short desktop gets normal flow');
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.locator('[data-tour="note"]').click();
+  await play.click();
+  await page.waitForTimeout(12300);
+  check(await play.textContent() === 'Replay tool story', 'Story ends after one pass');
+  check(await page.locator('[data-tool="files"]').getAttribute('aria-pressed') === 'true', 'Story holds final result');
+  check(errors.length === 0, 'No browser runtime errors');
+  await page.locator('#overview').scrollIntoViewIfNeeded();
+  return { status: 'PASS', count: results.length, checks: results, errors };
+}

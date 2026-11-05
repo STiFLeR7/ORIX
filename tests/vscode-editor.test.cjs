@@ -30,7 +30,7 @@ test('VS Code extension refuses dirty documents and saves an approved synthetic 
       const response = new EventEmitter(); callback(response); response.emit('data', Buffer.from('{"ok":true}')); response.emit('end');
     }); return req;
   } };
-  const source = fs.readFileSync(require.resolve('../vscode-editor/extension.js'), 'utf8');
+  const source = fs.readFileSync(require.resolve('../src/vscode-editor/extension.js'), 'utf8');
   const context = { exports: {}, require: name => name === 'vscode' ? vscode : name === 'http' ? http : require(name),
     Buffer, process, URLSearchParams, console };
   vm.runInNewContext(source.replace('  exports.activate =', '  exports.__testRun = run;\n  exports.activate ='), context);
@@ -76,7 +76,7 @@ test('project editor accepts only one concurrent ready request per claimed job',
     } } };
   const context = { module: { exports: {} }, require: name => name === 'electron' ? electron : name === 'fs' ? storage : require(name),
     Buffer, process, console, setTimeout, clearTimeout };
-  vm.runInNewContext(fs.readFileSync(require.resolve('../project-editor-main.js'), 'utf8'), context);
+  vm.runInNewContext(fs.readFileSync(require.resolve('../src/project-editor-main.js'), 'utf8'), context);
   const editor = context.module.exports({ resolveProjectFile: async () => ({ root, actual: file, relative: 'sample.txt' }), loadProjectPath: () => root });
   try {
     const before = await editor.fileState('sample.txt');

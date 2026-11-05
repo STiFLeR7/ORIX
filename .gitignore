@@ -10,11 +10,11 @@ dist/
 /.verification/
 
 # User-supplied visual references have no established redistribution license.
-/dashboard-rewamp/*.jpg
-/dashboard-rewamp/mascots/
+/docs/design/*.jpg
+/docs/design/mascots/
 
 # Unapproved logo sketches and generated explorations are local working material.
-/dashboard-rewamp/brand-exploration/
+/docs/design/brand-exploration/
 
 # Generated local document previews.
 /output/pdf/

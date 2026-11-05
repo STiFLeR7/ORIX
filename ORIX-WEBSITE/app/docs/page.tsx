@@ -91,7 +91,7 @@ export default function DocumentationPage() {
           <section id="updates" aria-labelledby="updates-title">
             <h2 id="updates-title">Updates are manual</h2>
             <p>ORIX does not automatically download or install updates. Check <a className={styles.textLink} href={`${repo}/releases`}>GitHub Releases</a>, read the notes and checksums for the version you choose, quit ORIX, then install the reviewed full package. Reopen ORIX and check its version and saved settings.</p>
-            <p>The <a className={styles.textLink} href={`${repo}/blob/main/UPDATES.md`}>update guide</a> contains the maintained procedure.</p>
+            <p>The <a className={styles.textLink} href={`${repo}/blob/main/docs/UPDATES.md`}>update guide</a> contains the maintained procedure.</p>
           </section>
 
           <section id="help" aria-labelledby="help-title">

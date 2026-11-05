@@ -25,7 +25,7 @@ Cloudflare documents static HTML delivery through Pages and static-asset deliver
 
 Use the draft in [Section content](SECTION-CONTENT.md) as the copy source for design review. Keep release-dependent content in one maintainable source during implementation. Required fields include release name/version, date, availability state, release URL, exact artifact links, Windows requirements, architectures, checksums and signature status.
 
-Resolve artifact destinations from reviewed published release information. Support the source-preview, available-binary and unavailable-information states described in the content file. Product feature claims follow the presented build and [release records](../RELEASE.md).
+Resolve artifact destinations from reviewed published release information. Support the source-preview, available-binary and unavailable-information states described in the content file. Product feature claims follow the presented build and [release records](../docs/RELEASE.md).
 
 The privacy page needs accurate website processing information alongside the existing [application disclosures](../docs/PRIVACY.md). Any later forms, analytics, accounts or donation features need their own scope and content review when selected.
 
