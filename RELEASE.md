@@ -8,7 +8,7 @@ The final setup installed successfully in a new isolated directory. All 193 inst
 
 The [beta.3 release](https://github.com/STiFLeR7/ORIX/releases/tag/v0.1.0-beta.3) supplies the unsigned setup, portable ZIP, matching third-party source supplement, demo and checksums. The installer SHA-256 is `98862bcf5e4b3a5894456f274d60b68f31b1c0b01d67869247ada4b37f7fec28`. Its corresponding native source revisions and dependency versions match beta.2. [Codex hook behavior](https://developers.openai.com/codex/hooks)
 
-Claude Code and ORIX ChatGPT live replies remain pending sign-in, which the owner deferred. Existing user Codex configuration reported a malformed pre-existing hooks file. Live checks use reviewed, session-scoped ORIX hooks and the existing account without changing that file. Users must review new or changed hook definitions through `/hooks`. The release remains unsigned while SignPath's reply and enrollment are pending. Other remaining Windows checks retain the scope described in the beta.2 follow-up.
+Claude Code and ORIX ChatGPT live replies remain pending sign-in, which the owner deferred. Live checks used reviewed, session-scoped ORIX hooks and the existing account. A malformed pre-existing user hooks file was later repaired by merging its legacy top-level SessionStart group into the nested hook map while retaining the existing groups and saving an exact backup. The packaged Codex parser then loaded 11 hooks with zero parse warnings. Users must review new or changed hook definitions through `/hooks`. The release remains unsigned while SignPath's reply and enrollment are pending. Other remaining Windows checks retain the scope described in the beta.2 follow-up.
 
 ## Beta.2 follow-up validation — 2026-11-05
 
