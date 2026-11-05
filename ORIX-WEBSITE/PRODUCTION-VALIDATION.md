@@ -1,6 +1,6 @@
 # ORIX website production validation
 
-Checked 2026-11-05. Production origin: <https://orix.stifler.in/>. Cloudflare Worker: `orix-website`; deployed version `67681b96-f3b4-4da9-87e0-716519be623e`.
+Checked 2026-11-05. Production origin: <https://orix.stifler.in/>. Cloudflare Worker: `orix-website`.
 
 ## Build and release
 
