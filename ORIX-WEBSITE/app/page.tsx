@@ -102,6 +102,28 @@ export default function HomePage() {
           id="overview"
           aria-labelledby="hero-title"
         >
+          <div className="hero-flow" aria-hidden="true">
+            <svg viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" fill="none">
+              <defs>
+                <path id="flow-a" d="M-40 155 C260 110 390 360 720 610" />
+                <path id="flow-b" d="M-40 430 C260 380 470 535 720 610" />
+                <path id="flow-c" d="M1480 155 C1180 110 1050 360 720 610" />
+                <path id="flow-d" d="M1480 430 C1180 380 970 535 720 610" />
+              </defs>
+              <g className="flow-lines">
+                <use href="#flow-a" />
+                <use href="#flow-b" />
+                <use href="#flow-c" />
+                <use href="#flow-d" />
+              </g>
+              <g className="flow-traces">
+                <use className="ambient" href="#flow-a" />
+                <use className="ambient" href="#flow-b" />
+                <use className="ambient" href="#flow-c" />
+                <use className="ambient" href="#flow-d" />
+              </g>
+            </svg>
+          </div>
           <div className="wrap">
             <div className="hero-intro">
               <div className="eyebrow">
@@ -550,6 +572,7 @@ export default function HomePage() {
           id="integrations"
           aria-labelledby="integrations-title"
         >
+          <div className="connection-flow ambient" aria-hidden="true"></div>
           <div className="wrap">
             <div className="center-head">
               <div className="eyebrow ice">02 / In good company</div>

@@ -693,9 +693,19 @@ function drawTerrain(time = 0) {
           row * 12 +
           Math.sin(col * 0.15 + phase + row * 0.2) * 24 +
           Math.sin(col * 0.08 - phase) * 22;
+      const crest = Math.max(
+        0,
+        1 - Math.abs(col / 49 - ((time / 6500) % 1) - row * 0.008) * 9,
+      );
       terrainContext.beginPath();
-      terrainContext.arc(x, y, row % 3 === 0 ? 1.3 : 0.7, 0, Math.PI * 2);
-      terrainContext.fillStyle = row % 3 === 0 ? "#dceaff" : "#a4c8ff";
+      terrainContext.arc(
+        x,
+        y,
+        (row % 3 === 0 ? 1.3 : 0.7) + crest,
+        0,
+        Math.PI * 2,
+      );
+      terrainContext.fillStyle = crest > 0.2 ? "#f4f5f7" : row % 3 === 0 ? "#dceaff" : "#a4c8ff";
       terrainContext.fill();
     }
   }

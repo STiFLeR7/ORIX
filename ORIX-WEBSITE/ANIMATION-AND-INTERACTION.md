@@ -72,4 +72,4 @@ Use a poster, explicit playback control, captions and a useful text summary for 
 - Test real mobile hardware, browser zoom and low-power conditions.
 - Confirm that anchors and navigation operate before every animation has settled.
 
-Animations remain unimplemented until the website development phase. These values and behaviors require prototype verification.
+Production now includes directional hero trails, moving connection light, staggered connection tiles, the source ribbon and a travelling crest across the closing point field. These effects use the existing pause control, stop offscreen or with a hidden tab, and settle under reduced motion. Real-device performance and final visual approval remain open.
